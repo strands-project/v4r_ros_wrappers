@@ -80,9 +80,23 @@ find_package(V4R REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES dynamic_object_learning
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS roscpp rospy tf do_learning_srv_definitions
 #  DEPENDS system_lib
 )
+
+include_directories(include
+  ${PCL_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${v4r_INCLUDE_DIRS}
+)
+
+
+# THIS NEEDS TO BE FIXED!!!
+set(V4R_DIR /home/thomas/Projects/v4r_git/)
+set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include;${V4R_DIR}/modules/object_learning/include")
+include_directories(${V4R_INCS})
+set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_object_learning.so")
+
 
 ###########
 ## Build ##
