@@ -74,7 +74,7 @@ include_directories(include
 )
 
 
-# THIS NEED TO BE FIXED!!!
+# THIS NEEDS TO BE FIXED!!!
 set(V4R_DIR /home/thomas/Projects/v4r_git/)
 set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
 include_directories(${V4R_INCS})
