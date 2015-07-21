@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
+find_package(V4R REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 #find_package(Boost REQUIRED COMPONENTS system)
 
@@ -98,6 +100,13 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
+# THIS NEED TO BE FIXED!!!
+set(V4R_DIR /home/thomas/Projects/v4r_git/)
+set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
+include_directories(${V4R_INCS})
+set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
+
+
 set(incs
     include/pcl_conversions.h
 #    include/world_representation_ros.h
@@ -147,7 +156,7 @@ target_link_libraries(multiview_object_recognizer_node_deprecated
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
-   ${STRANDSV4R_LIBS}
+   ${V4R_LIBS}
 #   ${Boost_LIBRARIES}
 )
 
@@ -155,7 +164,7 @@ target_link_libraries(multiview_object_recognizer_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
-   ${STRANDSV4R_LIBS}
+   ${V4R_LIBS}
 #   ${Boost_LIBRARIES}
 )
 
@@ -163,7 +172,7 @@ target_link_libraries(test_multiview_object_recognizer_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
-   ${STRANDSV4R_LIBS}
+   ${V4R_LIBS}
 #   ${Boost_LIBRARIES}
 )
 

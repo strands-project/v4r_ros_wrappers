@@ -57,7 +57,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
       typename pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      v4r::common::miscellaneous::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
+      v4r::common::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
 
       //ratio of inlier points
       float confidence = 0;
