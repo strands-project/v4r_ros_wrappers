@@ -1,0 +1,3 @@
+---
+std_msgs/String models_folder
+std_msgs/String recognition_structure_folder
