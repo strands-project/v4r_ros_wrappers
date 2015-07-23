@@ -145,9 +145,9 @@ add_executable(test_multiview_object_recognizer_node
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(multiview_object_recognizer_node_deprecated ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
-add_dependencies(multiview_object_recognizer_node ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
-#add_dependencies(multiview_object_recognizer_eval_node ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
+add_dependencies(multiview_object_recognizer_node_deprecated ${catkin_EXPORTED_TARGETS})
+add_dependencies(multiview_object_recognizer_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_multiview_object_recognizer_node ${catkin_EXPORTED_TARGETS}})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(multiview_object_recognizer_node_deprecated
