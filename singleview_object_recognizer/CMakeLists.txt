@@ -78,7 +78,7 @@ include_directories(include
 set(V4R_DIR /home/thomas/Projects/v4r_git/)
 set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
 include_directories(${V4R_INCS})
-set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
+set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common_keypoint.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
 
 set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
 
@@ -132,8 +132,9 @@ target_link_libraries(recognition_service_new
 target_link_libraries(test_recognition_service
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
-   ${CERES_LIBRARIES}
    ${V4R_LIBS}
+   ${CERES_LIBRARIES}
+   ${OpenCV_LIBS}
 )
 
 target_link_libraries(test_single_view_recognition_from_file
@@ -141,11 +142,13 @@ target_link_libraries(test_single_view_recognition_from_file
    ${PCL_LIBRARIES}
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
+   ${OpenCV_LIBS}
 )
 
 target_link_libraries(ply_to_pcl
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 
 #############
