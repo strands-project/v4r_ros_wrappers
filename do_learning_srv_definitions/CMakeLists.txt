@@ -50,6 +50,7 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs messa
  add_service_files(
   FILES
    learn_object.srv
+   learn_object_inc.srv
    save_model.srv
    visualize.srv
 )

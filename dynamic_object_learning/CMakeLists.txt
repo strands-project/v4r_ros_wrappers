@@ -84,86 +84,76 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+
+# THIS NEEDS TO BE FIXED!!!
+set(V4R_DIR /home/thomas/Projects/v4r_git)
+set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include;${V4R_DIR}/modules/object_modelling/include")
+set(V4R_LIBS "${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common_keypoint.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_object_modelling.so")
+
 include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${v4r_INCLUDE_DIRS}
+  ${V4R_INCS}
 )
 
-
-# THIS NEEDS TO BE FIXED!!!
-set(V4R_DIR /home/thomas/Projects/v4r_git/)
-set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include;${V4R_DIR}/modules/object_learning/include")
-include_directories(${V4R_INCS})
-set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_object_learning.so")
-
+add_definitions(-std=c++0x)
+add_definitions(${PCL_DEFINITIONS})
 
 ###########
 ## Build ##
 ###########
+set(incs include/pcl_conversions.h include/object_learning_ros.h)
+add_executable(do_learning_service src/object_learning_ros.cpp ${incs})
+add_dependencies(do_learning_service ${catkin_EXPORTED_TARGETS})
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
+target_link_libraries(do_learning_service
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${OpenCV_LIBS}
+   ${V4R_LIBS}
+   ${CERES_LIBRARIES}
+)
 
-## Declare a cpp library
-# add_library(dynamic_object_learning
-#   src/${PROJECT_NAME}/dynamic_object_learning.cpp
-# )
 
-## Declare a cpp executable
-# add_executable(dynamic_object_learning_node src/dynamic_object_learning_node.cpp)
+add_executable(test_do_learning_service src/test_dol_from_files.cpp ${incs})
+add_dependencies(test_do_learning_service ${catkin_EXPORTED_TARGETS})
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(dynamic_object_learning_node dynamic_object_learning_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(dynamic_object_learning_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(test_do_learning_service
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${OpenCV_LIBS}
+   ${V4R_LIBS}
+   ${CERES_LIBRARIES}
+)
 
 #############
 ## Install ##
 #############
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+install(TARGETS do_learning_service
+ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
 
-## Mark executables and/or libraries for installation
-# install(TARGETS dynamic_object_learning dynamic_object_learning_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS test_do_learning_service
+ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(DIRECTORY include/
+DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+FILES_MATCHING PATTERN "*.h"
+PATTERN ".svn" EXCLUDE
+)
 
 #############
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_dynamic_object_learning.cpp)
+## Add gtest based cpp test
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
