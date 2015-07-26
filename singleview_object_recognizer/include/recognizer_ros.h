@@ -40,6 +40,7 @@ public:
     {
           response.models_folder.data = models_dir_;
           response.recognition_structure_folder.data = sift_structure_;
+          return true;
     }
 
 
