@@ -6,6 +6,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Transform.h>
 
+#include "do_learning_srv_definitions/clear.h"
 #include "do_learning_srv_definitions/learn_object.h"
 #include "do_learning_srv_definitions/learn_object_inc.h"
 #include "do_learning_srv_definitions/save_model.h"
@@ -19,7 +20,8 @@ class DOL_ROS : public DOL
 {
 private:
     boost::shared_ptr<ros::NodeHandle> n_;
-    ros::ServiceServer learn_object_,
+    ros::ServiceServer clear_cached_model_,
+                       learn_object_,
                        learn_object_inc_,
                        save_model_,
                        vis_model_;
@@ -27,6 +29,9 @@ private:
 
 public:
     void initialize (int argc, char ** argv);
+
+    bool clear_cached_model (do_learning_srv_definitions::clear::Request & req,
+                     do_learning_srv_definitions::clear::Response & response);
 
     bool save_model (do_learning_srv_definitions::save_model::Request & req,
                      do_learning_srv_definitions::save_model::Response & response);

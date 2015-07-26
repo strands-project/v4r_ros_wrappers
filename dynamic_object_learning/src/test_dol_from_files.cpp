@@ -12,20 +12,12 @@
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
+#include "do_learning_srv_definitions/clear.h"
 #include "do_learning_srv_definitions/learn_object.h"
 #include "do_learning_srv_definitions/save_model.h"
 #include "do_learning_srv_definitions/visualize.h"
 #include <opencv2/opencv.hpp>
 #include <v4r/common/io/filesystem_utils.h>
-
-struct IndexPoint
-{
-  int idx;
-};
-
-POINT_CLOUD_REGISTER_POINT_STRUCT (IndexPoint,
-(int, idx, idx)
-)
 
 class DOLDemoFromFiles
 {
@@ -40,7 +32,6 @@ private:
 public:
     bool callDOL()
     {
-
         //read files from directory
         std::string so_far = "";
 
@@ -49,7 +40,7 @@ public:
         std::vector<std::string> poses_str;
 
         {
-            std::string pattern = ".*cloud.*.pcd";
+            std::string pattern = ".*.pcd";
             v4r::common::io::getFilesInDirectory(directory_, keyframes_str, so_far, pattern, false);
         }
 
@@ -71,7 +62,6 @@ public:
         ros::ServiceClient DOLclient = n_->serviceClient<do_learning_srv_definitions::learn_object>(service_name_learn);
         do_learning_srv_definitions::learn_object srv_learn;
 
-
         std::string service_name_save = "/dynamic_object_learning/save_model";
         ros::ServiceClient DOLclient_save = n_->serviceClient<do_learning_srv_definitions::save_model>(service_name_save);
         do_learning_srv_definitions::save_model srv_save;
@@ -80,20 +70,6 @@ public:
         ros::ServiceClient DOLclient_vis = n_->serviceClient<do_learning_srv_definitions::visualize>(service_name_vis);
         do_learning_srv_definitions::visualize srv_vis;
 
-
-        //create request
-#ifdef USE_PCL_INDICES
-        std::stringstream str;
-        str << directory_ << "/" << object_indices_str[0];
-
-        pcl::PointCloud<IndexPoint> obj_indices_cloud;
-        pcl::io::loadPCDFile (str.str(), obj_indices_cloud);
-
-        for(size_t i=0; i < obj_indices_cloud.points.size(); i++)
-        {
-	   srv.request.intial_object_indices.push_back(obj_indices_cloud.points[i].idx);
-        }
-#else
         std::ifstream initial_mask_file;
         initial_mask_file.open(directory_ + "/mask.txt");
 
@@ -106,13 +82,12 @@ public:
         }
         initial_mask_file.close();
 
-#endif
-
         for(size_t i=0; i < keyframes_str.size(); i++)
         {
             pcl::PointCloud<PointT>::Ptr pCloud(new pcl::PointCloud<PointT>());
             std::stringstream str;
             str << directory_ << "/" << keyframes_str[i];
+            std::cout << str.str() << std::endl;
             pcl::io::loadPCDFile(str.str(), *pCloud);
 
             sensor_msgs::PointCloud2 msg_cloud;
@@ -120,34 +95,18 @@ public:
 
             srv_learn.request.keyframes.push_back(msg_cloud);
 
-
             Eigen::Matrix4f trans;
-
-//            {
-//                std::stringstream str;
-//                str << directory_ << "/" << poses_str[i];
-//                v4r::utils::readMatrixFromFile (str.str(), trans);
-//            }
-
             geometry_msgs::Transform tt;
-            //            tt.translation.x = trans(0,3);
-            //            tt.translation.y = trans(1,3);
-            //            tt.translation.z = trans(2,3);
             tt.translation.x = pCloud->sensor_origin_[0];
             tt.translation.y = pCloud->sensor_origin_[1];
             tt.translation.z = pCloud->sensor_origin_[2];
 
             Eigen::Matrix3f rotation = trans.block<3,3>(0,0);
             Eigen::Quaternionf q(rotation);
-//            tt.rotation.x = q.x();
-//            tt.rotation.y = q.y();
-//            tt.rotation.z = q.z();
-//            tt.rotation.w = q.w();
             tt.rotation.x = pCloud->sensor_orientation_.x();
             tt.rotation.y = pCloud->sensor_orientation_.y();
             tt.rotation.z = pCloud->sensor_orientation_.z();
             tt.rotation.w = pCloud->sensor_orientation_.w();
-
             srv_learn.request.transforms.push_back(tt);
         }
 
@@ -155,7 +114,7 @@ public:
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_learn << std::endl;
-            ROS_ERROR(mm.str().c_str());
+            std::cerr << mm.str() << std::endl;
             return false;
         }
 
@@ -168,7 +127,7 @@ public:
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_save << std::endl;
-            ROS_ERROR(mm.str().c_str());
+            std::cerr << mm << std::endl;
             return false;
         }
 
@@ -178,10 +137,20 @@ public:
             {
                 std::stringstream mm;
                 mm << "Error calling service: " << service_name_vis << std::endl;
-                ROS_ERROR(mm.str().c_str());
+                std::cerr << mm.str() << std::endl;
             }
         }
 
+        std::string service_name_clear = "/dynamic_object_learning/clear_cached_model";
+        ros::ServiceClient DOL_clear_client = n_->serviceClient<do_learning_srv_definitions::clear>(service_name_clear);
+        do_learning_srv_definitions::clear srv_clear;
+
+        if ( ! DOL_clear_client.call ( srv_clear ) )
+        {
+            std::stringstream mm;
+            mm << "Error calling service: " << service_name_clear << std::endl;
+            std::cerr << mm.str() << std::endl;
+        }
         return true;
     }
 
@@ -206,13 +175,13 @@ public:
         {
             //directory_ = "/media/aitor14/DATA/STRANDS_MODELS/recognition_structure/playstation_turn_table.pcd/";
             ROS_ERROR("Specify a directory using param directory.\n");
-            exit(-1);
+            return false;
         }
 
         if(!n_->getParam( "models_dir", models_dir_) )
         {
             ROS_ERROR("Specify a model directory using param models_dir.\n");
-            exit(-1);
+            return false;
         }
 
         if(!n_->getParam( "recognition_dir", recognition_structure_dir_) )
@@ -220,6 +189,7 @@ public:
             ROS_ERROR("Specify a model directory using param recognition_dir.\n");
             exit(-1);
         }
+        return true;
     }
 };
 
@@ -227,7 +197,9 @@ int
 main (int argc, char ** argv)
 {
     DOLDemoFromFiles m;
-    m.initialize(argc, argv);
-    m.callDOL();
+    if (m.initialize(argc, argv))
+        m.callDOL();
+    else
+        return -1;
     return 0;
 }

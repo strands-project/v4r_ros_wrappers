@@ -11,12 +11,21 @@ namespace v4r
 {
 namespace object_modelling
 {
+
+
+bool
+DOL_ROS::clear_cached_model (do_learning_srv_definitions::clear::Request & req,
+                 do_learning_srv_definitions::clear::Response & response)
+{
+    clear();
+    return true;
+}
+
 bool
 DOL_ROS::save_model (do_learning_srv_definitions::save_model::Request & req,
                  do_learning_srv_definitions::save_model::Response & response)
 {
-
-    return true;
+    return DOL::save_model(req.models_folder.data, req.recognition_structure_folder.data, req.object_name.data);
 }
 
 bool
@@ -84,9 +93,11 @@ DOL_ROS::initialize (int argc, char ** argv)
     n_->getParam ( "voxel_res", param_.voxel_resolution_);
     n_->getParam ( "ratio", param_.ratio_);
     n_->getParam ( "do_erosion", param_.do_erosion_);
+    n_->getParam ( "do_mst_refinement", param_.do_mst_refinement_);
     n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
     n_->getParam ( "transfer_latest_only", param_.transfer_indices_from_latest_frame_only_);
     n_->getParam ( "chop_z", param_.chop_z_);
+    n_->getParam ( "normal_method", param_.normal_method_);
 
     if( n_->getParam ( "inlier_threshold_plane_seg", inlDist) )
         p_param_.inlDist = static_cast<float> (inlDist);
@@ -94,8 +105,10 @@ DOL_ROS::initialize (int argc, char ** argv)
     if ( n_->getParam ( "min_plane_points", minPoints) )
         p_param_.minPoints = static_cast<float> (minPoints);
 
+
     DOL::initialize(argc, argv);
 
+    clear_cached_model_  = n_->advertiseService ("clear_cached_model", &DOL_ROS::clear_cached_model, this);
     learn_object_  = n_->advertiseService ("learn_object", &DOL_ROS::learn_object, this);
     learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &DOL_ROS::learn_object_inc, this);
     save_model_  = n_->advertiseService ("save_model", &DOL_ROS::save_model, this);

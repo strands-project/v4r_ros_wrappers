@@ -49,6 +49,7 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs messa
 ## Generate services in the 'srv' folder
  add_service_files(
   FILES
+   clear.srv
    learn_object.srv
    learn_object_inc.srv
    save_model.srv
