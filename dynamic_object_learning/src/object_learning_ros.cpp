@@ -89,6 +89,7 @@ DOL_ROS::initialize (int argc, char ** argv)
     n_.reset( new ros::NodeHandle ( "~" ) );
     n_->getParam ( "radius", param_.radius_);
     n_->getParam ( "dot_product", param_.eps_angle_);
+    n_->getParam ( "dist_threshold_growing", param_.dist_threshold_growing_);
     n_->getParam ( "seed_res", param_.seed_resolution_);
     n_->getParam ( "voxel_res", param_.voxel_resolution_);
     n_->getParam ( "ratio", param_.ratio_);
