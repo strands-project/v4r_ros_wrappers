@@ -26,7 +26,8 @@ private:
     ros::NodeHandle *n_;
     std::string directory_,
                 models_dir_,
-                recognition_structure_dir_;
+                recognition_structure_dir_,
+                object_name_;
     bool visualize_;
 
 public:
@@ -119,7 +120,7 @@ public:
         }
 
         // Saving model
-        srv_save.request.object_name.data = "my_dynamic_object.pcd";
+        srv_save.request.object_name.data = object_name_;
         srv_save.request.models_folder.data = models_dir_;
         srv_save.request.recognition_structure_folder.data = recognition_structure_dir_;
 
@@ -188,6 +189,11 @@ public:
         {
             ROS_ERROR("Specify a model directory using param recognition_dir.\n");
             exit(-1);
+        }
+
+        if(!n_->getParam( "object_name", object_name_) )
+        {
+            object_name_ = "my_dynamic_object";
         }
         return true;
     }
