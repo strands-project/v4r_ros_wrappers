@@ -1,0 +1,9 @@
+std_msgs/String session_id
+sensor_msgs/PointCloud2 cloud
+geometry_msgs/Transform transform
+---
+# classification result for clusters (extracted from accumulated cloud)
+object_perception_msgs/classification[] class_results
+
+# centroid of the cluster (in global coordinates)
+geometry_msgs/Point32[] centroid
