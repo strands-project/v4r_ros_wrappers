@@ -19,6 +19,7 @@ RecognizerROS::retrainROS (recognition_srv_definitions::retrain_recognizer::Requ
           std::cout << req.load_ids[i].data << std::endl;
       }
       retrain(model_ids);
+      return true;
 }
 
 bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Request &req,
