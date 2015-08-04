@@ -10,6 +10,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 find_package(V4R REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 #find_package(Boost REQUIRED COMPONENTS system)
@@ -96,14 +100,8 @@ catkin_package(
 include_directories(include
     ${PCL_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${V4R_INCLUDE_DIRS}
 )
-
-# THIS NEEDS TO BE FIXED!!!
-set(V4R_DIR /home/thomas/Projects/v4r_git/)
-set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
-include_directories(${V4R_INCS})
-set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
-
 
 set(incs
     include/pcl_conversions.h
@@ -155,6 +153,7 @@ target_link_libraries(multiview_object_recognizer_node_deprecated
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 
@@ -163,6 +162,7 @@ target_link_libraries(multiview_object_recognizer_node
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 
@@ -171,6 +171,7 @@ target_link_libraries(test_multiview_object_recognizer_node
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 

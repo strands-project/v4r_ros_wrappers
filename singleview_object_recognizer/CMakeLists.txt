@@ -14,6 +14,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 find_package( PCL 1.7 REQUIRED )
 find_package( OpenCV 2.4 REQUIRED )
 find_package( V4R REQUIRED )
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 #list(${FAAT_PCL_LIBRARIES} APPEND boost_regex)
 
@@ -70,15 +74,8 @@ add_definitions(-std=c++0x)
 include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${v4r_INCLUDE_DIRS}
+  ${V4R_INCLUDE_DIRS}
 )
-
-
-# THIS NEEDS TO BE FIXED!!!
-set(V4R_DIR /home/thomas/Projects/v4r_git/)
-set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
-include_directories(${V4R_INCS})
-set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common_keypoint.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
 
 set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
 
@@ -117,6 +114,7 @@ target_link_libraries(recognition_service_new
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    opencv_nonfree
+ GLEW glut IL GL X11
 )
 
 #target_link_libraries(checkObjectPresence
@@ -135,6 +133,7 @@ target_link_libraries(test_recognition_service
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 target_link_libraries(test_single_view_recognition_from_file
@@ -143,12 +142,14 @@ target_link_libraries(test_single_view_recognition_from_file
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 target_link_libraries(ply_to_pcl
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
     ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 #############
