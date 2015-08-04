@@ -10,6 +10,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 find_package(V4R REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 #find_package(Boost REQUIRED COMPONENTS system)
@@ -156,6 +160,7 @@ target_link_libraries(multiview_object_recognizer_node_deprecated
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 
@@ -164,6 +169,7 @@ target_link_libraries(multiview_object_recognizer_node
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 
@@ -172,6 +178,7 @@ target_link_libraries(test_multiview_object_recognizer_node
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+ GLEW glut IL GL X11
 #   ${Boost_LIBRARIES}
 )
 

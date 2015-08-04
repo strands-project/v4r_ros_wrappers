@@ -14,6 +14,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 find_package( PCL 1.7 REQUIRED )
 find_package( OpenCV 2.4 REQUIRED )
 find_package( V4R REQUIRED )
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 #list(${FAAT_PCL_LIBRARIES} APPEND boost_regex)
 
@@ -71,6 +75,7 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${V4R_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 
@@ -112,6 +117,7 @@ target_link_libraries(recognition_service_new
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    opencv_nonfree
+ GLEW glut IL GL X11
 )
 
 #target_link_libraries(checkObjectPresence
@@ -130,6 +136,7 @@ target_link_libraries(test_recognition_service
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 target_link_libraries(test_single_view_recognition_from_file
@@ -138,12 +145,14 @@ target_link_libraries(test_single_view_recognition_from_file
    ${V4R_LIBS}
    ${CERES_LIBRARIES}
    ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 target_link_libraries(ply_to_pcl
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
     ${OpenCV_LIBS}
+ GLEW glut IL GL X11
 )
 
 #############
