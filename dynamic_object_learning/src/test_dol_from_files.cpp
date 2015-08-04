@@ -17,7 +17,7 @@
 #include "do_learning_srv_definitions/save_model.h"
 #include "do_learning_srv_definitions/visualize.h"
 #include <opencv2/opencv.hpp>
-#include <v4r/common/io/filesystem_utils.h>
+#include <v4r/io/filesystem_utils.h>
 
 class DOLDemoFromFiles
 {
@@ -42,17 +42,17 @@ public:
 
         {
             std::string pattern = ".*.pcd";
-            v4r::common::io::getFilesInDirectory(directory_, keyframes_str, so_far, pattern, false);
+            v4r::io::getFilesInDirectory(directory_, keyframes_str, so_far, pattern, false);
         }
 
         {
             std::string pattern = ".*object_indices.*.pcd";
-            v4r::common::io::getFilesInDirectory(directory_, object_indices_str, so_far, pattern, false);
+            v4r::io::getFilesInDirectory(directory_, object_indices_str, so_far, pattern, false);
         }
 
         {
             std::string pattern = ".*pose.*.txt";
-            v4r::common::io::getFilesInDirectory(directory_, poses_str, so_far, pattern, false);
+            v4r::io::getFilesInDirectory(directory_, poses_str, so_far, pattern, false);
         }
 
         std::sort(keyframes_str.begin(), keyframes_str.end());

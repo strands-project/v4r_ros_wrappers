@@ -69,7 +69,6 @@ bool DOL_ROS::learn_object_inc (do_learning_srv_definitions::learn_object_inc::R
     pcl::fromROSMsg(req.cloud, cloud);
 
     Eigen::Matrix4f tf = fromGMTransform(req.transform);
-//    v4r::common::setCloudPose(tf, cloud);
 
     std::vector<size_t> initial_indices;
     initial_indices.resize( req.object_indices.size() );
@@ -84,7 +83,7 @@ bool DOL_ROS::learn_object_inc (do_learning_srv_definitions::learn_object_inc::R
 void
 DOL_ROS::initialize (int argc, char ** argv)
 {
-    double inlDist, minPoints;
+    double inlDist, min_plane_points, min_smooth_points;
 
     n_.reset( new ros::NodeHandle ( "~" ) );
     n_->getParam ( "radius", param_.radius_);
@@ -99,12 +98,18 @@ DOL_ROS::initialize (int argc, char ** argv)
     n_->getParam ( "transfer_latest_only", param_.transfer_indices_from_latest_frame_only_);
     n_->getParam ( "chop_z", param_.chop_z_);
     n_->getParam ( "normal_method", param_.normal_method_);
+    n_->getParam ( "filter_planes_only", param_.filter_planes_only_);
+    n_->getParam ( "stat_outlier_removal_meanK", sor_params_.meanK_);
+    n_->getParam ( "stat_outlier_removal_std_mul", sor_params_.std_mul_);
 
     if( n_->getParam ( "inlier_threshold_plane_seg", inlDist) )
         p_param_.inlDist = static_cast<float> (inlDist);
 
-    if ( n_->getParam ( "min_plane_points", minPoints) )
-        p_param_.minPoints = static_cast<float> (minPoints);
+    if ( n_->getParam ( "min_plane_points", min_plane_points) )
+        p_param_.minPoints = static_cast<float> (min_plane_points);
+
+    if ( n_->getParam ( "min_points_smooth_cluster", min_smooth_points) )
+        p_param_.minPointsSmooth = static_cast<float> (min_smooth_points);
 
 
     DOL::initialize(argc, argv);

@@ -11,6 +11,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy do_learning_srv_definitions
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 find_package(V4R REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -84,16 +88,11 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-
-# THIS NEEDS TO BE FIXED!!!
-set(V4R_DIR /home/thomas/Projects/v4r_git)
-set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include;${V4R_DIR}/modules/object_modelling/include")
-set(V4R_LIBS "${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common_keypoint.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so;${V4R_DIR}/lib/libv4r_object_modelling.so")
-
+message("*******  ${V4R_INCLUDE_DIRS} ********")
 include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${V4R_INCS}
+  ${V4R_INCLUDE_DIRS}
 )
 
 add_definitions(-std=c++0x)
@@ -108,10 +107,11 @@ add_dependencies(do_learning_service ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(do_learning_service
    ${catkin_LIBRARIES}
+   ${V4R_LIBS}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
-   ${V4R_LIBS}
    ${CERES_LIBRARIES}
+ GLEW glut IL GL X11
 )
 
 
@@ -120,10 +120,11 @@ add_dependencies(test_do_learning_service ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(test_do_learning_service
    ${catkin_LIBRARIES}
+   ${V4R_LIBS}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
-   ${V4R_LIBS}
    ${CERES_LIBRARIES}
+ GLEW glut IL GL X11
 )
 
 #############
