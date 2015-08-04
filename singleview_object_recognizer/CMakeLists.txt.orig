@@ -75,9 +75,16 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${V4R_INCLUDE_DIRS}
+<<<<<<< HEAD
+)
+
+=======
   ${OpenCV_INCLUDE_DIRS}
 )
 
+
+
+>>>>>>> master
 set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
 
 ## Declare a cpp executable
