@@ -70,15 +70,10 @@ add_definitions(-std=c++0x)
 include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
-  ${v4r_INCLUDE_DIRS}
+  ${V4R_INCLUDE_DIRS}
 )
 
 
-# THIS NEEDS TO BE FIXED!!!
-set(V4R_DIR /home/thomas/Projects/v4r_git/)
-set(V4R_INCS "${V4R_DIR};${V4R_DIR}/modules/common/include;${V4R_DIR}/modules/recognition/include")
-include_directories(${V4R_INCS})
-set(V4R_LIBS "${V4R_DIR}/lib/libv4r_common_io.so;${V4R_DIR}/lib/libv4r_common_keypoint.so;${V4R_DIR}/lib/libv4r_common.so;${V4R_DIR}/lib/libv4r_common_features.so;${V4R_DIR}/lib/libv4r_recognition.so;${V4R_DIR}/lib/libsiftgpu.so")
 
 set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
 

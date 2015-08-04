@@ -12,7 +12,7 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
 #include "recognition_srv_definitions/recognize.h"
-#include <v4r/common/io/filesystem_utils.h>
+#include <v4r/io/filesystem_utils.h>
 
 class MultiViewRecognizerDemo
 {
@@ -23,7 +23,7 @@ private:
     std::string directory_;
     std::string topic_;
     bool KINECT_OK_;
-    int input_method_; // defines the test input (0... camera topic, 1... file)
+    int input_method_; // defines te test input (0... camera topic, 1... file)
 
 public:
     MultiViewRecognizerDemo()
@@ -95,7 +95,7 @@ public:
     bool callMvRecognizerUsingFiles()
     {
         std::vector<std::string> test_cloud;
-        v4r::common::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
+        v4r::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
         for(size_t i=0; i < test_cloud.size(); i++)
         {
             pcl::PointCloud<PointT> cloud;

@@ -37,13 +37,13 @@ bool multiviewGraphROS::respondSrvCall(recognition_srv_definitions::recognize::R
       response.transforms.push_back(tt);
 
       ConstPointInTPtr model_cloud = models_verified[j]->getAssembled ( resolution_ );
-      typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified[j]);
       *pRecognizedModels += *model_aligned;
 
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified[j]->getNormalsAssembled ( resolution_ );
 
-      typename pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
+      pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
       v4r::common::transformNormals(normal_cloud, normal_aligned, transforms_verified[j]);
 
       //ratio of inlier points
@@ -238,6 +238,8 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     std::cout << "Initialized multi-view recognizer with these settings:" << std::endl
               << "==========================================================" << std::endl;
     printParams(std::cout);
+
+    return 1;
 }
 
 
