@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(recognition_srv_definitions)
+project(object_classifier)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs object_perception_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs segmentation_srv_definitions classifier_srv_definitions object_perception_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL 1.7 REQUIRED)
+find_package( V4R REQUIRED )
 
+include_directories(${PCL_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -19,50 +22,6 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs objec
 ## Declare ROS messages, services and actions ##
 ################################################
 
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependencies might have been
-##     pulled in transitively but can be declared for certainty nonetheless:
-##     * add a build_depend tag for "message_generation"
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
-
-## Generate services in the 'srv' folder
- add_service_files(
-  FILES
-   retrain_recognizer.srv
-   recognize.srv
-   get_configuration.srv
- )
-
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
-   geometry_msgs  # Or other packages containing msgs
-   object_perception_msgs
- )
 
 ###################################
 ## catkin specific configuration ##
@@ -74,13 +33,61 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES recognition_srv_definitions
-#  CATKIN_DEPENDS other_catkin_pkg
+   INCLUDE_DIRS include
+#  LIBRARIES object_classifier
+   CATKIN_DEPENDS segmentation_srv_definitions classifier_srv_definitions
 #  DEPENDS system_lib
 )
 
+###########
+## Build ##
+###########
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+ include_directories(include
+ #${FAAT_PCL_INCLUDE_DIRS}
+ ${catkin_INCLUDE_DIRS}
+  ${V4R_INCLUDE_DIRS}
+)
+
+set(incs include/pcl_conversions.h include/segmenter.h include/global_nn_classifier_ros.h)
+## Declare a cpp library
+# add_library(object_classifier
+#   src/${PROJECT_NAME}/object_classifier.cpp
 # )
+
+## Declare a cpp executable
+add_executable(object_classifier_node src/global_nn_classifier_ros.cpp ${incs})
+add_executable(object_classifier_demo_node src/test.cpp)
+
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+add_dependencies(object_classifier_demo_node ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
+add_dependencies(object_classifier_node ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
+
+FIND_PACKAGE(Ceres)
+IF(${Ceres_FOUND})
+  INCLUDE_DIRECTORIES(${CERES_INCLUDES})
+ELSE(${Ceres_FOUND})
+  MESSAGE("\nATTENTION: Ceres solver is not installed!\n")
+ENDIF(${Ceres_FOUND})
+
+## Specify libraries to link a library or executable target against
+ target_link_libraries(object_classifier_node
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+   ${V4R_LIBS}
+  ${CERES_LIBRARIES}
+
+)
+
+target_link_libraries(object_classifier_demo_node
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+   ${V4R_LIBS}
+  ${CERES_LIBRARIES}
+  )
 
 #############
 ## Install ##
@@ -97,7 +104,7 @@ catkin_package(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS recognition_srv_definitions recognition_srv_definitions_node
+# install(TARGETS object_classifier object_classifier_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -122,7 +129,7 @@ catkin_package(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_recognition_srv_definitions.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_object_classifier.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

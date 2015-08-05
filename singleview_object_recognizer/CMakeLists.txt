@@ -14,41 +14,6 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
 find_package( PCL 1.7 REQUIRED )
 find_package( OpenCV 2.4 REQUIRED )
 find_package( V4R REQUIRED )
-find_package(GLEW REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(X11 REQUIRED)
-find_package(OpenGL REQUIRED)
-
-#list(${FAAT_PCL_LIBRARIES} APPEND boost_regex)
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/groovy/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-
-#######################################
-## Declare ROS messages and services ##
-#######################################
-
-#add_action_files(DIRECTORY action FILES CheckObjectPresence.action)
-
-## Generate services in the 'srv' folder
-#add_service_files(
-# FILES
-#  recognize.srv
-#)
-
-## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  sensor_msgs
-#  std_msgs
-# geometry_msgs
-#)
 
 ###################################
 ## catkin specific configuration ##
@@ -81,76 +46,34 @@ include_directories(include
 set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
 
 ## Declare a cpp executable
-add_executable(recognition_service_new src/recognizer_ros.cpp ${incs})
-#add_executable(checkObjectPresence src/CheckObjectPresence.cpp)
-#add_executable(checkObjectPresence_client src/CheckObjectPresence_client.cpp)
+add_executable(recognition_service src/recognizer_ros.cpp ${incs})
 add_executable(ply_to_pcl src/ply_to_pcl.cpp)
-add_executable(test_recognition_service src/test_recognition_service.cpp)
 add_executable(test_single_view_recognition_from_file src/test_single_view_recognizer.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(recognition_service_new ${catkin_EXPORTED_TARGETS})
-#add_dependencies(checkObjectPresence ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
-#add_dependencies(checkObjectPresence_client ${catkin_EXPORTED_TARGETS})
+add_dependencies(recognition_service ${catkin_EXPORTED_TARGETS})
 add_dependencies(ply_to_pcl ${catkin_EXPORTED_TARGETS})
-add_dependencies(test_recognition_service ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_single_view_recognition_from_file ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
-
-FIND_PACKAGE(Ceres)
-IF(${Ceres_FOUND})
-  INCLUDE_DIRECTORIES(${CERES_INCLUDES})
-ELSE(${Ceres_FOUND})
-  MESSAGE("\nATTENTION: Ceres solver is not installed!\n")
-ENDIF(${Ceres_FOUND})
-
-
-
-target_link_libraries(recognition_service_new
+target_link_libraries(recognition_service
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
-   ${CERES_LIBRARIES}
-   opencv_nonfree
- GLEW glut IL GL X11
-)
-
-#target_link_libraries(checkObjectPresence
-#   ${catkin_LIBRARIES}
-#   ${PCL_LIBRARIES}
-#)
-
-#target_link_libraries(checkObjectPresence_client
-#   ${catkin_LIBRARIES}
-#   ${PCL_LIBRARIES}
-#)
-
-target_link_libraries(test_recognition_service
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-   ${V4R_LIBS}
-   ${CERES_LIBRARIES}
-   ${OpenCV_LIBS}
- GLEW glut IL GL X11
 )
 
 target_link_libraries(test_single_view_recognition_from_file
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${V4R_LIBS}
-   ${CERES_LIBRARIES}
    ${OpenCV_LIBS}
- GLEW glut IL GL X11
 )
 
 target_link_libraries(ply_to_pcl
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
-    ${OpenCV_LIBS}
- GLEW glut IL GL X11
+   ${OpenCV_LIBS}
 )
 
 #############
@@ -162,7 +85,7 @@ scripts/action_server.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS recognition_service_new
+install(TARGETS recognition_service
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

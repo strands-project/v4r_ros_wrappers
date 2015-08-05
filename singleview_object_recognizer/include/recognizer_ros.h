@@ -6,12 +6,11 @@
 
 #include <image_transport/image_transport.h>
 
-class RecognizerROS : public v4r::Recognizer
+namespace v4r
 {
-    typedef v4r::rec_3d_framework::Model<PointT> ModelT;
-    typedef boost::shared_ptr<ModelT> ModelTPtr;
-
-    using v4r::Recognizer::initialize;
+class RecognizerROS : public SingleViewRecognizer
+{
+    using v4r::SingleViewRecognizer::initialize;
 
 private:
     bool debug_publish_;
@@ -28,7 +27,7 @@ private:
 
 public:
 
-    RecognizerROS() : v4r::Recognizer()
+    RecognizerROS() : SingleViewRecognizer()
     {
         debug_publish_ = false;
         resolution_ = 0.005f;
@@ -52,3 +51,5 @@ public:
 
     void initialize (int argc, char ** argv);
 };
+
+}

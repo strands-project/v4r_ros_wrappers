@@ -5,6 +5,8 @@
 #include <v4r/common/visibility_reasoning.h>
 #include <v4r/common/miscellaneous.h>
 
+namespace v4r
+{
 
 bool
 RecognizerROS::retrainROS (recognition_srv_definitions::retrain_recognizer::Request & req,
@@ -54,6 +56,9 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
       *pRecognizedModels += *model_aligned;
+      sensor_msgs::PointCloud2 rec_model;
+      pcl::toROSMsg(*model_aligned, rec_model);
+      response.models_cloud.push_back(rec_model);
 
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
@@ -232,12 +237,14 @@ RecognizerROS::initialize (int argc, char ** argv)
   printParams();
 }
 
+}
+
 int
 main (int argc, char ** argv)
 {
   ros::init (argc, argv, "recognition_service");
 
-  RecognizerROS m;
+  v4r::RecognizerROS m;
   m.initialize (argc, argv);
   ros::spin ();
 
