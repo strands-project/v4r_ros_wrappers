@@ -4,7 +4,10 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 
-class multiviewGraphROS : public v4r::MultiviewRecognizer
+namespace v4r
+{
+
+class multiviewGraphROS : public MultiviewRecognizer
 {
 private:
     boost::shared_ptr<image_transport::ImageTransport> it_;
@@ -18,7 +21,7 @@ private:
     bool respondSrvCall (recognition_srv_definitions::recognize::Request & req, recognition_srv_definitions::recognize::Response & response) const;
 
 public:
-    multiviewGraphROS() : v4r::MultiviewRecognizer()
+    multiviewGraphROS() : MultiviewRecognizer()
     {
         resolution_ = 0.005f;
         view_counter_ = 0;
@@ -27,3 +30,5 @@ public:
     bool recognizeROS (recognition_srv_definitions::recognize::Request & req, recognition_srv_definitions::recognize::Response & response);
     bool initializeMV (int argc, char ** argv);
 };
+
+}

@@ -1,5 +1,4 @@
 sensor_msgs/PointCloud2 cloud
-std_msgs/Bool complex_result
 float32[] transform #optional transform to world coordinate system
 std_msgs/String scene_name #optional name for multiview recognition
 std_msgs/String view_name #optional name for multiview recognition

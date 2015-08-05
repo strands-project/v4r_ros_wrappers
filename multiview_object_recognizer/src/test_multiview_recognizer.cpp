@@ -12,7 +12,7 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
 #include "recognition_srv_definitions/recognize.h"
-#include <v4r/io/filesystem_utils.h>
+#include <v4r/io/filesystem.h>
 
 class MultiViewRecognizerDemo
 {
@@ -36,7 +36,6 @@ public:
         std::cout << "Received point cloud.\n" << std::endl;
         recognition_srv_definitions::recognize srv;
         srv.request.cloud = *msg;
-        srv.request.complex_result.data = true;
 
         if (sv_rec_client_.call(srv))
         {
@@ -82,7 +81,7 @@ public:
         ros::Rate loop_rate (1);
         size_t kinect_trials_ = 0;
 
-        while (!KINECT_OK_ && ros::ok () && kinect_trials_ >= 30)
+        while (!KINECT_OK_ && ros::ok () && kinect_trials_ < 30)
         {
             std::cout << "Checking kinect status..." << std::endl;
             ros::spinOnce ();

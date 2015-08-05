@@ -8,11 +8,17 @@
 #include <pcl/common/common.h>
 #include <pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
-#include "ros/ros.h"
-#include "sensor_msgs/PointCloud2.h"
-#include "std_msgs/String.h"
+
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <std_msgs/String.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+
+#include <v4r/common/pcl_opencv.h>
+#include <v4r/io/filesystem.h>
+
 #include "recognition_srv_definitions/recognize.h"
-#include <v4r/io/filesystem_utils.h>
 
 class SingleViewRecognizerDemo
 {
@@ -24,6 +30,8 @@ private:
     std::string topic_;
     bool KINECT_OK_;
     int input_method_; // defines the test input (0... camera topic, 1... file)
+    boost::shared_ptr<image_transport::ImageTransport> it_;
+    image_transport::Publisher image_pub_;
 
 public:
     SingleViewRecognizerDemo()
@@ -36,39 +44,11 @@ public:
         std::cout << "Received point cloud.\n" << std::endl;
         recognition_srv_definitions::recognize srv;
         srv.request.cloud = *msg;
-        srv.request.complex_result.data = true;
 
         if (sv_rec_client_.call(srv))
-        {
-            std::vector<std::string> model_ids;
-            std::vector<Eigen::Matrix4f> transforms;
-
-            for(size_t i=0; i < srv.response.ids.size(); i++)
-            {
-                model_ids.push_back(srv.response.ids[i].data);
-
-                Eigen::Quaternionf q(srv.response.transforms[i].rotation.w,
-                                     srv.response.transforms[i].rotation.x,
-                                     srv.response.transforms[i].rotation.y,
-                                     srv.response.transforms[i].rotation.z);
-
-                Eigen::Vector3f translation(srv.response.transforms[i].translation.x,
-                                            srv.response.transforms[i].translation.y,
-                                            srv.response.transforms[i].translation.z);
-
-
-                Eigen::Matrix4f trans;
-                trans.block<3,3>(0,0) = q.toRotationMatrix();
-                trans.block<3,1>(0,3) = translation;
-                transforms.push_back(trans);
-            }
-
-            std::cout << "Called done..." << std::endl;
-        }
+            std::cout << "Call done..." << std::endl;
         else
-        {
             ROS_ERROR("Failed to call /recognition_service/sv_recognition");
-        }
     }
 
     void checkCloudArrive (const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -83,7 +63,7 @@ public:
         size_t kinect_trials_ = 0;
 
 
-        while (!KINECT_OK_ && ros::ok () && kinect_trials_ >= 30)
+        while (!KINECT_OK_ && ros::ok () && kinect_trials_ < 30)
         {
             std::cout << "Checking kinect status..." << std::endl;
             ros::spinOnce ();
@@ -119,7 +99,6 @@ public:
 
     }
 
-
     bool callSvRecognizerUsingFiles()
     {
         std::vector<std::string> test_cloud;
@@ -150,6 +129,8 @@ public:
 
         std::string service_name_sv_rec = "/recognition_service/sv_recognition";
         sv_rec_client_ = n_->serviceClient<recognition_srv_definitions::recognize>(service_name_sv_rec);
+        it_.reset(new image_transport::ImageTransport(*n_));
+        image_pub_ = it_->advertise("/mp_recognition/debug_image", 1, true);
 
         n_->getParam ( "input_method", input_method_ );
 

@@ -4,6 +4,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <v4r/common/visibility_reasoning.h>
 
+namespace v4r
+{
+
 bool multiviewGraphROS::respondSrvCall(recognition_srv_definitions::recognize::Request &req,
                             recognition_srv_definitions::recognize::Response &response) const
 {
@@ -40,6 +43,9 @@ bool multiviewGraphROS::respondSrvCall(recognition_srv_definitions::recognize::R
       pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified[j]);
       *pRecognizedModels += *model_aligned;
+      sensor_msgs::PointCloud2 rec_model;
+      pcl::toROSMsg(*model_aligned, rec_model);
+      response.models_cloud.push_back(rec_model);
 
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified[j]->getNormalsAssembled ( resolution_ );
 
@@ -149,7 +155,7 @@ bool multiviewGraphROS::recognizeROS (recognition_srv_definitions::recognize::Re
 
 bool multiviewGraphROS::initializeMV(int argc, char **argv)
 {
-    std::string training_dir_sift, training_dir_shot, sift_structure, training_dir_ourcvfh, models_dir;
+    std::string training_dir_sift, training_dir_shot, recognition_structure_dir, training_dir_ourcvfh, models_dir;
 
     n_.reset( new ros::NodeHandle ( "~" ) );
 
@@ -189,9 +195,9 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
 
     n_->getParam ( "training_dir_sift", training_dir_sift);
     n_->getParam ( "training_dir_shot", training_dir_shot);
-    n_->getParam ( "recognizer_structure_sift", sift_structure);
+    n_->getParam ( "recognition_structure_dir", recognition_structure_dir);
     n_->getParam ( "training_dir_ourcvfh", training_dir_ourcvfh);
-    n_->getParam ( "visualize_output", visualize_output_);
+    n_->getParam ( "visualize", visualize_output_);
 
     if ( ! n_->getParam ( "models_dir", models_dir ))
     {
@@ -226,7 +232,7 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     setTraining_dir_sift(training_dir_sift);
     setTraining_dir_shot(training_dir_shot);
     setModels_dir(models_dir);
-    setSift_structure(sift_structure);
+    setSift_structure(recognition_structure_dir);
 
     initialize();
 
@@ -241,14 +247,14 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
 
     return 1;
 }
-
+}
 
 int
 main (int argc, char ** argv)
 {
   ros::init (argc, argv, "multiview_recognition_service");
 
-  multiviewGraphROS m;
+  v4r::multiviewGraphROS m;
   m.initializeMV (argc, argv);
   ros::spin ();
 
