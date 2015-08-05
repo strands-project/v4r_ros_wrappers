@@ -6,7 +6,7 @@ project(camera_tracker)
 ## is used, also find other catkin packages
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy camera_srv_definitions
-                                        strands_v4r genmsg tf2 tf visualization_msgs
+                                        genmsg tf2 tf visualization_msgs
                                         cv_bridge image_transport)
 
 find_package(PCL 1.7 REQUIRED)
