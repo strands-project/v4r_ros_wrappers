@@ -45,7 +45,6 @@
   <build_depend>tf</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>camera_srv_definitions</build_depend>
-  <build_depend>strands_v4r</build_depend>
   <build_depend>tf2</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -56,7 +55,6 @@
   <run_depend>tf</run_depend>
   <run_depend>tf_conversions</run_depend>
   <run_depend>camera_srv_definitions</run_depend>
-  <run_depend>strands_v4r</run_depend>
   <run_depend>tf2</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
