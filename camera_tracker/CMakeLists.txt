@@ -43,7 +43,7 @@ find_package(OpenGL REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy camera_srv_definitions strands_v4r tf2
+   CATKIN_DEPENDS roscpp rospy camera_srv_definitions tf2
 )
 
 ###########

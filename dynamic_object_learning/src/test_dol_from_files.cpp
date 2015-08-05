@@ -17,7 +17,7 @@
 #include "do_learning_srv_definitions/save_model.h"
 #include "do_learning_srv_definitions/visualize.h"
 #include <opencv2/opencv.hpp>
-#include <v4r/io/filesystem_utils.h>
+#include <v4r/io/filesystem.h>
 
 class DOLDemoFromFiles
 {
