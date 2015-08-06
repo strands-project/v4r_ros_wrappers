@@ -210,6 +210,12 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
         return -1;
     }
 
+    if (recognition_structure_dir.compare ("") == 0)
+    {
+        PCL_ERROR ("Set -recognition_structure_dir option in the command line, ABORTING");
+        return -1;
+    }
+
     if (sv_params_.do_sift_ && training_dir_sift.compare ("") == 0)
     {
         PCL_ERROR ("do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line, ABORTING");
@@ -234,7 +240,7 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     setModels_dir(models_dir);
     setSift_structure(recognition_structure_dir);
 
-    initialize();
+    this->initialize();
 
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "multiview_recognized_objects", 0 );
     recognition_serv_ = n_->advertiseService("multiview_recognition_service", &multiviewGraphROS::recognizeROS, this);
