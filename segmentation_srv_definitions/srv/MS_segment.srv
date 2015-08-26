@@ -1,0 +1,10 @@
+sensor_msgs/PointCloud2 cloud
+std_msgs/Int32 max_mt
+std_msgs/Bool refinement
+std_msgs/Float32 nyu
+std_msgs/Float32 lambda
+std_msgs/Float32 sv_seed
+std_msgs/Float32 sv_res
+std_msgs/Bool use_SLIC
+---
+std_msgs/Int32MultiArray[] clusters_indices
