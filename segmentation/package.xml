@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>segmentation</name>
+  <version>0.0.0</version>
+  <description>The segmentation package</description>
+
+  <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
+  <maintainer email="alexandrov@acin.tuwien.ac.at">Sergey Alexandrov</maintainer>
+  <maintainer email="zillich@acin.tuwien.ac.at">Michael Zillich</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>segmentation_srv_definitions</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>image_transport</build_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>image_transport</run_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>segmentation_srv_definitions</run_depend>
+
+  <export>
+
+  </export>
+</package>
