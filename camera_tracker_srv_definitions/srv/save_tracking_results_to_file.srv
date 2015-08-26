@@ -1,0 +1,3 @@
+#the folder where to save the files
+std_msgs/String dir_name
+---

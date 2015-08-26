@@ -1,0 +1,4 @@
+---
+sensor_msgs/PointCloud2[] keyframes
+#transformations aligning each keyframe to the first keyframe
+geometry_msgs/Transform[] transforms

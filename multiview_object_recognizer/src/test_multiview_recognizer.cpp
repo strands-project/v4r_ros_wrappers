@@ -12,7 +12,7 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
 #include "recognition_srv_definitions/recognize.h"
-#include <v4r/common/io/filesystem_utils.h>
+#include <v4r/io/filesystem.h>
 
 class MultiViewRecognizerDemo
 {
@@ -23,7 +23,7 @@ private:
     std::string directory_;
     std::string topic_;
     bool KINECT_OK_;
-    int input_method_; // defines the test input (0... camera topic, 1... file)
+    int input_method_; // defines te test input (0... camera topic, 1... file)
 
 public:
     MultiViewRecognizerDemo()
@@ -36,7 +36,6 @@ public:
         std::cout << "Received point cloud.\n" << std::endl;
         recognition_srv_definitions::recognize srv;
         srv.request.cloud = *msg;
-        srv.request.complex_result.data = true;
 
         if (sv_rec_client_.call(srv))
         {
@@ -82,7 +81,7 @@ public:
         ros::Rate loop_rate (1);
         size_t kinect_trials_ = 0;
 
-        while (!KINECT_OK_ && ros::ok () && kinect_trials_ >= 30)
+        while (!KINECT_OK_ && ros::ok () && kinect_trials_ < 30)
         {
             std::cout << "Checking kinect status..." << std::endl;
             ros::spinOnce ();
@@ -95,7 +94,7 @@ public:
     bool callMvRecognizerUsingFiles()
     {
         std::vector<std::string> test_cloud;
-        v4r::common::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
+        v4r::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
         for(size_t i=0; i < test_cloud.size(); i++)
         {
             pcl::PointCloud<PointT> cloud;

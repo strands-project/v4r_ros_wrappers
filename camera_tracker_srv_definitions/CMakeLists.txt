@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(recognition_srv_definitions)
+project(camera_srv_definitions)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs object_perception_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs message_generation)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -49,11 +49,21 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs objec
 ## Generate services in the 'srv' folder
  add_service_files(
   FILES
-   retrain_recognizer.srv
-   recognize.srv
-   get_configuration.srv
+   start_tracker.srv
+   stop_tracker.srv
+   visualize_compound.srv
+   do_ba.srv
+   get_tracking_results.srv
+   save_tracking_results_to_file.srv
+   cleanup.srv
  )
 
+## Generate actions in the 'action' folder
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
@@ -61,7 +71,6 @@ generate_messages(
    std_msgs
    sensor_msgs
    geometry_msgs  # Or other packages containing msgs
-   object_perception_msgs
  )
 
 ###################################
@@ -80,6 +89,29 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+###########
+## Build ##
+###########
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+# include_directories(include)
+
+## Declare a cpp library
+# add_library(recognition_srv_definitions
+#   src/${PROJECT_NAME}/recognition_srv_definitions.cpp
+# )
+
+## Declare a cpp executable
+# add_executable(recognition_srv_definitions_node src/recognition_srv_definitions_node.cpp)
+
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+# add_dependencies(recognition_srv_definitions_node recognition_srv_definitions_generate_messages_cpp)
+
+## Specify libraries to link a library or executable target against
+# target_link_libraries(recognition_srv_definitions_node
+#   ${catkin_LIBRARIES}
 # )
 
 #############

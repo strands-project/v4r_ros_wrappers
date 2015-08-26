@@ -5,6 +5,8 @@
 #include <v4r/common/visibility_reasoning.h>
 #include <v4r/common/miscellaneous.h>
 
+namespace v4r
+{
 
 bool
 RecognizerROS::retrainROS (recognition_srv_definitions::retrain_recognizer::Request & req,
@@ -54,6 +56,9 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
       *pRecognizedModels += *model_aligned;
+      sensor_msgs::PointCloud2 rec_model;
+      pcl::toROSMsg(*model_aligned, rec_model);
+      response.models_cloud.push_back(rec_model);
 
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
@@ -205,19 +210,19 @@ RecognizerROS::initialize (int argc, char ** argv)
 
   if ( sv_params_.do_sift_ && training_dir_sift_.compare ("") == 0)
   {
-    PCL_ERROR ("do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line, ABORTING");
+    std::cout << "do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line if you want to keep your trained models. " << std::endl;
     return;
   }
 
   if ( sv_params_.do_ourcvfh_ && training_dir_ourcvfh_.compare ("") == 0)
   {
-    PCL_ERROR ("do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command line, ABORTING");
+    std::cout << "do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command lineif you want to keep your trained models. " << std::endl;
     return;
   }
 
   if ( sv_params_.do_shot_ && training_dir_shot_.compare ("") == 0)
   {
-    PCL_ERROR ("do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line, ABORTING");
+    std::cout << "do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line if you want to keep your trained models. " << std::endl;
     return;
   }
   vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
@@ -232,12 +237,14 @@ RecognizerROS::initialize (int argc, char ** argv)
   printParams();
 }
 
+}
+
 int
 main (int argc, char ** argv)
 {
   ros::init (argc, argv, "recognition_service");
 
-  RecognizerROS m;
+  v4r::RecognizerROS m;
   m.initialize (argc, argv);
   ros::spin ();
 

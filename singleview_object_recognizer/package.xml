@@ -44,11 +44,6 @@
   <build_depend>rospy</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>recognition_srv_definitions</build_depend>
-  <build_depend>actionlib</build_depend>
-  <build_depend>actionlib_msgs</build_depend>
-  <build_depend>mongodb_store_msgs</build_depend>
-  <build_depend>mongodb_store</build_depend>
-  <build_depend>scitos_ptu</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>image_transport</build_depend>
@@ -57,11 +52,6 @@
   <run_depend>rospy</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>recognition_srv_definitions</run_depend>
-  <run_depend>actionlib</run_depend>
-  <run_depend>actionlib_msgs</run_depend>
-  <run_depend>mongodb_store_msgs</run_depend>
-  <run_depend>mongodb_store</run_depend>
-  <run_depend>scitos_ptu</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>image_transport</run_depend>

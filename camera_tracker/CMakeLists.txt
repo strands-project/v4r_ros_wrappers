@@ -1,17 +1,37 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(singleview_object_recognizer)
+project(camera_tracker)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
-                                         genmsg cv_bridge sensor_msgs image_transport
-					)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy camera_srv_definitions
+                                         genmsg tf2 tf visualization_msgs
+                                        cv_bridge image_transport)
 
-find_package( PCL 1.7 REQUIRED )
+find_package(PCL 1.7 REQUIRED)
 find_package( OpenCV 2.4 REQUIRED )
 find_package( V4R REQUIRED )
+find_package(GLEW REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(X11 REQUIRED)
+find_package(OpenGL REQUIRED)
+
+
+#list(${FAAT_PCL_LIBRARIES} APPEND boost_regex)
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+
+
+## Uncomment this if the package has a setup.py. This macro ensures
+## modules and global scripts declared therein get installed
+## See http://ros.org/doc/groovy/api/catkin/html/user_guide/setup_dot_py.html
+# catkin_python_setup()
+
+#######################################
+## Declare ROS messages and services ##
+#######################################
 
 ###################################
 ## catkin specific configuration ##
@@ -23,7 +43,7 @@ find_package( V4R REQUIRED )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions
+   CATKIN_DEPENDS roscpp rospy camera_srv_definitions tf2
 )
 
 ###########
@@ -38,52 +58,33 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${V4R_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
-set(incs include/pcl_conversions.h include/segmenter.h include/recognizer_ros.h)
+set(incs include/pcl_conversions.h)
 
 ## Declare a cpp executable
-add_executable(recognition_service src/recognizer_ros.cpp ${incs})
-add_executable(ply_to_pcl src/ply_to_pcl.cpp)
-add_executable(test_single_view_recognition_from_file src/test_single_view_recognizer.cpp)
+add_executable(camera_tracker_service src/camera_tracker.cpp ${incs})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(recognition_service ${catkin_EXPORTED_TARGETS})
-add_dependencies(ply_to_pcl ${catkin_EXPORTED_TARGETS})
-add_dependencies(test_single_view_recognition_from_file ${catkin_EXPORTED_TARGETS})
+add_dependencies(camera_tracker_service ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
 
-target_link_libraries(recognition_service
+## Specify libraries to link a library or executable target against
+
+target_link_libraries(camera_tracker_service
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
-)
-
-target_link_libraries(test_single_view_recognition_from_file
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-   ${V4R_LIBS}
-   ${OpenCV_LIBS}
-)
-
-target_link_libraries(ply_to_pcl
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-   ${OpenCV_LIBS}
+   ${CERES_LIBRARIES}
+ GLEW glut IL GL X11
 )
 
 #############
 ## Install ##
 #############
 
-install(PROGRAMS
-scripts/action_server.py
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(TARGETS recognition_service
+install(TARGETS camera_tracker_service
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -95,10 +96,10 @@ FILES_MATCHING PATTERN "*.h"
 PATTERN ".svn" EXCLUDE
 )
 
-install(DIRECTORY launch/
-DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-FILES_MATCHING PATTERN "*.launch"
-)																																																																																																																
+#install(DIRECTORY launch/
+#DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+#FILES_MATCHING PATTERN "*.launch"
+#)																																																																																																																
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
