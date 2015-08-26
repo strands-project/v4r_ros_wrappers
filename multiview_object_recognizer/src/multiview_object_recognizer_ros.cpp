@@ -155,10 +155,7 @@ bool multiviewGraphROS::recognizeROS (recognition_srv_definitions::recognize::Re
 
 bool multiviewGraphROS::initializeMV(int argc, char **argv)
 {
-    std::string training_dir_sift, training_dir_shot, recognition_structure_dir, training_dir_ourcvfh, models_dir;
-
     n_.reset( new ros::NodeHandle ( "~" ) );
-
     n_->getParam ( "icp_iterations", sv_params_.icp_iterations_);
     n_->getParam ( "icp_type", sv_params_.icp_type_);
     n_->getParam ( "do_sift", sv_params_.do_sift_);
@@ -193,46 +190,40 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     n_->getParam ( "max_vertices_in_graph", mv_params_.max_vertices_in_graph_);
     n_->getParam ( "distance_keypoints_get_discarded", mv_params_.distance_keypoints_get_discarded_);
 
-    n_->getParam ( "training_dir_sift", training_dir_sift);
-    n_->getParam ( "training_dir_shot", training_dir_shot);
-    n_->getParam ( "recognition_structure_dir", recognition_structure_dir);
-    n_->getParam ( "training_dir_ourcvfh", training_dir_ourcvfh);
+    n_->getParam ( "training_dir_ourcvfh", training_dir_ourcvfh_);
+    n_->getParam ( "training_dir_sift", training_dir_sift_);
+    n_->getParam ( "training_dir_shot", training_dir_shot_);
     n_->getParam ( "visualize", visualize_output_);
 
-    if ( ! n_->getParam ( "models_dir", models_dir ))
-    {
-        std::cout << "No models_dir specified. " << std::endl;
-    }
-
-    if (models_dir.compare ("") == 0)
+    if ( ! n_->getParam ( "models_dir", models_dir_ ))
     {
         PCL_ERROR ("Set -models_dir option in the command line, ABORTING");
-        return -1;
+        return false;
     }
 
-    if (sv_params_.do_sift_ && training_dir_sift.compare ("") == 0)
+    if ( ! n_->getParam ( "recognition_structure_dir", sift_structure_ ))
     {
-        PCL_ERROR ("do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line, ABORTING");
-        return -1;
+        PCL_ERROR ("Set -recognition_structure_dir option in the command line, ABORTING");
+        return false;
     }
 
-    if (sv_params_.do_ourcvfh_ && training_dir_ourcvfh.compare ("") == 0)
+    if ( sv_params_.do_sift_ && training_dir_sift_.compare ("") == 0)
     {
-        PCL_ERROR ("do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command line, ABORTING");
-        return -1;
+      std::cout << "do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line if you want to keep your trained models. " << std::endl;
+      return false;
     }
 
-    if (sv_params_.do_shot_ && training_dir_shot.compare ("") == 0)
+    if ( sv_params_.do_ourcvfh_ && training_dir_ourcvfh_.compare ("") == 0)
     {
-        PCL_ERROR ("do_shot is activated but training_dir_ourcvfh_ is empty! Set -training_dir_shot option in the command line, ABORTING");
-        return -1;
+      std::cout << "do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command lineif you want to keep your trained models. " << std::endl;
+      return false;
     }
 
-    setTraining_dir_ourcvfh(training_dir_ourcvfh);
-    setTraining_dir_sift(training_dir_sift);
-    setTraining_dir_shot(training_dir_shot);
-    setModels_dir(models_dir);
-    setSift_structure(recognition_structure_dir);
+    if ( sv_params_.do_shot_ && training_dir_shot_.compare ("") == 0)
+    {
+      std::cout << "do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line if you want to keep your trained models. " << std::endl;
+      return false;
+    }
 
     initialize();
 
@@ -245,7 +236,7 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
               << "==========================================================" << std::endl;
     printParams(std::cout);
 
-    return 1;
+    return true;
 }
 }
 
@@ -255,8 +246,8 @@ main (int argc, char ** argv)
   ros::init (argc, argv, "multiview_recognition_service");
 
   v4r::multiviewGraphROS m;
-  m.initializeMV (argc, argv);
-  ros::spin ();
+  if( m.initializeMV (argc, argv) )
+      ros::spin ();
 
   return 0;
 }

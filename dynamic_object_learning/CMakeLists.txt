@@ -11,10 +11,6 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy do_learning_srv_definitions
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 find_package(V4R REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(X11 REQUIRED)
-find_package(OpenGL REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -88,7 +84,6 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-message("*******  ${V4R_INCLUDE_DIRS} ********")
 include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
@@ -111,7 +106,6 @@ target_link_libraries(do_learning_service
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${CERES_LIBRARIES}
- GLEW glut IL GL X11
 )
 
 
@@ -124,7 +118,6 @@ target_link_libraries(test_do_learning_service
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${CERES_LIBRARIES}
- GLEW glut IL GL X11
 )
 
 #############

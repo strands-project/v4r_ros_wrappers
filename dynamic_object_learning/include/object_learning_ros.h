@@ -11,6 +11,7 @@
 #include "do_learning_srv_definitions/learn_object_inc.h"
 #include "do_learning_srv_definitions/save_model.h"
 #include "do_learning_srv_definitions/visualize.h"
+#include "do_learning_srv_definitions/write_debug_images_to_disk.h"
 
 namespace v4r
 {
@@ -24,11 +25,14 @@ private:
                        learn_object_,
                        learn_object_inc_,
                        save_model_,
-                       vis_model_;
+                       vis_model_,
+                       write_images_to_disk_srv_;
     ros::Publisher vis_pc_pub_;
 
+    bool visualize_intermediate_results_;
+
 public:
-    void initialize (int argc, char ** argv);
+    void initSIFT (int argc, char ** argv);
 
     bool clear_cached_model (do_learning_srv_definitions::clear::Request & req,
                      do_learning_srv_definitions::clear::Response & response);
@@ -38,6 +42,9 @@ public:
 
     bool visualizeROS(do_learning_srv_definitions::visualize::Request & req,
                         do_learning_srv_definitions::visualize::Response & response);
+
+    bool writeImagesToDiskROS(do_learning_srv_definitions::write_debug_images_to_disk::Request & req,
+                        do_learning_srv_definitions::write_debug_images_to_disk::Response & response);
 
     bool learn_object (do_learning_srv_definitions::learn_object::Request & req,
                        do_learning_srv_definitions::learn_object::Response & response);

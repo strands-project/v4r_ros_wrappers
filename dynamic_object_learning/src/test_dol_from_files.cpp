@@ -27,7 +27,8 @@ private:
     std::string directory_,
                 models_dir_,
                 recognition_structure_dir_,
-                object_name_;
+                object_name_,
+                mask_file_;
     bool visualize_;
 
 public:
@@ -55,6 +56,17 @@ public:
             v4r::io::getFilesInDirectory(directory_, poses_str, so_far, pattern, false);
         }
 
+        std::string service_name_clear = "/dynamic_object_learning/clear_cached_model";
+        ros::ServiceClient DOL_clear_client = n_->serviceClient<do_learning_srv_definitions::clear>(service_name_clear);
+        do_learning_srv_definitions::clear srv_clear;
+
+        if ( ! DOL_clear_client.call ( srv_clear ) )
+        {
+            std::stringstream mm;
+            mm << "Error calling service: " << service_name_clear << std::endl;
+            std::cerr << mm.str() << std::endl;
+        }
+
         std::sort(keyframes_str.begin(), keyframes_str.end());
         std::sort(poses_str.begin(), poses_str.end());
         std::sort(object_indices_str.begin(), object_indices_str.end());
@@ -71,8 +83,11 @@ public:
         ros::ServiceClient DOLclient_vis = n_->serviceClient<do_learning_srv_definitions::visualize>(service_name_vis);
         do_learning_srv_definitions::visualize srv_vis;
 
+        if ( !mask_file_.compare("") )
+            mask_file_ = directory_ + "/mask.txt";
+
         std::ifstream initial_mask_file;
-        initial_mask_file.open(directory_ + "/mask.txt");
+        initial_mask_file.open( mask_file_ );
 
         int idx_tmp;
         pcl::PointIndices pind;
@@ -141,17 +156,6 @@ public:
                 std::cerr << mm.str() << std::endl;
             }
         }
-
-        std::string service_name_clear = "/dynamic_object_learning/clear_cached_model";
-        ros::ServiceClient DOL_clear_client = n_->serviceClient<do_learning_srv_definitions::clear>(service_name_clear);
-        do_learning_srv_definitions::clear srv_clear;
-
-        if ( ! DOL_clear_client.call ( srv_clear ) )
-        {
-            std::stringstream mm;
-            mm << "Error calling service: " << service_name_clear << std::endl;
-            std::cerr << mm.str() << std::endl;
-        }
         return true;
     }
 
@@ -174,7 +178,6 @@ public:
 
         if(!n_->getParam ( "directory", directory_ ))
         {
-            //directory_ = "/media/aitor14/DATA/STRANDS_MODELS/recognition_structure/playstation_turn_table.pcd/";
             ROS_ERROR("Specify a directory using param directory.\n");
             return false;
         }
@@ -195,6 +198,9 @@ public:
         {
             object_name_ = "my_dynamic_object";
         }
+
+        n_->getParam( "mask_file", mask_file_);
+
         return true;
     }
 };

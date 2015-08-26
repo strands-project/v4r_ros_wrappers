@@ -36,6 +36,15 @@ DOL_ROS::visualizeROS(do_learning_srv_definitions::visualize::Request & req,
     return true;
 }
 
+
+bool
+DOL_ROS::writeImagesToDiskROS(do_learning_srv_definitions::write_debug_images_to_disk::Request & req,
+                    do_learning_srv_definitions::write_debug_images_to_disk::Response & response)
+{
+    writeImagesToDisk(req.path.data, req.crop_images);
+    return true;
+}
+
 bool
 DOL_ROS::learn_object (do_learning_srv_definitions::learn_object::Request & req,
                    do_learning_srv_definitions::learn_object::Response & response)
@@ -56,8 +65,10 @@ DOL_ROS::learn_object (do_learning_srv_definitions::learn_object::Request & req,
 
         if (!ok)
             break;
-    }
 
+        if(visualize_intermediate_results_)
+            visualize();
+    }
     return ok;
 }
 
@@ -81,9 +92,10 @@ bool DOL_ROS::learn_object_inc (do_learning_srv_definitions::learn_object_inc::R
 }
 
 void
-DOL_ROS::initialize (int argc, char ** argv)
+DOL_ROS::initSIFT (int argc, char ** argv)
 {
-    double inlDist, min_plane_points, min_smooth_points;
+    int min_plane_points, min_smooth_points;
+    visualize_intermediate_results_ = false;
 
     n_.reset( new ros::NodeHandle ( "~" ) );
     n_->getParam ( "radius", param_.radius_);
@@ -91,34 +103,36 @@ DOL_ROS::initialize (int argc, char ** argv)
     n_->getParam ( "dist_threshold_growing", param_.dist_threshold_growing_);
     n_->getParam ( "seed_res", param_.seed_resolution_);
     n_->getParam ( "voxel_res", param_.voxel_resolution_);
-    n_->getParam ( "ratio", param_.ratio_);
+    n_->getParam ( "ratio", param_.ratio_supervoxel_);
     n_->getParam ( "do_erosion", param_.do_erosion_);
     n_->getParam ( "do_mst_refinement", param_.do_mst_refinement_);
     n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
     n_->getParam ( "transfer_latest_only", param_.transfer_indices_from_latest_frame_only_);
     n_->getParam ( "chop_z", param_.chop_z_);
     n_->getParam ( "normal_method", param_.normal_method_);
-    n_->getParam ( "filter_planes_only", param_.filter_planes_only_);
+    n_->getParam ( "smooth_clustering", p_param_.smooth_clustering);
+    n_->getParam ( "ratio_cluster_obj_supported", param_.ratio_cluster_obj_supported_);
+    n_->getParam ( "ratio_cluster_occluded", param_.ratio_cluster_occluded_);
     n_->getParam ( "stat_outlier_removal_meanK", sor_params_.meanK_);
     n_->getParam ( "stat_outlier_removal_std_mul", sor_params_.std_mul_);
-
-    if( n_->getParam ( "inlier_threshold_plane_seg", inlDist) )
-        p_param_.inlDist = static_cast<float> (inlDist);
+    n_->getParam ( "inlier_threshold_plane_seg", p_param_.inlDist);
+    n_->getParam ( "visualize_intermediate_results", visualize_intermediate_results_);
 
     if ( n_->getParam ( "min_plane_points", min_plane_points) )
-        p_param_.minPoints = static_cast<float> (min_plane_points);
+        p_param_.minPoints = static_cast<unsigned> (min_plane_points);
 
     if ( n_->getParam ( "min_points_smooth_cluster", min_smooth_points) )
-        p_param_.minPointsSmooth = static_cast<float> (min_smooth_points);
+        p_param_.minPointsSmooth = static_cast<unsigned> (min_smooth_points);
 
 
-    DOL::initialize(argc, argv);
+    DOL::initSIFT();
 
     clear_cached_model_  = n_->advertiseService ("clear_cached_model", &DOL_ROS::clear_cached_model, this);
     learn_object_  = n_->advertiseService ("learn_object", &DOL_ROS::learn_object, this);
     learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &DOL_ROS::learn_object_inc, this);
     save_model_  = n_->advertiseService ("save_model", &DOL_ROS::save_model, this);
     vis_model_  = n_->advertiseService ("visualize", &DOL_ROS::visualizeROS, this);
+    write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &DOL_ROS::writeImagesToDiskROS, this);
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "learned_model", 1 );
 
     std::cout << "Started dynamic object learning with parameters: " << std::endl
@@ -138,7 +152,7 @@ main (int argc, char ** argv)
 {
     ros::init (argc, argv, "dynamic_object_learning");
     v4r::object_modelling::DOL_ROS m;
-    m.initialize (argc, argv);
+    m.initSIFT (argc, argv);
 
     return 0;
 }

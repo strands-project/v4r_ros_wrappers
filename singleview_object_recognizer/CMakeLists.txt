@@ -26,6 +26,7 @@ find_package( V4R REQUIRED )
 catkin_package(
    INCLUDE_DIRS include
    CATKIN_DEPENDS roscpp rospy recognition_srv_definitions scitos_ptu mongodb_store_msgs mongodb_store
+                                        cv_bridge sensor_msgs image_transport
 )
 
 ###########
