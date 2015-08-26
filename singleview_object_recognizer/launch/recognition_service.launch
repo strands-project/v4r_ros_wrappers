@@ -1,42 +1,28 @@
 <launch>
-    <arg name="machine" default="localhost" />
-	<arg name="user" default="" />
-
-    <machine name="$(arg machine)" address="$(arg machine)" env-loader="/opt/strands/strands_catkin_ws/devel/env.sh" user="$(arg user)" default="true"/>
-
-	<arg name="models_dir" default="" />
-	<arg name="training_dir_sift" default="" />
-	<arg name="training_dir_shot" default="" />
-	<arg name="recognizer_structure_sift" default="" />
-	<arg name="training_dir_ourcvfh" default="" />
-	<arg name="chop_z" default="2.5" />
-	<arg name="icp_iterations" default="10" />
+	<arg name="models_dir" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/models" />
+	<arg name="recognizer_structure_sift" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/recognition_structure" />
+	<arg name="training_dir_sift" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/sift_trained" />
+	<arg name="training_dir_shot" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/shot_trained" />
+	<arg name="training_dir_ourcvfh" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/ourcvfh_trained" />
 	<arg name="do_sift" default="true" />
 	<arg name="do_shot" default="false" />
 	<arg name="do_ourcvfh" default="false" />
-	<arg name="ignore_color" default="false" />
-	<!-- minimum number of consistent correspondences to generate a hypothesis -->
-	<arg name="cg_size" default="7" />
-	<!-- each SIFT keypoint in the scene is associated to the closest (in feature space) knn_sift model keypoints -->
-	<arg name="knn_sift" default="2" />
-	<arg name="use_cg_graph" default="false" />
-	<arg name="publish_debug" default="false" />
-	
+	<arg name="chop_z" default="3.0" />
+	<arg name="cg_size_thresh" default="5" />
+	<arg name="knn_sift" default="3" />
+
 	<!-- recognition service service -->
 	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" respawn="true" >
 		<param name="models_dir" value="$(arg models_dir)" type="string"/>
+		<param name="recognizer_structure_sift" value="$(arg recognizer_structure_sift)" type="string"/>
 		<param name="training_dir_sift" value="$(arg training_dir_sift)" type="string"/>
 		<param name="training_dir_shot" value="$(arg training_dir_shot)" type="string"/>
-		<param name="recognizer_structure_sift" value="$(arg recognizer_structure_sift)" type="string"/>
-		<param name="icp_iterations" value="$(arg icp_iterations)" type="int"/>
+		<param name="training_dir_ourcvfh" value="$(arg training_dir_ourcvfh)" type="string"/>
 		<param name="do_sift" value="$(arg do_sift)" type="bool"/>
 		<param name="do_shot" value="$(arg do_shot)" type="bool"/>
 		<param name="do_ourcvfh" value="$(arg do_ourcvfh)" type="bool"/>
 		<param name="chop_z" value="$(arg chop_z)" type="double"/>
-		<param name="ignore_color" value="$(arg ignore_color)" type="bool"/>
-		<param name="cg_size" value="$(arg cg_size)" type="int"/>
+		<param name="cg_size_thresh" value="$(arg cg_size_thresh)" type="int"/>
 		<param name="knn_sift" value="$(arg knn_sift)" type="int"/>
-		<param name="use_cg_graph" value="$(arg use_cg_graph)" type="bool"/>
-		<param name="publish_debug" value="$(arg publish_debug)" type="bool"/>
 	</node>
 </launch>
