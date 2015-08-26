@@ -6,10 +6,8 @@ project(singleview_object_recognizer)
 ## is used, also find other catkin packages
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
-                                         genmsg actionlib_msgs actionlib
-                                        scitos_ptu mongodb_store_msgs mongodb_store
-                                        cv_bridge sensor_msgs image_transport
-					)
+                                         genmsg cv_bridge sensor_msgs image_transport
+                                        )
 
 find_package( PCL 1.7 REQUIRED )
 find_package( OpenCV 2.4 REQUIRED )
@@ -25,8 +23,7 @@ find_package( V4R REQUIRED )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions scitos_ptu mongodb_store_msgs mongodb_store
-                                        cv_bridge sensor_msgs image_transport
+   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions
 )
 
 ###########
@@ -101,7 +98,7 @@ PATTERN ".svn" EXCLUDE
 install(DIRECTORY launch/
 DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 FILES_MATCHING PATTERN "*.launch"
-)																																																																																																																
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
