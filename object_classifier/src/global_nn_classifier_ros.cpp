@@ -254,8 +254,8 @@ GlobalNNPipelineROS<Distance,PointT,FeatureT>::classifyROS (classifier_srv_defin
 template<template<class > class Distance, typename PointT, typename FeatureT>
 void GlobalNNPipelineROS<Distance,PointT,FeatureT>::initializeROS(int argc, char ** argv)
 {
-    n_.reset( new ros::NodeHandle ( "~" ) );
     ros::init (argc, argv, "classifier_service");
+    n_.reset( new ros::NodeHandle ( "~" ) );
     n_->getParam ( "models_dir", models_dir_ );
     n_->getParam ( "training_dir", this->training_dir_ );
     n_->getParam ( "descriptor_name", this->descr_name_ );

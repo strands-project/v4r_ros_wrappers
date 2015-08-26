@@ -40,7 +40,7 @@ template<template<class > class Distance, typename PointT, typename FeatureT>
   public:
     GlobalNNPipelineROS()
     {
-
+        camera_frame_ = "/head_xtion_depth_optical_frame";
     }
 
     bool classifyROS(classifier_srv_definitions::classify::Request & req,

@@ -92,7 +92,7 @@ private:
     double cos_min_delta_angle_;
     double sqr_min_cam_distance_;
     std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > cameras_;
-    std::vector<std::pair<int, pcl::PointCloud<pcl::PointXYZRGB>::Ptr> > keyframes_;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGB>> keyframes_;
     pcl::PointCloud<PointT>::Ptr scene_;
     int saved_clouds_;
     boost::posix_time::ptime last_cloud_;
@@ -139,38 +139,40 @@ private:
     {
         int type = 0;
 
-        if (cam_id>=0)
+//        if (cam_id>=0)
         {
             type = 1;
 
             Eigen::Matrix4f inv_pose;
             v4r::invPose(pose, inv_pose);
 
-            unsigned z;
-            for (z=0; z<cameras_.size(); z++)
+            bool close_view_exists = false;
+            for (size_t z=0; z<cameras_.size(); z++)
             {
                 if ( (inv_pose.block<3,1>(0,2).dot(cameras_[z].block<3,1>(0,2)) > cos_min_delta_angle_) &&
                      (inv_pose.block<3,1>(0,3)-cameras_[z].block<3,1>(0,3)).squaredNorm() < sqr_min_cam_distance_ )
                 {
+                    close_view_exists = true;
                     break;
                 }
             }
 
-            if (z>=cameras_.size())
+            if ( !close_view_exists )
             {
                 type = 2;
                 cameras_.push_back(inv_pose);
-                keyframes_.push_back(std::make_pair(cam_id, pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>())));
-                pcl::copyPointCloud(cloud, *(keyframes_.back().second));
+                pcl::PointCloud<pcl::PointXYZRGB> new_keyframe;
+                pcl::copyPointCloud(cloud, new_keyframe);
 
-                keyframes_.back().second->sensor_origin_[0] = inv_pose(0,3);
-                keyframes_.back().second->sensor_origin_[1] = inv_pose(1,3);
-                keyframes_.back().second->sensor_origin_[2] = inv_pose(2,3);
+                new_keyframe.sensor_origin_[0] = inv_pose(0,3);
+                new_keyframe.sensor_origin_[1] = inv_pose(1,3);
+                new_keyframe.sensor_origin_[2] = inv_pose(2,3);
 
                 Eigen::Matrix3f rotation = inv_pose.block<3,3>(0,0);
                 Eigen::Quaternionf q(rotation);
-                keyframes_.back().second->sensor_orientation_ = q;
-                ROS_INFO("Added new keyframe**********************************************************");
+                new_keyframe.sensor_orientation_ = q;
+                keyframes_.push_back(new_keyframe);
+                std::cout << "Added new keyframe**********************************************************" << std::endl;
 
                 geometry_msgs::Point p;
                 p.x = -pose(0,3);
@@ -181,7 +183,11 @@ private:
 
                 keyframe_publisher_.publish(keyframes_marker_);
             }
+//            else
+//                std::cout << "--- not adding keyframe " << std::endl;
         }
+//        else
+//            std::cout << "00000  camID 000000 " << std::endl;
         return type;
     }
 
@@ -260,6 +266,8 @@ private:
                 trajectory_publisher_.publish(trajectory_marker_);
             }
         }
+        else
+            std::cout << "cam tracker not ready!" << std::endl;
 
         /*std_msgs::Float32 conf_mesage;
       conf_mesage.data = conf;
@@ -383,32 +391,28 @@ private:
         float nm_integration_min_weight_ = 0.75f;
 
         v4r::utils::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
-        std::vector<std::pair<int, pcl::PointCloud<pcl::PointXYZRGB>::Ptr> > &ref_clouds = keyframes_;
-        std::vector< std::vector<float> > weights(ref_clouds.size());
-        std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > ptr_clouds(ref_clouds.size());
-        std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals(ref_clouds.size());
+        std::vector< std::vector<float> > weights(keyframes_.size());
+        std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > ptr_clouds(keyframes_.size());
+        std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals(keyframes_.size());
 
         nm.setLateralSigma(lateral_sigma);
         nm.setMaxAngle(max_angle);
         nm.setUseDepthEdges(depth_edges);
 
-        if (ref_clouds.size()>0)
+        if (keyframes_.size()>0)
         {
 
-            for (unsigned i=0; i<ref_clouds.size(); i++)
+            for (unsigned i=0; i<keyframes_.size(); i++)
             {
+
+                ptr_clouds[i].reset(new pcl::PointCloud<PointT>(keyframes_[i]));
                 pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> ne;
                 ne.setRadiusSearch(0.01f);
-                ne.setInputCloud (ref_clouds[i].second);
+                ne.setInputCloud (ptr_clouds[i]);
                 normals[i].reset(new pcl::PointCloud<pcl::Normal>());
                 ne.compute (*normals[i]);
-            }
 
-            for (unsigned i=0; i<ref_clouds.size(); i++)
-            {
-                ptr_clouds[i] = ref_clouds[i].second;
-
-                nm.setInputCloud(ref_clouds[i].second);
+                nm.setInputCloud(ptr_clouds[i]);
                 nm.setInputNormals(normals[i]);
                 nm.compute();
                 nm.getWeights(weights[i]);
@@ -445,7 +449,7 @@ private:
         for(size_t i=0; i < cameras_.size(); i++)
         {
             Eigen::Matrix4f inv_pose_after_ba;
-            v4r::invPose(model.cameras[keyframes_[i].first], inv_pose_after_ba);
+            v4r::invPose(model.cameras[i], inv_pose_after_ba);
             cameras_[i] = inv_pose_after_ba;
         }
         return true;
@@ -458,7 +462,7 @@ private:
         for(size_t i=0; i < cameras_.size(); i++)
         {
             sensor_msgs::PointCloud2 msg;
-            pcl::toROSMsg(*(keyframes_[i].second), msg);
+            pcl::toROSMsg(keyframes_[i], msg);
             response.keyframes.push_back(msg);
 
             Eigen::Matrix4f trans = cameras_[i];
@@ -496,13 +500,13 @@ private:
             if(!is_directory(s))
             {
                 path p(req.dir_name.data);
-                create_directory(p);
+                create_directories(req.dir_name.data);
                 for(size_t i=0; i < cameras_.size(); i++)
                 {
                     path f = p / boost::str(boost::format("cloud_%i.pcd") % i);
                     std::string filename = f.string();
                     std::cout << "Writing file to " << filename << "." << std::endl;
-                    pcl::io::savePCDFileBinary(filename, *(keyframes_[i].second));
+                    pcl::io::savePCDFileBinary(filename, keyframes_[i]);
                 }
             }
         }
@@ -536,7 +540,7 @@ private:
             for(size_t i=0; i < cameras_.size(); i++)
             {
                 Eigen::Matrix4f inv_pose_after_ba;
-                v4r::invPose(model.cameras[keyframes_[i].first], inv_pose_after_ba);
+                v4r::invPose(model.cameras[i], inv_pose_after_ba);
                 cameras_[i] = inv_pose_after_ba;
                 std::cout << cameras_[i] << std::endl << std::endl;
             }
@@ -544,9 +548,9 @@ private:
 
         for(size_t i=0; i < cameras_.size(); i++)
         {
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr c(new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::transformPointCloud( *(keyframes_[i].second), *c, cameras_[i]);
-            *compound += *c;
+            pcl::PointCloud<pcl::PointXYZRGB> c;
+            pcl::transformPointCloud( keyframes_[i], c, cameras_[i]);
+            *compound += c;
         }
 
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered;

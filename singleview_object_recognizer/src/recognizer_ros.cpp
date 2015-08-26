@@ -210,19 +210,19 @@ RecognizerROS::initialize (int argc, char ** argv)
 
   if ( sv_params_.do_sift_ && training_dir_sift_.compare ("") == 0)
   {
-    PCL_ERROR ("do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line, ABORTING");
+    std::cout << "do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line if you want to keep your trained models. " << std::endl;
     return;
   }
 
   if ( sv_params_.do_ourcvfh_ && training_dir_ourcvfh_.compare ("") == 0)
   {
-    PCL_ERROR ("do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command line, ABORTING");
+    std::cout << "do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command lineif you want to keep your trained models. " << std::endl;
     return;
   }
 
   if ( sv_params_.do_shot_ && training_dir_shot_.compare ("") == 0)
   {
-    PCL_ERROR ("do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line, ABORTING");
+    std::cout << "do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line if you want to keep your trained models. " << std::endl;
     return;
   }
   vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
