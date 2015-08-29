@@ -2,8 +2,8 @@
 Changelog for package multiview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2015-08-29)
+------------------
 * added V4R ass dependency where needed and changed maintainers to STRANDS people
 * Update ReadMe.md
 * Fixed wrong recognition_structure_dir parameter name

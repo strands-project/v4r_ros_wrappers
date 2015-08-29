@@ -2,8 +2,8 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2015-08-29)
+------------------
 * added dep
 * added V4R ass dependency where needed and changed maintainers to STRANDS people
 * removed table segmenation
