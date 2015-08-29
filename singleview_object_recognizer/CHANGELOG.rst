@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.4 (2015-08-29)
+------------------
 * fixed string formatting bug
 * Contributors: Marc Hanheide
 
