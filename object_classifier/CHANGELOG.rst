@@ -2,6 +2,9 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.1 (2015-08-29)
 ------------------
 * added dep

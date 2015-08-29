@@ -2,6 +2,11 @@
 Changelog for package classifier_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added message_runtime and missing message generation
+* Contributors: Marc Hanheide
+
 0.0.1 (2015-08-29)
 ------------------
 * added V4R ass dependency where needed and changed maintainers to STRANDS people
