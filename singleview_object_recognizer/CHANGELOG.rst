@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.3 (2015-08-29)
+------------------
 * disbale c++11 as PCL 1.7 cannot handle it
 * Contributors: Marc Hanheide
 

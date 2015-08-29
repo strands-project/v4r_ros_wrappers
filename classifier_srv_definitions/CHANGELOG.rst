@@ -2,8 +2,8 @@
 Changelog for package classifier_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.3 (2015-08-29)
+------------------
 * added message_runtime and missing message generation
 * Contributors: Marc Hanheide
 
