@@ -2,6 +2,12 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added missing dep
+* fixed maintainer
+* Contributors: Marc Hanheide
+
 0.0.3 (2015-08-29)
 ------------------
 

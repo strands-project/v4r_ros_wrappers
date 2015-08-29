@@ -2,6 +2,9 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.3 (2015-08-29)
 ------------------
 

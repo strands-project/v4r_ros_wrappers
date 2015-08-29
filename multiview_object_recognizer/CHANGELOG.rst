@@ -2,6 +2,11 @@
 Changelog for package multiview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixed string formatting bug
+* Contributors: Marc Hanheide
+
 0.0.3 (2015-08-29)
 ------------------
 

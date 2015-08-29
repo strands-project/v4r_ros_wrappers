@@ -2,6 +2,9 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.3 (2015-08-29)
 ------------------
 
