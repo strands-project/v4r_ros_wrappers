@@ -1,9 +1,5 @@
 <launch>
-	<arg name="models_dir" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/models" />
-	<arg name="recognizer_structure_sift" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/recognition_structure" />
-	<arg name="training_dir_sift" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/sift_trained" />
-	<arg name="training_dir_shot" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/shot_trained" />
-	<arg name="training_dir_ourcvfh" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data/ourcvfh_trained" />
+	<arg name="data_dir" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data" />
 	<arg name="do_sift" default="true" />
 	<arg name="do_shot" default="false" />
 	<arg name="do_ourcvfh" default="false" />
@@ -13,11 +9,11 @@
 
 	<!-- recognition service service -->
 	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" respawn="true" >
-		<param name="models_dir" value="$(arg models_dir)" type="string"/>
-		<param name="recognizer_structure_sift" value="$(arg recognizer_structure_sift)" type="string"/>
-		<param name="training_dir_sift" value="$(arg training_dir_sift)" type="string"/>
-		<param name="training_dir_shot" value="$(arg training_dir_shot)" type="string"/>
-		<param name="training_dir_ourcvfh" value="$(arg training_dir_ourcvfh)" type="string"/>
+		<param name="models_dir" value="$(arg data_dir)/models" type="string"/>
+		<param name="recognizer_structure_sift" value="$(arg data_dir)/recognition_structure" type="string"/>
+		<param name="training_dir_sift" value="$(arg data_dir)/sift_trained" type="string"/>
+		<param name="training_dir_shot" value="$(arg data_dir)/shot_trained" type="string"/>
+		<param name="training_dir_ourcvfh" value="$(arg data_dir)/ourcvfh_trained" type="string"/>
 		<param name="do_sift" value="$(arg do_sift)" type="bool"/>
 		<param name="do_shot" value="$(arg do_shot)" type="bool"/>
 		<param name="do_ourcvfh" value="$(arg do_ourcvfh)" type="bool"/>
