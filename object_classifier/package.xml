@@ -42,6 +42,7 @@
   <!--   <test_depend>gtest</test_depend> -->
 	<buildtool_depend>catkin</buildtool_depend>
 	<build_depend>roscpp</build_depend>
+  <build_depend>visualization_msgs</build_depend>
 	<build_depend>sensor_msgs</build_depend>
 	<build_depend>std_msgs</build_depend>
 	<build_depend>object_perception_msgs</build_depend>
@@ -58,6 +59,7 @@
         <run_depend>classifier_srv_definitions</run_depend>
         <run_depend>v4r</run_depend>
 	<run_depend>suitesparse</run_depend>
+  <run_depend>visualization_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
