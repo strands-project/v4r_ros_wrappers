@@ -41,7 +41,7 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>camera_tracker</run_depend>
-  <run_depend>camera_tracker_srv_definitions</run_depend>
+  <run_depend>camera_srv_definitions</run_depend>
   <run_depend>classifier_srv_definitions</run_depend>
   <run_depend>multiview_object_recognizer</run_depend>
   <run_depend>object_classifier</run_depend>
