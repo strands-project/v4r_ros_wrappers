@@ -2,8 +2,8 @@
 Changelog for package v4r_ros_wrappers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.2 (2015-08-29)
+------------------
 * fixed version number
 * Update package.xml
 * added meta package
