@@ -1,5 +1,5 @@
 <launch>
-	<arg name="data_dir" default="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data" />
+	<arg name="data_dir" /> <!-- e.g.  data_dir:="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data" -->
 	<arg name="do_sift" default="true" />
 	<arg name="do_shot" default="false" />
 	<arg name="do_ourcvfh" default="false" />
