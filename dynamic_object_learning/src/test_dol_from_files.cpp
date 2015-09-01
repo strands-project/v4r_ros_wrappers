@@ -163,6 +163,9 @@ public:
     DOLDemoFromFiles()
     {
         visualize_ = true;
+        models_dir_ = "/tmp/dol/models/",
+        recognition_structure_dir_ = "/tmp/dol/recognition_structure/",
+        object_name_ = "my_dynamic_object";
     }
 
     bool initialize(int argc, char ** argv)
@@ -174,32 +177,17 @@ public:
         }
         n_ = new ros::NodeHandle ( "~" );
 
-        n_->getParam("visualize", visualize_);
-
         if(!n_->getParam ( "directory", directory_ ))
         {
             ROS_ERROR("Specify a directory using param directory.\n");
             return false;
         }
 
-        if(!n_->getParam( "models_dir", models_dir_) )
-        {
-            ROS_ERROR("Specify a model directory using param models_dir.\n");
-            return false;
-        }
-
-        if(!n_->getParam( "recognition_dir", recognition_structure_dir_) )
-        {
-            ROS_ERROR("Specify a model directory using param recognition_dir.\n");
-            exit(-1);
-        }
-
-        if(!n_->getParam( "object_name", object_name_) )
-        {
-            object_name_ = "my_dynamic_object";
-        }
-
+        n_->getParam( "models_dir", models_dir_);
+        n_->getParam( "recognition_dir", recognition_structure_dir_);
+        n_->getParam( "object_name", object_name_);
         n_->getParam( "mask_file", mask_file_);
+        n_->getParam("visualize", visualize_);
 
         return true;
     }
