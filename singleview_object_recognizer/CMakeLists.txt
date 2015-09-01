@@ -30,7 +30,7 @@ catkin_package(
 ## Build ##
 ###########
 
-add_definitions(-std=c++0x)
+#add_definitions(-std=c++0x)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
