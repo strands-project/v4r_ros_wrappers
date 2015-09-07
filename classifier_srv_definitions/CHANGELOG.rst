@@ -2,6 +2,9 @@
 Changelog for package classifier_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.4 (2015-08-29)
 ------------------
 

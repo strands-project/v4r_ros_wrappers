@@ -2,6 +2,12 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* default was *very* specific and shouldn't be
+  This confused a lot of people as the component simply throws a `boost::filesystem` error when the directory doesn't exist. Here, we should not define a default, but force people to actually define the argument, as it is a required one.
+* Contributors: Marc Hanheide
+
 0.0.4 (2015-08-29)
 ------------------
 * fixed string formatting bug
