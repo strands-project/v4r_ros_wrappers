@@ -2,8 +2,8 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.5 (2015-09-07)
+------------------
 * reverted last change
   as it is needed here, it turns out.
 * Update CMakeLists.txt
