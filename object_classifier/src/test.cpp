@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: Feb 20, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>
@@ -211,7 +211,7 @@ public:
         {
             vis_.reset(new pcl::visualization::PCLVisualizer("classifier visualization"));
         }
-        vis_->addCoordinateSystem(0.2f, 0);
+        vis_->addCoordinateSystem(0.2f, "co", 0);
         float text_scale = 0.010f;
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr pClassifiedPCl (new pcl::PointCloud<pcl::PointXYZRGB>());
         pcl::copyPointCloud(*sceneXYZ_, *pClassifiedPCl);

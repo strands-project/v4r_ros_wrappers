@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: Feb 20, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>

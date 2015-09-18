@@ -390,7 +390,7 @@ private:
         bool depth_edges = true;
         float nm_integration_min_weight_ = 0.75f;
 
-        v4r::utils::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
+        v4r::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
         std::vector< std::vector<float> > weights(keyframes_.size());
         std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > ptr_clouds(keyframes_.size());
         std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals(keyframes_.size());
@@ -418,7 +418,7 @@ private:
                 nm.getWeights(weights[i]);
             }
 
-            v4r::utils::NMBasedCloudIntegration<pcl::PointXYZRGB> nmIntegration;
+            v4r::NMBasedCloudIntegration<pcl::PointXYZRGB> nmIntegration;
             octree_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
 
             nmIntegration.setInputClouds(ptr_clouds);

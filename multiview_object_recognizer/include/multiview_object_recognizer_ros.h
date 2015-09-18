@@ -1,4 +1,4 @@
-#include <v4r/recognition/multiview_object_recognizer_service.h>
+#include <v4r/recognition/multiview_object_recognizer.h>
 #include "recognition_srv_definitions/recognize.h"
 
 #include <ros/ros.h>

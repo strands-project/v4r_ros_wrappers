@@ -217,7 +217,7 @@ GlobalNNPipelineROS<Distance,PointT,FeatureT>::classifyROS (classifier_srv_defin
 
           // visualize the result as ROS topic
             visualization_msgs::Marker marker;
-            marker.header.frame_id = camera_frame_;
+            marker.header.frame_id = req.cloud.header.frame_id;
             marker.header.stamp = ros::Time::now();
             //marker.header.seq = ++marker_seq_;
             marker.ns = "object_classification";
@@ -279,7 +279,7 @@ void GlobalNNPipelineROS<Distance,PointT,FeatureT>::initializeROS(int argc, char
     return;
   }
 
-  boost::shared_ptr<MeshSource<pcl::PointXYZ> > mesh_source (new MeshSource<pcl::PointXYZ>);
+  boost::shared_ptr<MeshSource<PointT> > mesh_source (new MeshSource<PointT>);
   mesh_source->setPath (models_dir_);
   mesh_source->setResolution (150);
   mesh_source->setTesselationLevel (0);
@@ -288,7 +288,7 @@ void GlobalNNPipelineROS<Distance,PointT,FeatureT>::initializeROS(int argc, char
   mesh_source->setModelScale (1.f);
   mesh_source->generate (this->training_dir_);
 
-  this->source_ = boost::static_pointer_cast<v4r::MeshSource<pcl::PointXYZ> > (mesh_source);
+  this->source_ = boost::static_pointer_cast<v4r::MeshSource<PointT> > (mesh_source);
 
   boost::shared_ptr<v4r::ESFEstimation<PointT, pcl::ESFSignature640> > estimator;
   estimator.reset (new v4r::ESFEstimation<PointT, pcl::ESFSignature640>);

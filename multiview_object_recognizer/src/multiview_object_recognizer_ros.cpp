@@ -3,6 +3,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <v4r/common/visibility_reasoning.h>
+#include <v4r/common/pcl_opencv.h>
 
 namespace v4r
 {
@@ -50,7 +51,7 @@ bool multiviewGraphROS::respondSrvCall(recognition_srv_definitions::recognize::R
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified[j]->getNormalsAssembled ( resolution_ );
 
       pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      v4r::common::transformNormals(normal_cloud, normal_aligned, transforms_verified[j]);
+      v4r::transformNormals(normal_cloud, normal_aligned, transforms_verified[j]);
 
       //ratio of inlier points
       float confidence = 0;
@@ -58,7 +59,7 @@ bool multiviewGraphROS::respondSrvCall(recognition_srv_definitions::recognize::R
       const int img_width = 640;
       const int img_height = 480;
 
-      v4r::common::VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
+      v4r::VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
       vr.setThresholdTSS (0.01f);
       /*float fsv_ratio =*/ vr.computeFSVWithNormals (pInputCloud_, model_aligned, normal_aligned);
       confidence = 1.f - vr.getFSVUsedPoints() / static_cast<float>(model_aligned->points.size());
@@ -165,6 +166,7 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     n_->getParam ( "do_shot", sv_params_.do_shot_);
     n_->getParam ( "do_ourcvfh", sv_params_.do_ourcvfh_);
     n_->getParam ( "chop_z", sv_params_.chop_at_z_);
+    n_->getParam ( "normal_method", sv_params_.normal_computation_method_);
 
     n_->getParam ( "cg_size_thresh", cg_params_.cg_size_threshold_);
     n_->getParam ( "cg_size", cg_params_.cg_size_);
