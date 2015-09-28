@@ -118,6 +118,7 @@ public:
                 return false;
             }
         }
+        return true;
     }
 
     bool initialize(int argc, char ** argv)

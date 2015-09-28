@@ -88,6 +88,7 @@ public:
             }
 
         }
+        return true;
     }
 
     bool initialize(int argc, char ** argv)

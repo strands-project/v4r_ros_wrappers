@@ -149,7 +149,7 @@ bool multiviewGraphROS::recognizeROS (recognition_srv_definitions::recognize::Re
     view_nr_ss << view_counter_++;
     view_name = view_nr_ss.str();
     pcl::fromROSMsg (req.cloud, *scene);
-    recognize(scene, view_name, req.transform);
+    this->recognize(scene, view_name, req.transform);
     respondSrvCall(req, response);
     return true;
 }
@@ -190,6 +190,7 @@ bool multiviewGraphROS::initializeMV(int argc, char **argv)
     n_->getParam ( "hv_ignore_color", hv_params_.ignore_color_);
 
     n_->getParam ( "scene_to_scene", mv_params_.scene_to_scene_);
+//    n_->getParam ( "hyp_to_hyp", mv_params_.hyp_to_hyp_);
     n_->getParam ( "use_robot_pose", mv_params_.use_robot_pose_);
     n_->getParam ( "extension_mode", mv_params_.extension_mode_);
     n_->getParam ( "max_vertices_in_graph", mv_params_.max_vertices_in_graph_);

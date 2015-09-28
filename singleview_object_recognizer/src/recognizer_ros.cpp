@@ -54,7 +54,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       response.transforms.push_back(tt);
 
       ConstPointInTPtr model_cloud = models_verified_[j]->getAssembled ( resolution_ );
-      typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
       *pRecognizedModels += *model_aligned;
       sensor_msgs::PointCloud2 rec_model;
@@ -63,7 +63,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
 
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
-      typename pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
+      pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
       v4r::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
 
       //ratio of inlier points
