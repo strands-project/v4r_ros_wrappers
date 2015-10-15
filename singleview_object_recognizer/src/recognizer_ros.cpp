@@ -63,7 +63,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
       typename pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      v4r::common::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
+      v4r::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
 
       //ratio of inlier points
       float confidence = 0;
@@ -71,7 +71,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       const int img_width = 640;
       const int img_height = 480;
 
-      v4r::common::VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
+      v4r::VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
       vr.setThresholdTSS (0.01f);
       /*float fsv_ratio =*/ vr.computeFSVWithNormals (pInputCloud_, model_aligned, normal_aligned);
       confidence = 1.f - vr.getFSVUsedPoints() / static_cast<float>(model_aligned->points.size());
