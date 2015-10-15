@@ -2,6 +2,11 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixed namespace and include issues to fit V4R Version 1.0.11
+* Contributors: Thomas Fäulhammer
+
 0.0.5 (2015-09-07)
 ------------------
 * reverted last change
