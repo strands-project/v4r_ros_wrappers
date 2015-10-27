@@ -2,6 +2,17 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.6 (2015-10-15)
+------------------
+* fixed namespace and include issues to fit V4R Version 1.0.11
+* Contributors: Thomas Fäulhammer
+
+0.0.5 (2015-09-07)
+------------------
+* default was *very* specific and shouldn't be
+  This confused a lot of people as the component simply throws a `boost::filesystem` error when the directory doesn't exist. Here, we should not define a default, but force people to actually define the argument, as it is a required one.
+* Contributors: Marc Hanheide
+
 0.0.4 (2015-08-29)
 ------------------
 * fixed string formatting bug

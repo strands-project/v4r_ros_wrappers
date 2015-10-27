@@ -2,6 +2,18 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.6 (2015-10-15)
+------------------
+* fixed namespace and include issues to fit V4R Version 1.0.11
+* Contributors: Thomas Fäulhammer
+
+0.0.5 (2015-09-07)
+------------------
+* reverted last change
+  as it is needed here, it turns out.
+* Update CMakeLists.txt
+* Contributors: Marc Hanheide
+
 0.0.4 (2015-08-29)
 ------------------
 
