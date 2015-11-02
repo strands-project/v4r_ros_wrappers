@@ -1,6 +1,7 @@
 #include "pcl_conversions.h"
 #include <cv_bridge/cv_bridge.h>
 
+#include <v4r_config.h>
 #include <v4r/common/miscellaneous.h>
 #include <v4r/common/pcl_opencv.h>
 #include <v4r/common/visibility_reasoning.h>
@@ -313,7 +314,7 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
 
     if (do_sift)
     {
-#ifdef USE_SIFT_GPU
+#ifdef HAVE_SIFTGPU
   boost::shared_ptr < SIFTLocalEstimation<PointT, FeatureT > > estimator (new SIFTLocalEstimation<PointT, FeatureT >());
   boost::shared_ptr < LocalEstimator<PointT, FeatureT > > cast_estimator = boost::dynamic_pointer_cast<SIFTLocalEstimation<PointT, FeatureT > > (estimator);
 #else

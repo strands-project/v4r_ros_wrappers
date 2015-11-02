@@ -1,3 +1,4 @@
+#include <v4r_config.h>
 #include <v4r/recognition/multiview_object_recognizer.h>
 #include "recognition_srv_definitions/recognize.h"
 

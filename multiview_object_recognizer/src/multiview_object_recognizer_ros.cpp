@@ -2,6 +2,7 @@
 #include "pcl_conversions.h"
 
 #include <cv_bridge/cv_bridge.h>
+#include <v4r_config.h>
 #include <v4r/common/miscellaneous.h>
 #include <v4r/common/visibility_reasoning.h>
 #include <v4r/common/pcl_opencv.h>
@@ -9,9 +10,14 @@
 #include <v4r/recognition/hv_go_3D.h>
 #include <v4r/recognition/local_recognizer.h>
 #include <v4r/recognition/registered_views_source.h>
-#include <v4r/features/opencv_sift_local_estimator.h>
-#include <v4r/features/shot_local_estimator_omp.h>
+
+#ifdef HAVE_SIFTGPU
 #include <v4r/features/sift_local_estimator.h>
+#else
+#include <v4r/features/opencv_sift_local_estimator.h>
+#endif
+
+#include <v4r/features/shot_local_estimator_omp.h>
 
 namespace v4r
 {
@@ -292,7 +298,7 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
 
     if (do_sift)
     {
-#ifdef USE_SIFT_GPU
+#ifdef HAVE_SIFTGPU
     static char kw[][16] = {"-m", "-fo", "-1", "-s", "-v", "1", "-pack"};
     char * argvv[] = {kw[0], kw[1], kw[2], kw[3],kw[4],kw[5],kw[6], NULL};
 
