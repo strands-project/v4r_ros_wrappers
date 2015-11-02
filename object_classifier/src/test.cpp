@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: Feb 20, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>
@@ -17,7 +17,6 @@
 #include "segmentation_srv_definitions/segment.h"
 #include "object_perception_msgs/classification.h"
 #include "geometry_msgs/Point32.h"
-#include "table_segmentation/SegmentTable.h"
 
 class SOCDemo
 {
@@ -136,23 +135,7 @@ private:
             std::cout << "going to call service..." << std::endl;
 
             sensor_msgs::PointCloud2::Ptr input_cloud (new sensor_msgs::PointCloud2() );
-            if(table_id_ != "")
-            {
-                std::cout << "Calling table segmenter service to remove points not on table " << table_id_ << "." << std::endl;
-                ros::ServiceClient segmentation_client;
-                table_segmentation::SegmentTable segmentation_srv;
-                segmentation_srv.request.cloud = *msg;
-                segmentation_srv.request.table_id = table_id_;
-                if (!segmentation_client.call(segmentation_srv)) {
-                    ROS_ERROR("Failed to call table segmentation service.");
-                    return;
-                }
-                *input_cloud = segmentation_srv.response.cloud;
-            }
-            else
-            {
-                *input_cloud = *msg;
-            }
+            *input_cloud = *msg;
 
             if(do_segmentation_)
             {

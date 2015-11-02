@@ -1,0 +1,8 @@
+sensor_msgs/PointCloud2 cloud
+
+# Optional transform from cloud frame to base_link. This is a row  major array
+# of the 4x4 transformation matrix. If it has not the right number of elements
+# then the transform is taken from ROS TF live.
+float32[] transform 
+---
+std_msgs/Int32MultiArray[] clusters_indices

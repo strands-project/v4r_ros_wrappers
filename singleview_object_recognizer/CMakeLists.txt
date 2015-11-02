@@ -30,7 +30,7 @@ catkin_package(
 ## Build ##
 ###########
 
-add_definitions(-std=c++0x)
+#add_definitions(-std=c++0x)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -59,6 +59,7 @@ target_link_libraries(recognition_service
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+   ${EDT_LIBRARIES}
 )
 
 target_link_libraries(test_single_view_recognition_from_file

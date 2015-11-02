@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>segmentation</name>
-  <version>0.0.0</version>
+  <version>0.0.6</version>
   <description>The segmentation package</description>
 
   <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
@@ -24,6 +24,10 @@
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>segmentation_srv_definitions</run_depend>
+
+  <build_depend>v4r</build_depend>
+  <run_depend>v4r</run_depend>
+
 
   <export>
 

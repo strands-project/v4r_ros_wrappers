@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: June, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>
@@ -155,12 +155,11 @@ public:
 
             if (!sv_rec_client_.call(srv_rec))
             {
-                std::stringstream mm;
-                mm << "Error calling multiview recognition service. "<< std::endl;
-                ROS_ERROR(mm.str().c_str());
+                ROS_ERROR("Error calling multiview recognition service. ");
                 return false;
             }
         }
+        return true;
     }
 
     bool initialize(int argc, char ** argv)
