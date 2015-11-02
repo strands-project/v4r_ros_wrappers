@@ -59,6 +59,7 @@ target_link_libraries(recognition_service
    ${PCL_LIBRARIES}
    ${OpenCV_LIBS}
    ${V4R_LIBS}
+   ${EDT_LIBRARIES}
 )
 
 target_link_libraries(test_single_view_recognition_from_file

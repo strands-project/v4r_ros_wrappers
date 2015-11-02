@@ -1,37 +1,60 @@
-#include "recognizer_ros.h"
 #include "pcl_conversions.h"
 #include <cv_bridge/cv_bridge.h>
 
-#include <v4r/common/visibility_reasoning.h>
 #include <v4r/common/miscellaneous.h>
 #include <v4r/common/pcl_opencv.h>
+#include <v4r/common/visibility_reasoning.h>
+#include <v4r/features/opencv_sift_local_estimator.h>
+#include <v4r/features/shot_local_estimator_omp.h>
+#include <v4r/features/sift_local_estimator.h>
+#include <v4r/io/filesystem.h>
+#include <v4r/recognition/ghv.h>
+#include <v4r/recognition/hv_go_3D.h>
+#include <v4r/recognition/local_recognizer.h>
+#include <v4r/recognition/recognizer.h>
+#include <v4r/recognition/registered_views_source.h>
+
+#include <pcl/common/centroid.h>
+#include <pcl/console/parse.h>
+#include <pcl/filters/passthrough.h>
+
+#include <iostream>
+#include <sstream>
+#include <time.h>
+#include <stdlib.h>
+
+#include "recognizer_ros.h"
 
 namespace v4r
 {
 
+template<typename PointT>
 bool
-RecognizerROS::retrainROS (recognition_srv_definitions::retrain_recognizer::Request & req,
+RecognizerROS<PointT>::retrainROS (recognition_srv_definitions::retrain_recognizer::Request & req,
          recognition_srv_definitions::retrain_recognizer::Response & response)
 {
-      std::vector<std::string> model_ids;
-      std::cout << "Number of ids:" << req.load_ids.size() << std::endl;
+    std::cerr << "Retrain not implemented yet!" << std::endl;
+//      std::vector<std::string> model_ids;
+//      std::cout << "Number of ids:" << req.load_ids.size() << std::endl;
 
-      for(size_t i=0; i < req.load_ids.size(); i++)
-      {
-          model_ids.push_back(req.load_ids[i].data);
-          std::cout << req.load_ids[i].data << std::endl;
-      }
-      retrain(model_ids);
-      return true;
+//      for(size_t i=0; i < req.load_ids.size(); i++)
+//      {
+//          model_ids.push_back(req.load_ids[i].data);
+//          std::cout << req.load_ids[i].data << std::endl;
+//      }
+//      retrain(model_ids);
+      return false;
 }
 
-bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Request &req,
+template<typename PointT>
+bool
+RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Request &req,
                             recognition_srv_definitions::recognize::Response &response) const
 {
-    pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
     cv::Mat_<cv::Vec3b> annotated_img;
 
-    PCLOpenCV::ConvertPCLCloud2Image<PointT>(pInputCloud_, annotated_img);
+    PCLOpenCV::ConvertPCLCloud2Image<PointT>(scene_, annotated_img);
 
     for (size_t j = 0; j < models_verified_.size(); j++)
     {
@@ -53,8 +76,8 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       tt.rotation.w = q.w();
       response.transforms.push_back(tt);
 
-      ConstPointInTPtr model_cloud = models_verified_[j]->getAssembled ( resolution_ );
-      pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
+      typename pcl::PointCloud<PointT>::ConstPtr model_cloud = models_verified_[j]->getAssembled ( resolution_ );
+      typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
       pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
       *pRecognizedModels += *model_aligned;
       sensor_msgs::PointCloud2 rec_model;
@@ -64,7 +87,7 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
 
       pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      v4r::transformNormals(normal_cloud, normal_aligned, transforms_verified_[j]);
+      transformNormals(*normal_cloud, *normal_aligned, transforms_verified_[j]);
 
       //ratio of inlier points
       float confidence = 0;
@@ -72,9 +95,9 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
       const int img_width = 640;
       const int img_height = 480;
 
-      v4r::VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
+      VisibilityReasoning<pcl::PointXYZRGB> vr (focal_length, img_width, img_height);
       vr.setThresholdTSS (0.01f);
-      /*float fsv_ratio =*/ vr.computeFSVWithNormals (pInputCloud_, model_aligned, normal_aligned);
+      /*float fsv_ratio =*/ vr.computeFSVWithNormals (scene_, model_aligned, normal_aligned);
       confidence = 1.f - vr.getFSVUsedPoints() / static_cast<float>(model_aligned->points.size());
       response.confidence.push_back(confidence);
 
@@ -153,89 +176,204 @@ bool RecognizerROS::respondSrvCall(recognition_srv_definitions::recognize::Reque
     return true;
 }
 
-bool RecognizerROS::recognizeROS(recognition_srv_definitions::recognize::Request &req,
+template<typename PointT>
+bool
+RecognizerROS<PointT>::recognizeROS(recognition_srv_definitions::recognize::Request &req,
                                  recognition_srv_definitions::recognize::Response &response)
 {
-    pcl::PointCloud<PointT>::Ptr scene (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg (req.cloud, *scene);
-    setInputCloud(scene);
-    recognize();
+    pcl::fromROSMsg (req.cloud, *scene_);
+
+    if( chop_z_ > 0)
+    {
+        pcl::PassThrough<PointT> pass;
+        pass.setFilterLimits ( 0.f, chop_z_ );
+        pass.setFilterFieldName ("z");
+        pass.setInputCloud (scene_);
+        pass.setKeepOrganized (true);
+        pass.filter (*scene_);
+    }
+
+    rr_->setInputCloud (scene_);
+    rr_->recognize();
+    models_verified_ = rr_->getVerifiedModels();
+    transforms_verified_ = rr_->getVerifiedTransforms();
     return respondSrvCall(req, response);
 }
 
+template<typename PointT>
 void
-RecognizerROS::initialize (int argc, char ** argv)
+RecognizerROS<PointT>::initialize (int argc, char ** argv)
 {
     n_.reset( new ros::NodeHandle ( "~" ) );
-    n_->getParam ( "models_dir", models_dir_);
-    n_->getParam ( "training_dir_sift", training_dir_sift_);
-    n_->getParam ( "training_dir_shot", training_dir_shot_);
-    n_->getParam ( "recognizer_structure_sift", sift_structure_);
-    n_->getParam ( "training_dir_ourcvfh", training_dir_ourcvfh_);
-    n_->getParam ( "chop_z", sv_params_.chop_at_z_ );
-    n_->getParam ( "icp_iterations", sv_params_.icp_iterations_);
-    n_->getParam ( "do_sift", sv_params_.do_sift_);
-    n_->getParam ( "do_shot", sv_params_.do_shot_);
-    n_->getParam ( "do_ourcvfh", sv_params_.do_ourcvfh_);
-    n_->getParam ( "knn_sift", sv_params_.knn_sift_);
-    n_->getParam ( "publish_debug", debug_publish_);
+    bool do_sift = true;
+    bool do_shot = false;
+    bool do_ourcvfh = false;
 
-    n_->getParam ( "cg_size_thresh", cg_params_.cg_size_threshold_);
-    n_->getParam ( "cg_size", cg_params_.cg_size_);
-    n_->getParam ( "cg_ransac_threshold", cg_params_.ransac_threshold_);
-    n_->getParam ( "cg_dist_for_clutter_factor", cg_params_.dist_for_clutter_factor_);
-    n_->getParam ( "cg_max_taken", cg_params_.max_taken_);
-    n_->getParam ( "cg_max_time_for_cliques_computation", cg_params_.max_time_for_cliques_computation_);
-    n_->getParam ( "cg_dot_distance", cg_params_.dot_distance_);
-    n_->getParam ( "use_cg_graph", cg_params_.use_cg_graph_);
+    float resolution = 0.003f;
+    std::string models_dir, training_dir;
 
-    n_->getParam ( "hv_resolution", hv_params_.resolution_);
-    n_->getParam ( "hv_inlier_threshold", hv_params_.inlier_threshold_);
-    n_->getParam ( "hv_radius_clutter", hv_params_.radius_clutter_);
-    n_->getParam ( "hv_regularizer", hv_params_.regularizer_);
-    n_->getParam ( "hv_clutter_regularizer", hv_params_.clutter_regularizer_);
-    n_->getParam ( "hv_occlusion_threshold", hv_params_.occlusion_threshold_);
-    n_->getParam ( "hv_optimizer_type", hv_params_.optimizer_type_);
-    n_->getParam ( "hv_color_sigma_l", hv_params_.color_sigma_l_);
-    n_->getParam ( "hv_color_sigma_ab", hv_params_.color_sigma_ab_);
-    n_->getParam ( "hv_use_supervoxels", hv_params_.use_supervoxels_);
-    n_->getParam ( "hv_detect_clutter", hv_params_.detect_clutter_);
-    n_->getParam ( "hv_ignore_color", hv_params_.ignore_color_);
+    typename GHV<PointT, PointT>::Parameter paramGHV;
+    typename GraphGeometricConsistencyGrouping<PointT, PointT>::Parameter paramGgcg;
+    typename LocalRecognitionPipeline<flann::L1, PointT, FeatureT >::Parameter paramLocalRecSift;
+    typename LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> >::Parameter paramLocalRecShot;
+    typename MultiRecognitionPipeline<PointT>::Parameter paramMultiPipeRec;
+    typename SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> >::Parameter paramLocalEstimator;
 
-    std::cout << sv_params_.chop_at_z_ << ", " << hv_params_.ignore_color_ << ", do_shot:" << sv_params_.do_shot_ << std::endl;
-  if (models_dir_.compare ("") == 0)
-  {
-    PCL_ERROR ("Set -models_dir option in the command line, ABORTING");
-    return;
-  }
+    paramGgcg.gc_size_ = 0.015f;
+    paramGgcg.thres_dot_distance_ = 0.2f;
+    paramGgcg.dist_for_cluster_factor_ = 0;
+    paramGgcg.max_taken_correspondence_ = 2;
+    paramGgcg.max_time_allowed_cliques_comptutation_ = 100;
 
-  if ( sv_params_.do_sift_ && training_dir_sift_.compare ("") == 0)
-  {
-    std::cout << "do_sift is activated but training_dir_sift_ is empty! Set -training_dir_sift option in the command line if you want to keep your trained models. " << std::endl;
-    return;
-  }
+    paramGHV.eps_angle_threshold_ = 0.1f;
+    paramGHV.min_points_ = 100;
+    paramGHV.cluster_tolerance_ = 0.01f;
+    paramGHV.use_histogram_specification_ = true;
+    paramGHV.w_occupied_multiple_cm_ = 0.f;
+    paramGHV.opt_type_ = 0;
+//        paramGHV.active_hyp_penalty_ = 0.f;
+    paramGHV.regularizer_ = 3;
+    paramGHV.color_sigma_ab_ = 0.5f;
+    paramGHV.radius_normals_ = 0.02f;
+    paramGHV.occlusion_thres_ = 0.01f;
+    paramGHV.inliers_threshold_ = 0.015f;
 
-  if ( sv_params_.do_ourcvfh_ && training_dir_ourcvfh_.compare ("") == 0)
-  {
-    std::cout << "do_ourcvfh is activated but training_dir_ourcvfh_ is empty! Set -training_dir_ourcvfh option in the command lineif you want to keep your trained models. " << std::endl;
-    return;
-  }
+    paramLocalRecSift.use_cache_ = paramLocalRecShot.use_cache_ = true;
+    paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = 10;
+    paramLocalRecSift.save_hypotheses_ = paramLocalRecShot.save_hypotheses_ = true;
+    paramLocalRecShot.kdtree_splits_ = 128;
 
-  if ( sv_params_.do_shot_ && training_dir_shot_.compare ("") == 0)
-  {
-    std::cout << "do_shot is activated but training_dir_shot_ is empty! Set -training_dir_shot option in the command line if you want to keep your trained models. " << std::endl;
-    return;
-  }
-  vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
-  recognize_  = n_->advertiseService ("sv_recognition", &RecognizerROS::recognizeROS, this);
+    n_->getParam ( "visualize", visualize_);
+    n_->getParam ( "test_dir", test_dir_);
+    n_->getParam ( "models_dir", models_dir);
+    n_->getParam ( "training_dir", training_dir);
+    n_->getParam ( "chop_z", (double&)chop_z_ );
+    n_->getParam ( "do_sift", do_sift);
+    n_->getParam ( "do_shot", do_shot);
+    n_->getParam ( "do_ourcvfh", do_ourcvfh);
+    n_->getParam ( "knn_sift", paramLocalRecSift.knn_);
+    n_->getParam ( "knn_shot", paramLocalRecShot.knn_);
 
-  it_.reset(new image_transport::ImageTransport(*n_));
-  image_pub_ = it_->advertise("sv_recogniced_object_instances_img", 1, true);
+    int normal_computation_method;
+    if(n_->getParam ( "normal_method", normal_computation_method) != -1)
+    {
+        paramLocalRecSift.normal_computation_method_ =
+                paramLocalRecShot.normal_computation_method_ =
+                paramMultiPipeRec.normal_computation_method_ =
+                paramLocalEstimator.normal_computation_method_ =
+                normal_computation_method;
+    }
 
-  initialize();
-  std::cout << "Initialized single-view recognizer with these settings:" << std::endl
-            << "==========================================================" << std::endl;
-  printParams();
+    int icp_iterations;
+    if(n_->getParam ( "icp_iterations", icp_iterations) != -1)
+        paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = paramMultiPipeRec.icp_iterations_ = icp_iterations;
+
+    n_->getParam ( "cg_size_thresh", paramGgcg.gc_threshold_);
+    n_->getParam ( "cg_size", paramGgcg.gc_size_);
+    n_->getParam ( "cg_ransac_threshold", (double&)paramGgcg.ransac_threshold_);
+    n_->getParam ( "cg_dist_for_clutter_factor", (double&)paramGgcg.dist_for_cluster_factor_);
+    n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
+    n_->getParam ( "cg_max_time_for_cliques_computation", (double&)paramGgcg.max_time_allowed_cliques_comptutation_);
+    n_->getParam ( "cg_dot_distance", paramGgcg.thres_dot_distance_);
+    n_->getParam ( "use_cg_graph", paramGgcg.use_graph_);
+    n_->getParam ( "hv_clutter_regularizer", (double&)paramGHV.clutter_regularizer_);
+    n_->getParam ( "hv_color_sigma_ab", (double&)paramGHV.color_sigma_ab_);
+    n_->getParam ( "hv_color_sigma_l", (double&)paramGHV.color_sigma_l_);
+    n_->getParam ( "hv_detect_clutter", paramGHV.detect_clutter_);
+    n_->getParam ( "hv_duplicity_cm_weight", (double&)paramGHV.w_occupied_multiple_cm_);
+    n_->getParam ( "hv_histogram_specification", paramGHV.use_histogram_specification_);
+    n_->getParam ( "hv_hyp_penalty", (double&)paramGHV.active_hyp_penalty_);
+    n_->getParam ( "hv_ignore_color", paramGHV.ignore_color_even_if_exists_);
+    n_->getParam ( "hv_initial_status", paramGHV.initial_status_);
+    n_->getParam ( "hv_inlier_threshold", (double&)paramGHV.inliers_threshold_);
+    n_->getParam ( "hv_occlusion_threshold", (double&)paramGHV.occlusion_thres_);
+    n_->getParam ( "hv_optimizer_type", paramGHV.opt_type_);
+    n_->getParam ( "hv_radius_clutter", (double&)paramGHV.radius_neighborhood_clutter_);
+    n_->getParam ( "hv_radius_normals", (double&)paramGHV.radius_normals_);
+    n_->getParam ( "hv_regularizer", (double&)paramGHV.regularizer_);
+    n_->getParam ( "hv_min_plane_inliers", (int&)paramGHV.min_plane_inliers_);
+//        n_->getParam ( "hv_requires_normals", r_.hv_params_.requires_normals_);
+
+    rr_.reset(new MultiRecognitionPipeline<PointT>(paramMultiPipeRec));
+
+    boost::shared_ptr < GraphGeometricConsistencyGrouping<PointT, PointT> > gcg_alg (
+                new GraphGeometricConsistencyGrouping<PointT, PointT> (paramGgcg));
+
+    boost::shared_ptr <Source<PointT> > cast_source;
+    if (do_sift || do_shot ) // for local recognizers we need this source type / training data
+    {
+        boost::shared_ptr < RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT> > src
+                (new RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT>(resolution));
+        src->setPath (models_dir);
+        src->setModelStructureDir (training_dir);
+        src->generate ();
+//        src->createVoxelGridAndDistanceTransform(resolution);
+        cast_source = boost::static_pointer_cast<RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT> > (src);
+    }
+
+    if (do_sift)
+    {
+#ifdef USE_SIFT_GPU
+  boost::shared_ptr < SIFTLocalEstimation<PointT, FeatureT > > estimator (new SIFTLocalEstimation<PointT, FeatureT >());
+  boost::shared_ptr < LocalEstimator<PointT, FeatureT > > cast_estimator = boost::dynamic_pointer_cast<SIFTLocalEstimation<PointT, FeatureT > > (estimator);
+#else
+  boost::shared_ptr < OpenCVSIFTLocalEstimation<PointT, FeatureT > > estimator (new OpenCVSIFTLocalEstimation<PointT, FeatureT >);
+  boost::shared_ptr < LocalEstimator<PointT, FeatureT > > cast_estimator = boost::dynamic_pointer_cast<OpenCVSIFTLocalEstimation<PointT, FeatureT > > (estimator);
+#endif
+
+        boost::shared_ptr<LocalRecognitionPipeline<flann::L1, PointT, FeatureT > > sift_r;
+        sift_r.reset (new LocalRecognitionPipeline<flann::L1, PointT, FeatureT > (paramLocalRecSift));
+        sift_r->setDataSource (cast_source);
+        sift_r->setTrainingDir (training_dir);
+        sift_r->setFeatureEstimator (cast_estimator);
+        sift_r->initialize (false);
+
+        boost::shared_ptr < Recognizer<PointT> > cast_recog;
+        cast_recog = boost::static_pointer_cast<LocalRecognitionPipeline<flann::L1, PointT, FeatureT > > (sift_r);
+        std::cout << "Feature Type: " << cast_recog->getFeatureType() << std::endl;
+        rr_->addRecognizer (cast_recog);
+    }
+    if (do_shot)
+    {
+        boost::shared_ptr<UniformSamplingExtractor<PointT> > uniform_kp_extractor ( new UniformSamplingExtractor<PointT>);
+        uniform_kp_extractor->setSamplingDensity (0.01f);
+        uniform_kp_extractor->setFilterPlanar (true);
+        uniform_kp_extractor->setThresholdPlanar(0.1);
+        uniform_kp_extractor->setMaxDistance( 1000.0 ); // for training we want to consider all points (except nan values)
+
+        boost::shared_ptr<KeypointExtractor<PointT> > keypoint_extractor = boost::static_pointer_cast<KeypointExtractor<PointT> > (uniform_kp_extractor);
+        boost::shared_ptr<SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> > > estimator (new SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> >(paramLocalEstimator));
+        estimator->addKeypointExtractor (keypoint_extractor);
+
+        boost::shared_ptr<LocalEstimator<PointT, pcl::Histogram<352> > > cast_estimator;
+        cast_estimator = boost::dynamic_pointer_cast<LocalEstimator<PointT, pcl::Histogram<352> > > (estimator);
+
+        boost::shared_ptr<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > local;
+        local.reset(new LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > (paramLocalRecShot));
+        local->setDataSource (cast_source);
+        local->setTrainingDir(training_dir);
+        local->setFeatureEstimator (cast_estimator);
+        local->initialize (false);
+
+        uniform_kp_extractor->setMaxDistance( chop_z_ ); // for training we do not want this restriction
+
+        boost::shared_ptr<Recognizer<PointT> > cast_recog;
+        cast_recog = boost::static_pointer_cast<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > (local);
+        std::cout << "Feature Type: " << cast_recog->getFeatureType() << std::endl;
+        rr_->addRecognizer(cast_recog);
+    }
+
+
+    boost::shared_ptr<GHV<PointT, PointT> > hyp_verification_method (new GHV<PointT, PointT>(paramGHV));
+    boost::shared_ptr<HypothesisVerification<PointT,PointT> > cast_hyp_pointer = boost::static_pointer_cast<GHV<PointT, PointT> > (hyp_verification_method);
+    rr_->setHVAlgorithm( cast_hyp_pointer );
+    rr_->setCGAlgorithm( gcg_alg );
+
+    vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
+    recognize_  = n_->advertiseService ("sv_recognition", &RecognizerROS::recognizeROS, this);
+
+    it_.reset(new image_transport::ImageTransport(*n_));
+    image_pub_ = it_->advertise("sv_recogniced_object_instances_img", 1, true);
 }
 
 }
@@ -245,7 +383,7 @@ main (int argc, char ** argv)
 {
   ros::init (argc, argv, "recognition_service");
 
-  v4r::RecognizerROS m;
+  v4r::RecognizerROS<pcl::PointXYZRGB> m;
   m.initialize (argc, argv);
   ros::spin ();
 
