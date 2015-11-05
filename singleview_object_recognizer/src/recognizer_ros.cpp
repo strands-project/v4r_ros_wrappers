@@ -5,9 +5,7 @@
 #include <v4r/common/miscellaneous.h>
 #include <v4r/common/pcl_opencv.h>
 #include <v4r/common/visibility_reasoning.h>
-#include <v4r/features/opencv_sift_local_estimator.h>
 #include <v4r/features/shot_local_estimator_omp.h>
-#include <v4r/features/sift_local_estimator.h>
 #include <v4r/io/filesystem.h>
 #include <v4r/recognition/ghv.h>
 #include <v4r/recognition/hv_go_3D.h>
@@ -23,6 +21,13 @@
 #include <sstream>
 #include <time.h>
 #include <stdlib.h>
+
+#ifdef HAVE_SIFTGPU
+#include <v4r/features/sift_local_estimator.h>
+#else
+#include <v4r/features/opencv_sift_local_estimator.h>
+#endif
+
 
 #include "recognizer_ros.h"
 
