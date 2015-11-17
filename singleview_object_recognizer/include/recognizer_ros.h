@@ -40,7 +40,7 @@ private:
 public:
     RecognizerROS()
     {
-        visualize_ = true;
+        visualize_ = false;
         chop_z_ = std::numeric_limits<float>::max();
         debug_publish_ = false;
         resolution_ = 0.005f;

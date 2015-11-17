@@ -18,9 +18,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <v4r/recognition/mesh_source.h>
-#include <v4r/features/vfh_estimator.h>
 #include <v4r/features/esf_estimator.h>
-#include <v4r/features/cvfh_estimator.h>
 #include <v4r/recognition/metrics.h>
 
 #include "global_nn_classifier_ros.h"
@@ -39,7 +37,7 @@
 //    std::vector < std::string > categories_;
 //    std::vector<float> conf_;
 
-//    boost::shared_ptr<v4r::GlobalNNPipeline<flann::L1, PointT, pcl::ESFSignature640> > classifier_;
+//    boost::shared_ptr<GlobalNNPipeline<flann::L1, PointT, pcl::ESFSignature640> > classifier_;
 //    ros::ServiceServer segment_and_classify_service_;
 //    ros::ServiceServer classify_service_;
 //    ros::NodeHandle *n_;
@@ -47,8 +45,8 @@
 //    visualization_msgs::MarkerArray markerArray_;
 //    std::string camera_frame_;
 
-//    bool segmentAndClassify(classifier_srv_definitions::segment_and_classify::Request & req,
-//                               classifier_srv_definitions::segment_and_classify::Response & response)
+//    bool segmentAndClassify(classifier_srv_definitions::segment_and_classify::Request  req,
+//                               classifier_srv_definitions::segment_and_classify::Response  response)
 //    {
 //      //------- Segmentation------------------
 //      /*Eigen::Vector4f table_plane;
@@ -110,8 +108,9 @@
 namespace v4r
 {
 
-template<template<class > class Distance, typename PointT, typename FeatureT> bool
-GlobalNNPipelineROS<Distance,PointT,FeatureT>::classifyROS (classifier_srv_definitions::classify::Request & req, classifier_srv_definitions::classify::Response & response)
+template<template<class > class Distance, typename PointT>
+bool
+GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions::classify::Request &req, classifier_srv_definitions::classify::Response &response)
     {
         typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>());
         pcl::fromROSMsg(req.cloud, *cloud);
@@ -251,56 +250,69 @@ GlobalNNPipelineROS<Distance,PointT,FeatureT>::classifyROS (classifier_srv_defin
         return true;
     }
 
-template<template<class > class Distance, typename PointT, typename FeatureT>
-void GlobalNNPipelineROS<Distance,PointT,FeatureT>::initializeROS(int argc, char ** argv)
+template<template<class > class Distance, typename PointT>
+void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** argv)
 {
+    PCLSegmenter<pcl::PointXYZRGB>::Parameter seg_param;
     ros::init (argc, argv, "classifier_service");
     n_.reset( new ros::NodeHandle ( "~" ) );
-    n_->getParam ( "models_dir", models_dir_ );
-    n_->getParam ( "training_dir", this->training_dir_ );
-    n_->getParam ( "descriptor_name", this->descr_name_ );
-    n_->getParam ( "nn", this->NN_ );
     n_->getParam ( "chop_z", chop_at_z_ );
-
-    if(!n_->getParam ( "camera_frame", camera_frame_ ))
-        camera_frame_ = "/head_xtion_depth_optical_frame";
+    n_->getParam ( "chop_z", seg_param.chop_at_z_ );
+    n_->getParam ( "seg_type", seg_param.seg_type_ );
+    n_->getParam ( "min_cluster_size", seg_param.min_cluster_size_ );
+    n_->getParam ( "max_vertical_plane_size", seg_param.max_vertical_plane_size_ );
+    n_->getParam ( "num_plane_inliers", seg_param.num_plane_inliers_ );
+    n_->getParam ( "max_angle_plane_to_ground", seg_param.max_angle_plane_to_ground_ );
+    n_->getParam ( "sensor_noise_max", seg_param.sensor_noise_max_ );
+    n_->getParam ( "table_range_min", seg_param.table_range_min_ );
+    n_->getParam ( "table_range_max", seg_param.table_range_max_ );
+    n_->getParam ( "angular_threshold_deg", seg_param.angular_threshold_deg_ );
+    n_->getParam ( "camera_frame", camera_frame_ );
 
     ROS_INFO("models_dir, training dir, desc, camera_frame:  %s, %s, %s, %s",  models_dir_.c_str(), this->training_dir_.c_str(), this->descr_name_.c_str(), camera_frame_.c_str());
 
-  if(models_dir_.compare("") == 0)
+  if(!n_->getParam ( "models_dir", models_dir_ ))
   {
     PCL_ERROR("Set -models_dir option in the command line, ABORTING");
     return;
   }
 
-  if(this->training_dir_.compare("") == 0)
+  if(!n_->getParam ( "training_dir", this->training_dir_ ))
   {
     PCL_ERROR("Set -training_dir option in the command line, ABORTING");
     return;
   }
 
+  int nn = static_cast<int>(this->NN_);
+  n_->getParam ( "nn", nn);
+  this->NN_ = static_cast<size_t>(nn);
+
+
+  seg_.reset( new PCLSegmenter<pcl::PointXYZRGB>(seg_param));
+
   boost::shared_ptr<MeshSource<PointT> > mesh_source (new MeshSource<PointT>);
   mesh_source->setPath (models_dir_);
   mesh_source->setResolution (150);
   mesh_source->setTesselationLevel (0);
-  mesh_source->setViewAngle (57.f);
+//  mesh_source->setViewAngle (57.f);
   mesh_source->setRadiusSphere (1.f);
   mesh_source->setModelScale (1.f);
   mesh_source->generate (this->training_dir_);
 
-  this->source_ = boost::static_pointer_cast<v4r::MeshSource<PointT> > (mesh_source);
+  this->source_ = boost::static_pointer_cast<MeshSource<PointT> > (mesh_source);
 
-  boost::shared_ptr<v4r::ESFEstimation<PointT, pcl::ESFSignature640> > estimator;
-  estimator.reset (new v4r::ESFEstimation<PointT, pcl::ESFSignature640>);
+  boost::shared_ptr<ESFEstimation<PointT> > estimator;
+  estimator.reset (new ESFEstimation<PointT>);
 
-  boost::shared_ptr<v4r::GlobalEstimator<PointT, pcl::ESFSignature640> > cast_estimator;
-  cast_estimator = boost::dynamic_pointer_cast<v4r::ESFEstimation<PointT, pcl::ESFSignature640> > (estimator);
+  boost::shared_ptr<GlobalEstimator<PointT> > cast_estimator;
+  cast_estimator = boost::dynamic_pointer_cast<ESFEstimation<PointT> > (estimator);
 
+  this->setDescriptorName("esf");
   this->setFeatureEstimator (cast_estimator);
   this->initialize (false);
 
-//  segment_and_classify_service_ = n_->advertiseService("segment_and_classify", &ShapeClassifier::segmentAndClassify, this);
-  classify_service_ = n_->advertiseService("classify", &v4r::GlobalNNPipelineROS<Distance,PointT,FeatureT>::classifyROS, this);
+//  segment_and_classify_service_ = n_->advertiseService("segment_and_classify", ShapeClassifier::segmentAndClassify, this);
+  classify_service_ = n_->advertiseService("classify", GlobalNNClassifierROS<Distance,PointT>::classifyROS, this);
   vis_pub_ = n_->advertise<visualization_msgs::MarkerArray>( "visualization_marker", 0 );
   vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "clusters", 1 );
   ros::spin();
@@ -311,7 +323,7 @@ void GlobalNNPipelineROS<Distance,PointT,FeatureT>::initializeROS(int argc, char
 int
 main (int argc, char ** argv)
 {
-  v4r::GlobalNNPipelineROS<flann::L1, pcl::PointXYZ, pcl::ESFSignature640> ros_classifier;
+  v4r::GlobalNNClassifierROS<flann::L1, pcl::PointXYZ> ros_classifier;
   ros_classifier.initializeROS (argc, argv);
 
   return 0;
