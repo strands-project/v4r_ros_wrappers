@@ -17,10 +17,9 @@ private:
     typedef pcl::Histogram<128> FeatureT;
 
     boost::shared_ptr<MultiRecognitionPipeline<PointT> > rr_;
-    std::string test_dir_;
     bool visualize_;
     pcl::visualization::PCLVisualizer::Ptr vis_;
-    float chop_z_;
+    double chop_z_;
     bool debug_publish_;
 
 

@@ -187,6 +187,7 @@ bool
 RecognizerROS<PointT>::recognizeROS(recognition_srv_definitions::recognize::Request &req,
                                  recognition_srv_definitions::recognize::Response &response)
 {
+    scene_.reset(new pcl::PointCloud<PointT>());
     pcl::fromROSMsg (req.cloud, *scene_);
 
     if( chop_z_ > 0)
@@ -203,7 +204,10 @@ RecognizerROS<PointT>::recognizeROS(recognition_srv_definitions::recognize::Requ
     rr_->recognize();
     models_verified_ = rr_->getVerifiedModels();
     transforms_verified_ = rr_->getVerifiedTransforms();
-    return respondSrvCall(req, response);
+    bool b = respondSrvCall(req, response);
+    if(visualize_)
+        rr_->visualize();
+    return b;
 }
 
 template<typename PointT>
@@ -225,35 +229,13 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
     typename MultiRecognitionPipeline<PointT>::Parameter paramMultiPipeRec;
     typename SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> >::Parameter paramLocalEstimator;
 
-    paramGgcg.gc_size_ = 0.015f;
-    paramGgcg.thres_dot_distance_ = 0.2f;
-    paramGgcg.dist_for_cluster_factor_ = 0;
-    paramGgcg.max_taken_correspondence_ = 2;
-    paramGgcg.max_time_allowed_cliques_comptutation_ = 100;
-
-    paramGHV.eps_angle_threshold_ = 0.1f;
-    paramGHV.min_points_ = 100;
-    paramGHV.cluster_tolerance_ = 0.01f;
-    paramGHV.use_histogram_specification_ = true;
-    paramGHV.w_occupied_multiple_cm_ = 0.f;
-    paramGHV.opt_type_ = 0;
-//        paramGHV.active_hyp_penalty_ = 0.f;
-    paramGHV.regularizer_ = 3;
-    paramGHV.color_sigma_ab_ = 0.5f;
-    paramGHV.radius_normals_ = 0.02f;
-    paramGHV.occlusion_thres_ = 0.01f;
-    paramGHV.inliers_threshold_ = 0.015f;
-
     paramLocalRecSift.use_cache_ = paramLocalRecShot.use_cache_ = true;
-    paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = 10;
     paramLocalRecSift.save_hypotheses_ = paramLocalRecShot.save_hypotheses_ = true;
-    paramLocalRecShot.kdtree_splits_ = 128;
 
     n_->getParam ( "visualize", visualize_);
-    n_->getParam ( "test_dir", test_dir_);
     n_->getParam ( "models_dir", models_dir);
     n_->getParam ( "training_dir", training_dir);
-    n_->getParam ( "chop_z", (double&)chop_z_ );
+    n_->getParam ( "chop_z", chop_z_ );
     n_->getParam ( "do_sift", do_sift);
     n_->getParam ( "do_shot", do_shot);
     n_->getParam ( "do_ourcvfh", do_ourcvfh);
@@ -261,7 +243,7 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
     n_->getParam ( "knn_shot", paramLocalRecShot.knn_);
 
     int normal_computation_method;
-    if(n_->getParam ( "normal_method", normal_computation_method) != -1)
+    if( n_->getParam ( "normal_method", normal_computation_method) )
     {
         paramLocalRecSift.normal_computation_method_ =
                 paramLocalRecShot.normal_computation_method_ =
@@ -271,33 +253,39 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
     }
 
     int icp_iterations;
-    if(n_->getParam ( "icp_iterations", icp_iterations) != -1)
+    if(n_->getParam ( "icp_iterations", icp_iterations))
         paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = paramMultiPipeRec.icp_iterations_ = icp_iterations;
 
     n_->getParam ( "cg_size_thresh", paramGgcg.gc_threshold_);
     n_->getParam ( "cg_size", paramGgcg.gc_size_);
-    n_->getParam ( "cg_ransac_threshold", (double&)paramGgcg.ransac_threshold_);
-    n_->getParam ( "cg_dist_for_clutter_factor", (double&)paramGgcg.dist_for_cluster_factor_);
+    n_->getParam ( "cg_ransac_threshold", paramGgcg.ransac_threshold_);
+    n_->getParam ( "cg_dist_for_clutter_factor", paramGgcg.dist_for_cluster_factor_);
     n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
-    n_->getParam ( "cg_max_time_for_cliques_computation", (double&)paramGgcg.max_time_allowed_cliques_comptutation_);
+    n_->getParam ( "cg_max_time_for_cliques_computation", paramGgcg.max_time_allowed_cliques_comptutation_);
     n_->getParam ( "cg_dot_distance", paramGgcg.thres_dot_distance_);
     n_->getParam ( "use_cg_graph", paramGgcg.use_graph_);
-    n_->getParam ( "hv_clutter_regularizer", (double&)paramGHV.clutter_regularizer_);
-    n_->getParam ( "hv_color_sigma_ab", (double&)paramGHV.color_sigma_ab_);
-    n_->getParam ( "hv_color_sigma_l", (double&)paramGHV.color_sigma_l_);
+    n_->getParam ( "hv_clutter_regularizer", paramGHV.clutter_regularizer_);
+    n_->getParam ( "hv_color_sigma_ab", paramGHV.color_sigma_ab_);
+    n_->getParam ( "hv_color_sigma_l", paramGHV.color_sigma_l_);
     n_->getParam ( "hv_detect_clutter", paramGHV.detect_clutter_);
-    n_->getParam ( "hv_duplicity_cm_weight", (double&)paramGHV.w_occupied_multiple_cm_);
+    n_->getParam ( "hv_duplicity_cm_weight", paramGHV.w_occupied_multiple_cm_);
     n_->getParam ( "hv_histogram_specification", paramGHV.use_histogram_specification_);
-    n_->getParam ( "hv_hyp_penalty", (double&)paramGHV.active_hyp_penalty_);
+    n_->getParam ( "hv_hyp_penalty", paramGHV.active_hyp_penalty_);
     n_->getParam ( "hv_ignore_color", paramGHV.ignore_color_even_if_exists_);
     n_->getParam ( "hv_initial_status", paramGHV.initial_status_);
-    n_->getParam ( "hv_inlier_threshold", (double&)paramGHV.inliers_threshold_);
-    n_->getParam ( "hv_occlusion_threshold", (double&)paramGHV.occlusion_thres_);
+    n_->getParam ( "hv_inlier_threshold", paramGHV.inliers_threshold_);
+    n_->getParam ( "hv_occlusion_threshold", paramGHV.occlusion_thres_);
     n_->getParam ( "hv_optimizer_type", paramGHV.opt_type_);
-    n_->getParam ( "hv_radius_clutter", (double&)paramGHV.radius_neighborhood_clutter_);
-    n_->getParam ( "hv_radius_normals", (double&)paramGHV.radius_normals_);
-    n_->getParam ( "hv_regularizer", (double&)paramGHV.regularizer_);
-    n_->getParam ( "hv_min_plane_inliers", (int&)paramGHV.min_plane_inliers_);
+    n_->getParam ( "hv_radius_clutter", paramGHV.radius_neighborhood_clutter_);
+    n_->getParam ( "hv_radius_normals", paramGHV.radius_normals_);
+    n_->getParam ( "hv_regularizer", paramGHV.regularizer_);
+    n_->getParam ( "hv_plane_method", paramGHV.plane_method_);
+    n_->getParam ( "hv_add_planes", paramGHV.add_planes_);
+
+    int min_plane_inliers;
+    if(n_->getParam ( "hv_min_plane_inliers", min_plane_inliers))
+        paramGHV.min_plane_inliers_ = static_cast<size_t>(min_plane_inliers);
+
 //        n_->getParam ( "hv_requires_normals", r_.hv_params_.requires_normals_);
 
     rr_.reset(new MultiRecognitionPipeline<PointT>(paramMultiPipeRec));

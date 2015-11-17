@@ -196,24 +196,6 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     typename SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> >::Parameter paramLocalEstimator;
     typename MultiviewRecognizer<PointT>::Parameter paramMultiView;
 
-    paramGgcg.gc_size_ = 0.015f;
-    paramGgcg.thres_dot_distance_ = 0.2f;
-    paramGgcg.dist_for_cluster_factor_ = 0;
-//        paramGgcg.max_taken_correspondence_ = 2;
-    paramGgcg.max_time_allowed_cliques_comptutation_ = 100;
-
-    paramGO3D.eps_angle_threshold_ = 0.1f;
-    paramGO3D.min_points_ = 100;
-    paramGO3D.cluster_tolerance_ = 0.01f;
-    paramGO3D.use_histogram_specification_ = true;
-    paramGO3D.w_occupied_multiple_cm_ = 0.f;
-    paramGO3D.opt_type_ = 0;
-//        paramGHV.active_hyp_penalty_ = 0.f;
-    paramGO3D.regularizer_ = 3;
-    paramGO3D.radius_normals_ = 0.02f;
-    paramGO3D.occlusion_thres_ = 0.01f;
-    paramGO3D.inliers_threshold_ = 0.015f;
-
     paramLocalRecSift.use_cache_ = paramLocalRecShot.use_cache_ = true;
     paramLocalRecSift.save_hypotheses_ = paramLocalRecShot.save_hypotheses_ = true;
     paramLocalRecShot.kdtree_splits_ = 128;
@@ -247,36 +229,44 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     if(n_->getParam ( "icp_iterations", icp_iterations) != -1)
         paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = paramMultiPipeRec.icp_iterations_ = icp_iterations;
 
-    n_->getParam ( "chop_z", (double&)paramMultiView.chop_z_ );
+    n_->getParam ( "chop_z", paramMultiView.chop_z_ );
     n_->getParam ( "max_vertices_in_graph", paramMultiView.max_vertices_in_graph_ );
     n_->getParam ( "compute_mst", paramMultiView.compute_mst_ );
 
     n_->getParam ( "cg_size_thresh", paramGgcg.gc_threshold_);
     n_->getParam ( "cg_size", paramGgcg.gc_size_);
-    n_->getParam ( "cg_ransac_threshold", (double&)paramGgcg.ransac_threshold_);
-    n_->getParam ( "cg_dist_for_clutter_factor", (double&)paramGgcg.dist_for_cluster_factor_);
+    n_->getParam ( "cg_ransac_threshold", paramGgcg.ransac_threshold_);
+    n_->getParam ( "cg_dist_for_clutter_factor", paramGgcg.dist_for_cluster_factor_);
     n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
-    n_->getParam ( "cg_max_time_for_cliques_computation", (double&)paramGgcg.max_time_allowed_cliques_comptutation_);
+    n_->getParam ( "cg_max_time_for_cliques_computation", paramGgcg.max_time_allowed_cliques_comptutation_);
     n_->getParam ( "cg_dot_distance", paramGgcg.thres_dot_distance_);
     n_->getParam ( "cg_use_graph", paramGgcg.use_graph_);
-    n_->getParam ( "hv_clutter_regularizer", (double&)paramGO3D.clutter_regularizer_);
-    n_->getParam ( "hv_color_sigma_ab", (double&)paramGO3D.color_sigma_ab_);
-    n_->getParam ( "hv_color_sigma_l", (double&)paramGO3D.color_sigma_l_);
+    n_->getParam ( "hv_clutter_regularizer", paramGO3D.clutter_regularizer_);
+    n_->getParam ( "hv_color_sigma_ab", paramGO3D.color_sigma_ab_);
+    n_->getParam ( "hv_color_sigma_l", paramGO3D.color_sigma_l_);
     n_->getParam ( "hv_detect_clutter", paramGO3D.detect_clutter_);
-    n_->getParam ( "hv_duplicity_cm_weight", (double&)paramGO3D.w_occupied_multiple_cm_);
+    n_->getParam ( "hv_duplicity_cm_weight", paramGO3D.w_occupied_multiple_cm_);
     n_->getParam ( "hv_histogram_specification", paramGO3D.use_histogram_specification_);
-    n_->getParam ( "hv_hyp_penalty", (double&)paramGO3D.active_hyp_penalty_);
+    n_->getParam ( "hv_hyp_penalty", paramGO3D.active_hyp_penalty_);
     n_->getParam ( "hv_ignore_color", paramGO3D.ignore_color_even_if_exists_);
     n_->getParam ( "hv_initial_status", paramGO3D.initial_status_);
-    n_->getParam ( "hv_inlier_threshold", (double&)paramGO3D.inliers_threshold_);
-    n_->getParam ( "hv_occlusion_threshold", (double&)paramGO3D.occlusion_thres_);
+    n_->getParam ( "hv_inlier_threshold", paramGO3D.inliers_threshold_);
+    n_->getParam ( "hv_occlusion_threshold", paramGO3D.occlusion_thres_);
     n_->getParam ( "hv_optimizer_type", paramGO3D.opt_type_);
-    n_->getParam ( "hv_radius_clutter", (double&)paramGO3D.radius_neighborhood_clutter_);
-    n_->getParam ( "hv_radius_normals", (double&)paramGO3D.radius_normals_);
-    n_->getParam ( "hv_regularizer", (double&)paramGO3D.regularizer_);
+    n_->getParam ( "hv_radius_clutter", paramGO3D.radius_neighborhood_clutter_);
+    n_->getParam ( "hv_radius_normals", paramGO3D.radius_normals_);
+    n_->getParam ( "hv_regularizer", paramGO3D.regularizer_);
     n_->getParam ( "hv_plane_method", paramGO3D.plane_method_);
     n_->getParam ( "hv_add_planes", paramGO3D.add_planes_);
-    n_->getParam ( "hv_min_plane_inliers", (int&)paramGO3D.min_plane_inliers_);
+    n_->getParam ( "hv_regularizer", paramGO3D.regularizer_);
+    n_->getParam ( "hv_plane_method", paramGO3D.plane_method_);
+    n_->getParam ( "hv_add_planes", paramGO3D.add_planes_);
+    n_->getParam ( "knn_plane_clustering_search", paramGO3D.knn_plane_clustering_search_);
+
+    int min_plane_inliers;
+    if(n_->getParam ( "hv_min_plane_inliers", min_plane_inliers))
+        paramGO3D.min_plane_inliers_ = static_cast<size_t>(min_plane_inliers);
+
 //        n_->getParam ( "hv_requires_normals", r_.hv_params_.requires_normals_);
 
     rr_.reset(new MultiRecognitionPipeline<PointT>(paramMultiPipeRec));
