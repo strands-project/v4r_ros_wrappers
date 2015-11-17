@@ -28,11 +28,10 @@ private:
     using GlobalNNClassifier<Distance, PointT>::input_;
     using GlobalNNClassifier<Distance, PointT>::training_dir_;
 
-    boost::shared_ptr<PCLSegmenter<pcl::PointXYZRGB> > seg_;  ///@brief segmentation object
+//    boost::shared_ptr<PCLSegmenter<pcl::PointXYZRGB> > seg_;  ///@brief segmentation object
     std::string models_dir_;
 
     double chop_at_z_;  /// @brief maximum depth to be considered when processing the input cloud (with respect to the camera coordinate system)
-    std::string camera_frame_;  /// @brief rostopic of the camera input
 
     // ROS stuff
     boost::shared_ptr<ros::NodeHandle> n_;
@@ -44,11 +43,10 @@ private:
 public:
     GlobalNNClassifierROS()
     {
-        camera_frame_ = "/head_xtion_depth_optical_frame";
     }
 
-    bool classifyROS(classifier_srv_definitions::classify::Request & req,
-                     classifier_srv_definitions::classify::Response & response);
+    bool classifyROS(classifier_srv_definitions::classify::Request &req,
+                     classifier_srv_definitions::classify::Response &response);
 
     void initializeROS (int argc, char ** argv);
 

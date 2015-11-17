@@ -11,5 +11,3 @@ The classifier can then be started by:
 
 , where *models_dir* is your training directory with the CAD models of the classes, *training_dir* is the directory containing the trained data (if they exist - otherwise they will be re-trained) and *topic* is the camera topic.
 
-The launch file also lets you choose which segmentation type you want to use. The *pcl_object_segmenter* segments objects on a table plane, whereby the highest plane parallel to the largest plane (usually the floor) is considered as table.
-On the contrary, the *object_rgb_segmenter* segments all objects within a distance *chop_z* from the camera. The segmentation takes a bit longer in this case.

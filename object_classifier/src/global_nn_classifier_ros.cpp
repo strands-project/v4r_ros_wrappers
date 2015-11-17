@@ -253,23 +253,22 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
 template<template<class > class Distance, typename PointT>
 void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** argv)
 {
-    PCLSegmenter<pcl::PointXYZRGB>::Parameter seg_param;
+//    PCLSegmenter<pcl::PointXYZRGB>::Parameter seg_param;
     ros::init (argc, argv, "classifier_service");
     n_.reset( new ros::NodeHandle ( "~" ) );
     n_->getParam ( "chop_z", chop_at_z_ );
-    n_->getParam ( "chop_z", seg_param.chop_at_z_ );
-    n_->getParam ( "seg_type", seg_param.seg_type_ );
-    n_->getParam ( "min_cluster_size", seg_param.min_cluster_size_ );
-    n_->getParam ( "max_vertical_plane_size", seg_param.max_vertical_plane_size_ );
-    n_->getParam ( "num_plane_inliers", seg_param.num_plane_inliers_ );
-    n_->getParam ( "max_angle_plane_to_ground", seg_param.max_angle_plane_to_ground_ );
-    n_->getParam ( "sensor_noise_max", seg_param.sensor_noise_max_ );
-    n_->getParam ( "table_range_min", seg_param.table_range_min_ );
-    n_->getParam ( "table_range_max", seg_param.table_range_max_ );
-    n_->getParam ( "angular_threshold_deg", seg_param.angular_threshold_deg_ );
-    n_->getParam ( "camera_frame", camera_frame_ );
+//    n_->getParam ( "chop_z", seg_param.chop_at_z_ );
+//    n_->getParam ( "seg_type", seg_param.seg_type_ );
+//    n_->getParam ( "min_cluster_size", seg_param.min_cluster_size_ );
+//    n_->getParam ( "max_vertical_plane_size", seg_param.max_vertical_plane_size_ );
+//    n_->getParam ( "num_plane_inliers", seg_param.num_plane_inliers_ );
+//    n_->getParam ( "max_angle_plane_to_ground", seg_param.max_angle_plane_to_ground_ );
+//    n_->getParam ( "sensor_noise_max", seg_param.sensor_noise_max_ );
+//    n_->getParam ( "table_range_min", seg_param.table_range_min_ );
+//    n_->getParam ( "table_range_max", seg_param.table_range_max_ );
+//    n_->getParam ( "angular_threshold_deg", seg_param.angular_threshold_deg_ );
 
-    ROS_INFO("models_dir, training dir, desc, camera_frame:  %s, %s, %s, %s",  models_dir_.c_str(), this->training_dir_.c_str(), this->descr_name_.c_str(), camera_frame_.c_str());
+    ROS_INFO("models_dir, training dir:  %s, %s",  models_dir_.c_str(), this->training_dir_.c_str());
 
   if(!n_->getParam ( "models_dir", models_dir_ ))
   {
@@ -288,7 +287,7 @@ void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** ar
   this->NN_ = static_cast<size_t>(nn);
 
 
-  seg_.reset( new PCLSegmenter<pcl::PointXYZRGB>(seg_param));
+//  seg_.reset( new PCLSegmenter<pcl::PointXYZRGB>(seg_param));
 
   boost::shared_ptr<MeshSource<PointT> > mesh_source (new MeshSource<PointT>);
   mesh_source->setPath (models_dir_);
@@ -312,7 +311,7 @@ void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** ar
   this->initialize (false);
 
 //  segment_and_classify_service_ = n_->advertiseService("segment_and_classify", ShapeClassifier::segmentAndClassify, this);
-  classify_service_ = n_->advertiseService("classify", GlobalNNClassifierROS<Distance,PointT>::classifyROS, this);
+  classify_service_ = n_->advertiseService("classify", &GlobalNNClassifierROS<Distance,PointT>::classifyROS, this);
   vis_pub_ = n_->advertise<visualization_msgs::MarkerArray>( "visualization_marker", 0 );
   vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "clusters", 1 );
   ros::spin();

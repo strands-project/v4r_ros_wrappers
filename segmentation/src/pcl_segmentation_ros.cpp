@@ -67,6 +67,7 @@ PCLSegmenterROS<PointT>::initialize (int argc, char ** argv)
     ros::init (argc, argv, "pcl_segmentation_service");
 
     n_.reset( new ros::NodeHandle ( "~" ) );
+    param_.seg_type_ = 1;
     n_->getParam ( "seg_type", param_.seg_type_ );
     n_->getParam ( "min_cluster_size", param_.min_cluster_size_ );
     n_->getParam ( "max_vertical_plane_size", param_.max_vertical_plane_size_ );

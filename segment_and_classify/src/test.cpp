@@ -15,13 +15,15 @@
 
 #include <v4r/io/filesystem.h>
 #include "segmentation_srv_definitions/segment.h"
+#include "classifier_srv_definitions/classify.h"
 
 class SegmenationAndClassifyDemo
 {
 private:
     typedef pcl::PointXYZRGB PointT;
     ros::NodeHandle *n_;
-    ros::ServiceClient srv_client;
+    ros::ServiceClient srv_client_seg;
+    ros::ServiceClient srv_client_classify;
     std::string directory_;
     std::string topic_;
     bool KINECT_OK_;
@@ -33,16 +35,24 @@ public:
         input_method_ = 0;
     }
 
-    void callUsingCam(const sensor_msgs::PointCloud2::ConstPtr& msg)
+    void
+    callUsingCam(const sensor_msgs::PointCloud2::ConstPtr& msg)
     {
         std::cout << "Received point cloud.\n" << std::endl;
-        segmentation_srv_definitions::segment srv;
-        srv.request.cloud = *msg;
+        segmentation_srv_definitions::segment srv_seg;
+        srv_seg.request.cloud = *msg;
 
-        if (srv_client.call(srv))
-            std::cout << "Call done..." << std::endl;
+        if (!srv_client_seg.call(srv_seg))
+            std::cerr << "Error calling segmentation service!" << std::endl;
         else
-            ROS_ERROR("Failed to call service");
+        {
+            classifier_srv_definitions::classify srv_classify;
+            srv_classify.request.cloud = srv_seg.request.cloud;
+            srv_classify.request.clusters_indices = srv_seg.response.clusters_indices;
+
+            if (!srv_client_classify.call(srv_classify))
+                std::cerr << "Error calling classification service!" << std::endl;
+        }
     }
 
     void checkCloudArrive (const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -76,28 +86,39 @@ public:
             pcl::io::loadPCDFile(directory_ + "/" + test_cloud[i], cloud);
             sensor_msgs::PointCloud2 cloud_ros;
             pcl::toROSMsg(cloud, cloud_ros);
-            segmentation_srv_definitions::segment srv;
-            srv.request.cloud = cloud_ros;
+            segmentation_srv_definitions::segment srv_seg;
+            srv_seg.request.cloud = cloud_ros;
 
-            if (!srv_client.call(srv))
+            if (!srv_client_seg.call(srv_seg))
             {
-                std::stringstream mm;
-                mm << "Error calling service. "<< std::endl;
-                std::cerr << mm.str() << std::endl;
+                std::cerr << "Error calling segmentation service!" << std::endl;
                 return false;
             }
+            else
+            {
+                classifier_srv_definitions::classify srv_classify;
+                srv_classify.request.cloud = srv_seg.request.cloud;
+                srv_classify.request.clusters_indices = srv_seg.response.clusters_indices;
 
+                if (!srv_client_classify.call(srv_classify))
+                {
+                    std::cerr << "Error calling classification service!" << std::endl;
+                    return false;
+                }
+            }
         }
         return true;
     }
 
     bool initialize(int argc, char ** argv)
     {
-        ros::init (argc, argv, "SegmentationDemo");
+        ros::init (argc, argv, "SegmenationAndClassificationDemo");
         n_ = new ros::NodeHandle ( "~" );
 
-        std::string service_name_sv_rec = "/pcl_segmentation_service/pcl_segmentation";
-        srv_client = n_->serviceClient<segmentation_srv_definitions::segment>(service_name_sv_rec);
+        std::string service_name_seg = "/pcl_segmentation_service/pcl_segmentation";
+        std::string service_name_classify = "/classifier_service/classify";
+        srv_client_seg = n_->serviceClient<segmentation_srv_definitions::segment>(service_name_seg);
+        srv_client_classify = n_->serviceClient<classifier_srv_definitions::classify>(service_name_classify);
 
         n_->getParam ( "input_method", input_method_ );
 

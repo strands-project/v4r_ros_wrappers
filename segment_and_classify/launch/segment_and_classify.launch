@@ -1,0 +1,24 @@
+<launch>
+	<arg name="models_dir" /> <!-- required -->
+	<arg name="training_dir" />  <!-- required -->
+	<arg name="nn" default="10" />
+	<arg name="chop_z" default="2.5" />
+	<arg name="seg_type" default="1" /> 
+	<arg name="min_cluster_size" default="500" /> 
+
+	<!-- classifier service -->
+	<node pkg="object_classifier" type="object_classifier_node" name="classifier_service" output="screen" >
+		<param name="models_dir" value="$(arg models_dir)" type="string"/>
+		<param name="training_dir" value="$(arg training_dir)" type="string"/>
+		<param name="nn" value="$(arg nn)" type="int"/>
+		<param name="chop_z" value="$(arg chop_z)" type="double"/>
+	</node>
+
+	<!-- pcl segmentation Service -->
+	<node pkg="segmentation" type="pcl_segmentation_service" name="pcl_segmentation_service" output="screen" >
+		<param name="seg_type" value="$(arg seg_type)" type="int"/>
+		<param name="chop_z" value="$(arg chop_z)" type="double"/>
+		<param name="min_cluster_size" value="$(arg min_cluster_size)" type="int"/>
+	</node>
+	
+</launch>
