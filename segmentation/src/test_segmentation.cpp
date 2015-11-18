@@ -16,7 +16,7 @@
 #include <v4r/io/filesystem.h>
 #include "segmentation_srv_definitions/segment.h"
 
-class SegmenationAndClassifyDemo
+class SegmenationDemo
 {
 private:
     typedef pcl::PointXYZRGB PointT;
@@ -28,7 +28,7 @@ private:
     int input_method_; // defines the test input (0... camera topic, 1... file)
 
 public:
-    SegmenationAndClassifyDemo()
+    SegmenationDemo()
     {
         input_method_ = 0;
     }
@@ -52,7 +52,7 @@ public:
 
     bool checkKinect ()
     {
-        ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationAndClassifyDemo::checkCloudArrive, this);
+        ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationDemo::checkCloudArrive, this);
         ros::Rate loop_rate (1);
         size_t kinect_trials_ = 0;
 
@@ -114,7 +114,7 @@ public:
             if ( checkKinect() )
             {
                 std::cout << "Camera (topic: " << topic_ << ") is up and running." << std::endl;
-                ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationAndClassifyDemo::callUsingCam, this);
+                ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationDemo::callUsingCam, this);
                 ros::spin();
             }
             else
@@ -142,7 +142,7 @@ public:
 int
 main (int argc, char ** argv)
 {
-    SegmenationAndClassifyDemo m;
+    SegmenationDemo m;
     m.initialize(argc, argv);
     return 0;
 }

@@ -180,9 +180,9 @@ template<typename PointT>
 bool
 multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
 {
+    n_.reset( new ros::NodeHandle ( "~" ) );
     bool do_sift = true;
     bool do_shot = false;
-    bool do_ourcvfh = false;
     bool use_go3d = false;
 
     float resolution = 0.003f;
@@ -203,12 +203,10 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     paramMultiPipeRec.save_hypotheses_ = true;
 
     n_->getParam ( "visualize", visualize_);
-    n_->getParam ( "test_dir", test_dir_);
     n_->getParam ( "models_dir", models_dir);
     n_->getParam ( "training_dir", training_dir);
     n_->getParam ( "do_sift", do_sift);
     n_->getParam ( "do_shot", do_shot);
-    n_->getParam ( "do_ourcvfh", do_ourcvfh);
     n_->getParam ( "use_go3d", use_go3d);
     n_->getParam ( "knn_sift", paramLocalRecSift.knn_);
     n_->getParam ( "knn_shot", paramLocalRecShot.knn_);

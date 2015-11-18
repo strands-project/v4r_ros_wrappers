@@ -157,7 +157,7 @@ public:
         }
         else //input_method==1
         {
-            if(n_->getParam ( "directory", directory_ ) && directory_.length())
+            if(n_->getParam ( " ", directory_ ) && directory_.length())
             {
                 callSvRecognizerUsingFiles();
             }

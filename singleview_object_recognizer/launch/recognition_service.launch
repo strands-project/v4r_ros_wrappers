@@ -6,6 +6,7 @@
 	<arg name="chop_z" default="3.0" />
 	<arg name="cg_size_thresh" default="5" />
 	<arg name="knn_sift" default="3" />
+	<arg name="knn_shot" default="1" />
 
 	<!-- recognition service service -->
 	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" respawn="true" >
@@ -16,5 +17,6 @@
 		<param name="chop_z" value="$(arg chop_z)" type="double"/>
 		<param name="cg_size_thresh" value="$(arg cg_size_thresh)" type="int"/>
 		<param name="knn_sift" value="$(arg knn_sift)" type="int"/>
+		<param name="knn_shot" value="$(arg knn_shot)" type="int"/>
 	</node>
 </launch>
