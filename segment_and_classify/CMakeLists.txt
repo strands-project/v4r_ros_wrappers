@@ -6,7 +6,7 @@ find_package(PCL 1.7 REQUIRED)
 find_package(V4R REQUIRED)
 
 catkin_package(
-   CATKIN_DEPENDS segmentation_srv_definitions classifier_srv_definitions object_classifer segmentation
+   CATKIN_DEPENDS segmentation_srv_definitions classifier_srv_definitions object_classifier segmentation
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
