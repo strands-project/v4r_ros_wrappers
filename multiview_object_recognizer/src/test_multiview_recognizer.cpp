@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: June, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>
@@ -159,6 +159,7 @@ public:
                 return false;
             }
         }
+        return true;
     }
 
     bool initialize(int argc, char ** argv)

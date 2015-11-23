@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: Aug 20, 2014
- *      Author: Thomas Fäulhammer
+ *      Author: Thomas Faeulhammer
  */
 
 #include <pcl/common/common.h>
@@ -16,7 +16,7 @@
 #include <v4r/io/filesystem.h>
 #include "segmentation_srv_definitions/segment.h"
 
-class SegmentationDemo
+class SegmenationDemo
 {
 private:
     typedef pcl::PointXYZRGB PointT;
@@ -28,7 +28,7 @@ private:
     int input_method_; // defines the test input (0... camera topic, 1... file)
 
 public:
-    SegmentationDemo()
+    SegmenationDemo()
     {
         input_method_ = 0;
     }
@@ -52,7 +52,7 @@ public:
 
     bool checkKinect ()
     {
-        ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmentationDemo::checkCloudArrive, this);
+        ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationDemo::checkCloudArrive, this);
         ros::Rate loop_rate (1);
         size_t kinect_trials_ = 0;
 
@@ -88,6 +88,7 @@ public:
             }
 
         }
+        return true;
     }
 
     bool initialize(int argc, char ** argv)
@@ -113,7 +114,7 @@ public:
             if ( checkKinect() )
             {
                 std::cout << "Camera (topic: " << topic_ << ") is up and running." << std::endl;
-                ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmentationDemo::callUsingCam, this);
+                ros::Subscriber sub_pc = n_->subscribe (topic_, 1, &SegmenationDemo::callUsingCam, this);
                 ros::spin();
             }
             else
@@ -141,7 +142,7 @@ public:
 int
 main (int argc, char ** argv)
 {
-    SegmentationDemo m;
+    SegmenationDemo m;
     m.initialize(argc, argv);
     return 0;
 }

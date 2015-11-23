@@ -15,40 +15,42 @@
 #include "segmentation_srv_definitions/segment.h"
 
 #include <v4r/recognition/global_nn_classifier.h>
+#include <v4r/segmentation/pcl_segmentation_methods.h>
 
 namespace v4r
 {
 
-template<template<class > class Distance, typename PointT, typename FeatureT>
-  class GlobalNNPipelineROS : public GlobalNNPipeline<Distance, PointT, FeatureT>
-  {
-  private:
-      boost::shared_ptr<ros::NodeHandle> n_;
+template<template<class > class Distance, typename PointT>
+class GlobalNNClassifierROS : public GlobalNNClassifier<Distance, PointT>
+{
+private:
+    using GlobalNNClassifier<Distance, PointT>::indices_;
+    using GlobalNNClassifier<Distance, PointT>::input_;
+    using GlobalNNClassifier<Distance, PointT>::training_dir_;
 
+//    boost::shared_ptr<PCLSegmenter<pcl::PointXYZRGB> > seg_;  ///@brief segmentation object
     std::string models_dir_;
-    double chop_at_z_;
-//    pcl::PointCloud<PointT>::Ptr frame_;
-//    std::vector<pcl::PointIndices> cluster_indices_;
-//    std::vector < std::string > categories_;
-//    std::vector<float> conf_;
+
+    double chop_at_z_;  /// @brief maximum depth to be considered when processing the input cloud (with respect to the camera coordinate system)
+
+    // ROS stuff
+    boost::shared_ptr<ros::NodeHandle> n_;
     ros::ServiceServer segment_and_classify_service_;
     ros::ServiceServer classify_service_;
     ros::Publisher vis_pub_, vis_pc_pub_;
     visualization_msgs::MarkerArray markerArray_;
-    std::string camera_frame_;
 
-  public:
-    GlobalNNPipelineROS()
+public:
+    GlobalNNClassifierROS()
     {
-        camera_frame_ = "/head_xtion_depth_optical_frame";
     }
 
-    bool classifyROS(classifier_srv_definitions::classify::Request & req,
-                  classifier_srv_definitions::classify::Response & response);
+    bool classifyROS(classifier_srv_definitions::classify::Request &req,
+                     classifier_srv_definitions::classify::Response &response);
 
     void initializeROS (int argc, char ** argv);
 
-  };
+};
 
 }
 

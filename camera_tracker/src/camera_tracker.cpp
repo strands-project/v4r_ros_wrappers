@@ -1,8 +1,8 @@
 /*
- * shape_simple_classifier_node.cpp
+ * camera_tracker.cpp
  *
- *  Created on: Sep 7, 2013
- *      Author: aitor
+ *  Created on: June, 2015
+ *      Author: Aitor, Thomas
  */
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
@@ -43,8 +43,8 @@
 #include <v4r/common/noise_models.h>
 #include <v4r/common/convertCloud.h>
 #include <v4r/common/convertImage.h>
-#include <v4r/keypoints/impl/invPose.hpp>
 #include <v4r/common/PointTypes.h>
+#include <v4r/keypoints/impl/invPose.hpp>
 #include <v4r/reconstruction/KeypointSlamRGBD2.h>
 #include <v4r/reconstruction/ProjBundleAdjuster.h>
 

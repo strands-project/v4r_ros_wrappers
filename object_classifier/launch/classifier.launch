@@ -1,0 +1,15 @@
+<launch>
+	<arg name="models_dir" /> <!-- required -->
+	<arg name="training_dir" />  <!-- required -->
+	<arg name="nn" default="10" />
+	<arg name="chop_z" default="2.5" />
+
+	<!-- classifier service -->
+	<node pkg="object_classifier" type="object_classifier_node" name="classifier_service" output="screen" >
+		<param name="models_dir" value="$(arg models_dir)" type="string"/>
+		<param name="training_dir" value="$(arg training_dir)" type="string"/>
+		<param name="nn" value="$(arg nn)" type="int"/>
+		<param name="chop_z" value="$(arg chop_z)" type="double"/>
+	</node>
+	
+</launch>

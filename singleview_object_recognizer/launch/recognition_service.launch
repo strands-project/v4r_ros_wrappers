@@ -1,24 +1,22 @@
 <launch>
-	<arg name="data_dir" /> <!-- e.g.  data_dir:="/home/mz/work/STRANDS/code/catkin_ws/src/v4r_ros_wrappers/singleview_object_recognizer/data" -->
+	<arg name="models_dir" /> <!-- required -->
+	<arg name="training_dir" />  <!-- required -->
 	<arg name="do_sift" default="true" />
 	<arg name="do_shot" default="false" />
-	<arg name="do_ourcvfh" default="false" />
 	<arg name="chop_z" default="3.0" />
 	<arg name="cg_size_thresh" default="5" />
 	<arg name="knn_sift" default="3" />
+	<arg name="knn_shot" default="1" />
 
 	<!-- recognition service service -->
 	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" respawn="true" >
-		<param name="models_dir" value="$(arg data_dir)/models" type="string"/>
-		<param name="recognizer_structure_sift" value="$(arg data_dir)/recognition_structure" type="string"/>
-		<param name="training_dir_sift" value="$(arg data_dir)/sift_trained" type="string"/>
-		<param name="training_dir_shot" value="$(arg data_dir)/shot_trained" type="string"/>
-		<param name="training_dir_ourcvfh" value="$(arg data_dir)/ourcvfh_trained" type="string"/>
+		<param name="models_dir" value="$(arg models_dir)" type="string"/>
+		<param name="training_dir" value="$(arg training_dir)" type="string"/>
 		<param name="do_sift" value="$(arg do_sift)" type="bool"/>
 		<param name="do_shot" value="$(arg do_shot)" type="bool"/>
-		<param name="do_ourcvfh" value="$(arg do_ourcvfh)" type="bool"/>
 		<param name="chop_z" value="$(arg chop_z)" type="double"/>
 		<param name="cg_size_thresh" value="$(arg cg_size_thresh)" type="int"/>
 		<param name="knn_sift" value="$(arg knn_sift)" type="int"/>
+		<param name="knn_shot" value="$(arg knn_shot)" type="int"/>
 	</node>
 </launch>
