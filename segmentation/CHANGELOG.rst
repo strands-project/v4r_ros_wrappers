@@ -2,6 +2,18 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* updated ReadMes
+  removed unused files
+  updated some launch files, created segement_and_classify package
+* added object classifer again (compiles but crashes - will be fixed soon)
+  wrote launch file for segmentation + classification
+* updated namespace
+* fix headers and some warnings
+* change namespace according to v4r
+* Contributors: Thomas Fäulhammer
+
 0.0.6 (2015-10-15)
 ------------------
 

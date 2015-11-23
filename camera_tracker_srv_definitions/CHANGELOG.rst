@@ -2,6 +2,9 @@
 Changelog for package camera_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.6 (2015-10-15)
 ------------------
 

@@ -2,6 +2,19 @@
 Changelog for package multiview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* updated ReadMes
+  removed unused files
+  updated some launch files, created segement_and_classify package
+* updated namespace
+* fixed paramter input of doubles
+* using v4r_config.h to check for SIFTGPU
+* tmp commit
+* fix headers and some warnings
+* change namespace according to v4r
+* Contributors: Thomas Fäulhammer
+
 0.0.6 (2015-10-15)
 ------------------
 * fixed namespace and include issues to fit V4R Version 1.0.11
