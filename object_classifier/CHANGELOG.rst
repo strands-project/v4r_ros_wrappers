@@ -2,8 +2,8 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.7 (2015-11-23)
+------------------
 * Update package.xml
 * updated ReadMes
   removed unused files

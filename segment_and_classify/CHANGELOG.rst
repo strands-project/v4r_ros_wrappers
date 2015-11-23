@@ -2,8 +2,8 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.7 (2015-11-23)
+------------------
 * corrected typo
 * corrected type
 * updated ReadMes

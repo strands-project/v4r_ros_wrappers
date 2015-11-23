@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.7 (2015-11-23)
+------------------
 * updated ReadMes
   removed unused files
   updated some launch files, created segement_and_classify package
