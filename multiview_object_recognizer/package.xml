@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>multiview_object_recognizer</name>
-  <version>0.0.7</version>
+  <version>0.0.8</version>
   <description>The multiview_object_recognizer package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
