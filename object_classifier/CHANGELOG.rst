@@ -2,6 +2,11 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added segmentation_srv_definitions as dependency
+* Contributors: Marc Hanheide
+
 0.0.8 (2015-11-24)
 ------------------
 * added segmentation_srv_definitions as dependency
