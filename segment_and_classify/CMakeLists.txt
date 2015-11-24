@@ -11,7 +11,7 @@ catkin_package(
 
 set(incs include/pcl_segmentation_ros.h include/pcl_conversions.h)
 include_directories(include ${catkin_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-add_executable(segement_and_classify_test src/test.cppi ${incs})
+add_executable(segement_and_classify_test src/test.cpp ${incs})
 add_dependencies(segement_and_classify_test ${catkin_EXPORTED_TARGETS})
 target_link_libraries(segement_and_classify_test ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${V4R_LIBS})
 
