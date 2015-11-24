@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(object_classifier)
 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs visualization_msgs classifier_srv_definitions object_perception_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp 
+   sensor_msgs std_msgs visualization_msgs 
+   segmentation_srv_definitions classifier_srv_definitions object_perception_msgs)
 
 find_package(PCL 1.7 REQUIRED)
 find_package(V4R REQUIRED)
