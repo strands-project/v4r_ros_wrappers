@@ -2,8 +2,8 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.10 (2015-11-25)
+-------------------
 * using packaged version of pcl_conversions.h
 * Contributors: Thomas Fäulhammer
 
