@@ -50,6 +50,7 @@
   <run_depend>segmentation</run_depend>
   <run_depend>segmentation_srv_definitions</run_depend>
   <run_depend>singleview_object_recognizer</run_depend>
+  <run_depend>segment_and_classify</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
