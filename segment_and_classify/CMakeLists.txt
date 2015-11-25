@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(segment_and_classify)
 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs visualization_msgs segmentation_srv_definitions classifier_srv_definitions object_perception_msgs segmentation object_classifier)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs visualization_msgs pcl_conversions segmentation_srv_definitions classifier_srv_definitions object_perception_msgs segmentation object_classifier)
 find_package(PCL 1.7 REQUIRED)
 find_package(V4R REQUIRED)
 
 catkin_package(
-   CATKIN_DEPENDS segmentation_srv_definitions classifier_srv_definitions object_classifier segmentation
+   CATKIN_DEPENDS segmentation_srv_definitions classifier_srv_definitions object_classifier segmentation pcl_conversions
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})

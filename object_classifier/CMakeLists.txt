@@ -3,7 +3,7 @@ project(object_classifier)
 
 find_package(catkin REQUIRED COMPONENTS roscpp 
    sensor_msgs std_msgs visualization_msgs 
-   segmentation_srv_definitions classifier_srv_definitions object_perception_msgs)
+   segmentation_srv_definitions classifier_srv_definitions object_perception_msgs pcl_conversions)
 
 find_package(PCL 1.7 REQUIRED)
 find_package(V4R REQUIRED)
@@ -12,12 +12,12 @@ include_directories(${PCL_INCLUDE_DIRS})
 
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS classifier_srv_definitions
+   CATKIN_DEPENDS classifier_srv_definitions pcl_conversions
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS})
 
-set(incs include/pcl_conversions.h include/global_nn_classifier_ros.h)
+set(incs include/global_nn_classifier_ros.h)
 
 add_executable(object_classifier_node src/global_nn_classifier_ros.cpp ${incs})
 add_executable(object_classifier_demo_node src/test.cpp)
