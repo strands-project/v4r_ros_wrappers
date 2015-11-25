@@ -1,5 +1,5 @@
 #include "multiview_object_recognizer_ros.h"
-#include "pcl_conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <cv_bridge/cv_bridge.h>
 #include <v4r_config.h>

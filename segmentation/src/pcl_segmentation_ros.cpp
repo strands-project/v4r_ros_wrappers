@@ -1,5 +1,5 @@
 #include "pcl_segmentation_ros.h"
-#include "pcl_conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/common/common.h>
 #include <pcl/io/io.h>

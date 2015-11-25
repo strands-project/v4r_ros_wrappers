@@ -12,7 +12,7 @@
 #include <boost/lexical_cast.hpp>
 #include <Eigen/Eigenvalues>
 #include <pcl/common/common.h>
-#include <pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <v4r/recognition/mesh_source.h>
 #include <v4r/features/esf_estimator.h>

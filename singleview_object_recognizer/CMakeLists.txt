@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(singleview_object_recognizer)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
-                                         genmsg cv_bridge sensor_msgs image_transport )
+                                         genmsg cv_bridge sensor_msgs image_transport pcl_conversions)
 
 find_package( PCL 1.7 REQUIRED )
 find_package( OpenCV 2.4 REQUIRED )
@@ -10,7 +10,7 @@ find_package( V4R REQUIRED )
 
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions
+   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions pcl_conversions
 )
 
 include_directories(include
@@ -20,7 +20,7 @@ include_directories(include
   ${OpenCV_INCLUDE_DIRS}
 )
 
-set(incs include/pcl_conversions.h include/recognizer_ros.h)
+set(incs include/recognizer_ros.h)
 
 add_executable(recognition_service src/recognizer_ros.cpp ${incs})
 add_executable(test_single_view_recognition src/test_single_view_recognizer.cpp)

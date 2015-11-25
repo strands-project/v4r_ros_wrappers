@@ -6,7 +6,7 @@
  */
 
 #include <pcl/common/common.h>
-#include <pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
 
 #include <ros/ros.h>
