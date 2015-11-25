@@ -2,6 +2,11 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* using packaged version of pcl_conversions.h
+* Contributors: Thomas Fäulhammer
+
 0.0.9 (2015-11-24)
 ------------------
 

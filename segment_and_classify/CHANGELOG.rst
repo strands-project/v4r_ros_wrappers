@@ -2,6 +2,13 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* using packaged version of pcl_conversions.h
+* fixed typo
+* hopefully fixes missing include file
+* Contributors: Thomas Fäulhammer
+
 0.0.9 (2015-11-24)
 ------------------
 

@@ -2,6 +2,11 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* using packaged version of pcl_conversions.h
+* Contributors: Thomas Fäulhammer
+
 0.0.9 (2015-11-24)
 ------------------
 * added segmentation_srv_definitions as dependency
