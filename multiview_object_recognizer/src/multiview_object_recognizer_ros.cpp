@@ -231,11 +231,15 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     n_->getParam ( "max_vertices_in_graph", paramMultiView.max_vertices_in_graph_ );
     n_->getParam ( "compute_mst", paramMultiView.compute_mst_ );
 
-    n_->getParam ( "cg_size_thresh", paramGgcg.gc_threshold_);
+    int gc_thresh;
+    if( n_->getParam ( "cg_size_thresh", gc_thresh) )
+        paramGgcg.gc_threshold_ = static_cast<size_t>(gc_thresh);
+
     n_->getParam ( "cg_size", paramGgcg.gc_size_);
     n_->getParam ( "cg_ransac_threshold", paramGgcg.ransac_threshold_);
     n_->getParam ( "cg_dist_for_clutter_factor", paramGgcg.dist_for_cluster_factor_);
-    n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
+
+//    n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
     n_->getParam ( "cg_max_time_for_cliques_computation", paramGgcg.max_time_allowed_cliques_comptutation_);
     n_->getParam ( "cg_dot_distance", paramGgcg.thres_dot_distance_);
     n_->getParam ( "cg_use_graph", paramGgcg.use_graph_);

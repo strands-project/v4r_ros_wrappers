@@ -7,7 +7,7 @@ project(camera_tracker)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy camera_srv_definitions
                                          genmsg tf2 tf visualization_msgs
-                                        cv_bridge image_transport)
+                                        cv_bridge image_transport pcl_conversions)
 
 find_package(PCL 1.7 REQUIRED)
 find_package( OpenCV 2.4 REQUIRED )
@@ -60,14 +60,14 @@ include_directories(include
   ${V4R_INCLUDE_DIRS}
 )
 
-set(incs include/pcl_conversions.h)
+set(incs include/camera_tracker.h)
 
 ## Declare a cpp executable
 add_executable(camera_tracker_service src/camera_tracker.cpp ${incs})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(camera_tracker_service ${catkin_EXPORTED_TARGETS} ${STRANDSV4R_LIBS})
+add_dependencies(camera_tracker_service ${catkin_EXPORTED_TARGETS} ${V4R_LIBS})
 
 ## Specify libraries to link a library or executable target against
 
