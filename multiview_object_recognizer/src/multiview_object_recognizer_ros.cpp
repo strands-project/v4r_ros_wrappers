@@ -27,9 +27,7 @@ multiviewRecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::reco
                             recognition_srv_definitions::recognize::Response &response) const
 {
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
-    cv::Mat_<cv::Vec3b> annotated_img;
-
-    ConvertPCLCloud2Image<PointT>(scene_, annotated_img);
+    cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
     std::vector<ModelTPtr> models_verified = mv_r_->getVerifiedModels();
     std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified = mv_r_->getVerifiedTransforms();

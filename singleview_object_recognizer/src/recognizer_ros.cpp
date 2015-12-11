@@ -58,9 +58,7 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
                             recognition_srv_definitions::recognize::Response &response) const
 {
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
-    cv::Mat_<cv::Vec3b> annotated_img;
-
-    ConvertPCLCloud2Image<PointT>(scene_, annotated_img);
+    cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
     for (size_t j = 0; j < models_verified_.size(); j++)
     {
