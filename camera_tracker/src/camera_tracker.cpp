@@ -22,11 +22,11 @@
 #include <pcl/features/normal_3d_omp.h>
 
 #include <v4r/common/impl/ScopeTime.hpp>
-#include <v4r/common/noise_model_based_cloud_integration.h>
 #include <v4r/common/noise_models.h>
 #include <v4r/common/convertCloud.h>
 #include <v4r/common/convertImage.h>
 #include <v4r/common/PointTypes.h>
+#include <v4r/registration/noise_model_based_cloud_integration.h>
 #include <v4r/io/filesystem.h>
 #include <v4r/keypoints/impl/invPose.hpp>
 
@@ -223,6 +223,16 @@ CamTracker::start (camera_srv_definitions::start_tracker::Request & req,
     cleanup();
     initializeVisualizationMarkers();
 
+    cv::Mat_<double> distCoeffs = cv::Mat_<double>::zeros(4,1);
+    cv::Mat_<double> intrinsic = cv::Mat::zeros(3, 3, CV_64F);
+    intrinsic.at<double>(0,0) = 525.f;
+    intrinsic.at<double>(1,1) = 525.f;
+//    intrinsic.at<double>(0,2) = 320.f;
+//    intrinsic.at<double>(1,2) = 240.f;
+    intrinsic.at<double>(0,2) = 319.5f;
+    intrinsic.at<double>(1,2) = 239.0f;
+    intrinsic.at<double>(2,2) = 1.f;
+
 #ifdef USE_PCL_GRABBER
     try
     {
@@ -234,16 +244,6 @@ CamTracker::start (camera_srv_definitions::start_tracker::Request & req,
                   << ". Could not start camera..." << std::endl;
         return false;
     }
-
-    cv::Mat_<double> distCoeffs;
-    cv::Mat_<double> intrinsic = cv::Mat::zeros(3, 3, CV_64F);
-    intrinsic.at<double>(0,0) = 525.f;
-    intrinsic.at<double>(1,1) = 525.f;
-    intrinsic.at<double>(0,2) = 320.f;
-    intrinsic.at<double>(1,2) = 240.f;
-    intrinsic.at<double>(2,2) = 1.f;
-    std::cout << intrinsic << std::endl << std::endl;
-
     camtracker.reset( new v4r::KeypointSlamRGBD2(param) );
     camtracker->setCameraParameter(intrinsic,distCoeffs);
 
@@ -251,21 +251,24 @@ CamTracker::start (camera_srv_definitions::start_tracker::Request & req,
             boost::bind (&CamTracker::cloud_cb_, this, _1);
     interface->registerCallback (f);
     interface->start ();
-
-    std::cout << "Camera started..." << std::endl;
 #else
-    camera_info_subscriber_ = n_->subscribe(camera_topic_ +"/camera_info", 1, &CamTracker::camera_info_cb, this);
+    if(use_cam_params_from_ROS_topic_)
+    {
+        camera_info_subscriber_ = n_->subscribe(camera_topic_ +"/camera_info", 1, &CamTracker::camera_info_cb, this);
 
-    ROS_INFO_STREAM("Wating for camera info...topic=" << camera_topic_ << "/camera_info...");
-    while (!got_camera_info_) {
-        ros::Duration(0.1).sleep();
-        ros::spinOnce();
+        ROS_INFO_STREAM("Wating for camera info...topic=" << camera_topic_ << "/camera_info...");
+        while (!got_camera_info_) {
+            ros::Duration(0.1).sleep();
+            ros::spinOnce();
+        }
+        ROS_INFO("got it.");
+        camera_info_subscriber_.shutdown();
+
+        distCoeffs = cv::Mat(4, 1, CV_64F, camera_info_.D.data());
+        intrinsic = cv::Mat(3, 3, CV_64F, camera_info_.K.data());
     }
-    ROS_INFO("got it.");
-    camera_info_subscriber_.shutdown();
-
-    cv::Mat_<double> distCoeffs = cv::Mat(4, 1, CV_64F, camera_info_.D.data());
-    cv::Mat_<double> intrinsic = cv::Mat(3, 3, CV_64F, camera_info_.K.data());
+    std::cout << "Intrinsic camera parameters: " << std::endl << intrinsic << std::endl << std::endl <<
+                 "Distortion camera parameters: " << std::endl << distCoeffs << std::endl << std::endl;
 
     camtracker.reset( new v4r::KeypointSlamRGBD2(param) );
     camtracker->setCameraParameter(intrinsic, distCoeffs);
@@ -273,6 +276,7 @@ CamTracker::start (camera_srv_definitions::start_tracker::Request & req,
     confidence_publisher_ = n_->advertise<std_msgs::Float32>("cam_tracker_confidence", 1);
     camera_topic_subscriber_ = n_->subscribe(camera_topic_ +"/points", 1, &CamTracker::trackNewCloud, this);
 #endif
+    std::cout << "Camera started..." << std::endl;
     last_cloud_ = boost::posix_time::microsec_clock::local_time ();
     last_cloud_ros_time_ = ros::Time::now();
     return true;
@@ -297,24 +301,13 @@ CamTracker::stop (camera_srv_definitions::start_tracker::Request & req,
 void
 CamTracker::createObjectCloudFiltered(pcl::PointCloud<pcl::PointXYZRGB>::Ptr & octree_cloud)
 {
-    double max_angle = 70.f;
-    double lateral_sigma = 0.0015f;
-    bool depth_edges = true;
-    float nm_integration_min_weight_ = 0.75f;
-
-    v4r::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
-    std::vector< std::vector<float> > weights(keyframes_.size());
-    std::vector< std::vector<float> > sigmas(keyframes_.size());
+    v4r::NguyenNoiseModel<pcl::PointXYZRGB> nm;
+    std::vector<std::vector<std::vector<float> > > pt_properties (keyframes_.size());
     std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > ptr_clouds(keyframes_.size());
     std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals(keyframes_.size());
 
-    nm.setLateralSigma(lateral_sigma);
-    nm.setMaxAngle(max_angle);
-    nm.setUseDepthEdges(depth_edges);
-
-    if (keyframes_.size()>0)
+    if (!keyframes_.empty())
     {
-
         for (unsigned i=0; i<keyframes_.size(); i++)
         {
 
@@ -328,22 +321,18 @@ CamTracker::createObjectCloudFiltered(pcl::PointCloud<pcl::PointXYZRGB>::Ptr & o
             nm.setInputCloud(ptr_clouds[i]);
             nm.setInputNormals(normals[i]);
             nm.compute();
-            nm.getWeights(weights[i]);
-            sigmas[i] = nm.getSigmas();
+            pt_properties[i] = nm.getPointProperties();
         }
 
         v4r::NMBasedCloudIntegration<pcl::PointXYZRGB>::Parameter nmParam;
-        nmParam.min_weight_ = nm_integration_min_weight_;
         nmParam.octree_resolution_ = 0.005f;
-        nmParam.final_resolution_ = 0.005f;
         nmParam.min_points_per_voxel_ = 1;
         v4r::NMBasedCloudIntegration<pcl::PointXYZRGB> nmIntegration (nmParam);
         octree_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
         nmIntegration.setInputClouds(ptr_clouds);
-        nmIntegration.setWeights(weights);
-        nmIntegration.setSigmas(sigmas);
         nmIntegration.setTransformations(cameras_);
         nmIntegration.setInputNormals(normals);
+        nmIntegration.setPointProperties(pt_properties);
         nmIntegration.compute(octree_cloud);
     }
 }
@@ -417,7 +406,7 @@ CamTracker::saveTrackingResultsToFile(camera_srv_definitions::save_tracking_resu
             v4r::io::createDirIfNotExist(req.dir_name.data);
             for(size_t i=0; i < cameras_.size(); i++)
             {
-                std::stringstream fn; fn << req.dir_name.data << "/cloud_" << i << ".pcd";
+                std::stringstream fn; fn << req.dir_name.data << "/cloud_" << std::setw(5) << std::setfill('0') << i << ".pcd";
                 std::cout << "Writing file to " << fn.str() << "." << std::endl;
                 pcl::io::savePCDFileBinary(fn.str(), keyframes_[i]);
             }
@@ -485,7 +474,6 @@ CamTracker::visCompound (camera_srv_definitions::visualize_compound::Request & r
 void
 CamTracker::initialize (int argc, char ** argv)
 {
-    double delta_angle_deg;
     n_.reset( new ros::NodeHandle ( "~" ) );
 
     confidence_publisher_ = n_->advertise<visualization_msgs::Marker>("confidence", 1);
@@ -500,14 +488,13 @@ CamTracker::initialize (int argc, char ** argv)
     cam_tracker_save_tracking_results_to_file_  = n_->advertiseService ("save_results_to_file", &CamTracker::saveTrackingResultsToFile, this);
     cam_tracker_cleanup_  = n_->advertiseService ("cleanup", &CamTracker::cleanup, this);
 
-    if(!n_->getParam ( "camera_topic", camera_topic_ ))
-        camera_topic_ = "/camera/depth_registered";
+    n_->getParam ( "camera_topic", camera_topic_ );
+    n_->getParam ( "trajectory_threshold", trajectory_threshold_ );
+    n_->getParam ( "use_cam_params_from_ROS_topic", use_cam_params_from_ROS_topic_ );
 
+    double delta_angle_deg;
     if( n_->getParam ( "delta_angle_deg", delta_angle_deg ) )
         cos_min_delta_angle_ = cos( delta_angle_deg *M_PI/180.);
-
-    if(!n_->getParam ( "trajectory_threshold_", trajectory_threshold_ ) )
-        trajectory_threshold_ = 0.02;
 
     debug_image_transport_.reset(new image_transport::ImageTransport(*n_));
     debug_image_publisher_ = debug_image_transport_->advertise("debug_images", 1);

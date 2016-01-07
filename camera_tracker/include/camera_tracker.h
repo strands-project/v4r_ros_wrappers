@@ -91,6 +91,7 @@ private:
 
     double cos_min_delta_angle_;
     double sqr_min_cam_distance_;
+    bool use_cam_params_from_ROS_topic_;
     std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > cameras_;
     std::vector<pcl::PointCloud<pcl::PointXYZRGB>> keyframes_;
     pcl::PointCloud<PointT>::Ptr scene_;
@@ -170,12 +171,14 @@ private:
 
 
 public:
-    CamTracker () : got_camera_info_(false)
+    CamTracker () : got_camera_info_(false), use_cam_params_from_ROS_topic_(true)
     {
         conf_ = 0;
         pose_ = Eigen::Matrix4f::Identity();
         cos_min_delta_angle_ = cos(15*M_PI/180.);
         sqr_min_cam_distance_ = 1.*1.;
+
+        trajectory_threshold_ = 0.02;
 
         param.det_param.nfeatures = 150;
         param.kt_param.plk_param.use_ncc = true;
