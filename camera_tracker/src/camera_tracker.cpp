@@ -14,7 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-#include <pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/common/angles.h>
 #include <pcl/common/transforms.h>
 #include <pcl/common/time.h>
