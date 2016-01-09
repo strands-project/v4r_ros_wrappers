@@ -28,6 +28,8 @@ private:
 
     bool visualize_;
 
+    std::string models_dir_;
+
     cv::Ptr<SiftGPU> sift_;
 
 

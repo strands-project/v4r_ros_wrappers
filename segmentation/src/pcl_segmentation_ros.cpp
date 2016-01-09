@@ -54,8 +54,7 @@ PCLSegmenterROS<PointT>::respondSrvCall(segmentation_srv_definitions::segment::R
     segmented_cloud_colored.header.frame_id = req.cloud.header.frame_id;
     vis_pc_pub_.publish(segmented_cloud_colored);
 
-    cv::Mat_<cv::Vec3b> colored_img;
-    ConvertUnorganizedPCLCloud2Image<PointT>(colored_cloud, colored_img);
+    cv::Mat colored_img = ConvertUnorganizedPCLCloud2Image(*colored_cloud);
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", colored_img).toImageMsg();
     image_pub_.publish(msg);
     return true;

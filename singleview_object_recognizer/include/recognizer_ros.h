@@ -52,7 +52,7 @@ public:
     bool recognizeROS (recognition_srv_definitions::recognize::Request & req,
                     recognition_srv_definitions::recognize::Response & response);
 
-    void initialize (int argc, char ** argv);
+    bool initialize (int argc, char ** argv);
 };
 
 }

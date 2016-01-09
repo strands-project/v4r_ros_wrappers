@@ -101,8 +101,7 @@ public:
 
     bool callSvRecognizerUsingFiles()
     {
-        std::vector<std::string> test_cloud;
-        v4r::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
+        std::vector<std::string> test_cloud = v4r::io::getFilesInDirectory(directory_, ".*.pcd", false);
         for(size_t i=0; i < test_cloud.size(); i++)
         {
             pcl::PointCloud<PointT> cloud;

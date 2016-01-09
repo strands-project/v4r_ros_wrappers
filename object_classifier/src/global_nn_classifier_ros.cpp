@@ -206,12 +206,13 @@ void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** ar
 
     boost::shared_ptr<MeshSource<PointT> > mesh_source (new MeshSource<PointT>);
     mesh_source->setPath (models_dir_);
+    mesh_source->setMeshDir(this->training_dir_);
     mesh_source->setResolution (150);
     mesh_source->setTesselationLevel (0);
     //  mesh_source->setViewAngle (57.f);
     mesh_source->setRadiusSphere (1.f);
     mesh_source->setModelScale (1.f);
-    mesh_source->generate (this->training_dir_);
+    mesh_source->generate ();
 
     this->source_ = boost::static_pointer_cast<MeshSource<PointT> > (mesh_source);
 

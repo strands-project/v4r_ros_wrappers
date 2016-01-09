@@ -19,6 +19,11 @@
 
 #include <v4r/features/shot_local_estimator_omp.h>
 
+#include <boost/program_options.hpp>
+#include <glog/logging.h>
+
+namespace po = boost::program_options;
+
 namespace v4r
 {
 template<typename PointT>
@@ -27,9 +32,7 @@ multiviewRecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::reco
                             recognition_srv_definitions::recognize::Response &response) const
 {
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
-    cv::Mat_<cv::Vec3b> annotated_img;
-
-    ConvertPCLCloud2Image<PointT>(scene_, annotated_img);
+    cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
     std::vector<ModelTPtr> models_verified = mv_r_->getVerifiedModels();
     std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified = mv_r_->getVerifiedTransforms();
@@ -181,13 +184,13 @@ bool
 multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
 {
     n_.reset( new ros::NodeHandle ( "~" ) );
-    bool do_sift = true;
-    bool do_shot = false;
-    bool use_go3d = false;
+    bool do_sift;
+    bool do_shot;
+    bool do_ourcvfh;
+    bool use_go3d;
+    float resolution = 0.005f;
 
-    float resolution = 0.003f;
-    std::string models_dir, training_dir;
-
+    // Parameter classes
     typename GO3D<PointT, PointT>::Parameter paramGO3D;
     typename GraphGeometricConsistencyGrouping<PointT, PointT>::Parameter paramGgcg;
     typename LocalRecognitionPipeline<flann::L1, PointT, FeatureT >::Parameter paramLocalRecSift;
@@ -195,77 +198,97 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     typename MultiRecognitionPipeline<PointT>::Parameter paramMultiPipeRec;
     typename SHOTLocalEstimationOMP<PointT, pcl::Histogram<352> >::Parameter paramLocalEstimator;
     typename MultiviewRecognizer<PointT>::Parameter paramMultiView;
+    typename NguyenNoiseModel<PointT>::Parameter nm_param;
+    typename NMBasedCloudIntegration<PointT>::Parameter nmInt_param;
+    nmInt_param.octree_resolution_ = 0.001f;
 
     paramLocalRecSift.use_cache_ = paramLocalRecShot.use_cache_ = true;
     paramLocalRecSift.save_hypotheses_ = paramLocalRecShot.save_hypotheses_ = true;
     paramLocalRecShot.kdtree_splits_ = 128;
 
-    paramMultiPipeRec.save_hypotheses_ = true;
+    int normal_computation_method = paramLocalRecSift.normal_computation_method_;
 
-    n_->getParam ( "visualize", visualize_);
-    n_->getParam ( "models_dir", models_dir);
-    n_->getParam ( "training_dir", training_dir);
-    n_->getParam ( "do_sift", do_sift);
-    n_->getParam ( "do_shot", do_shot);
-    n_->getParam ( "use_go3d", use_go3d);
-    n_->getParam ( "knn_sift", paramLocalRecSift.knn_);
-    n_->getParam ( "knn_shot", paramLocalRecShot.knn_);
+    po::options_description desc("Multiview Object Instance Recognizer\n======================================**Reference(s): Faeulhammer et al, ICRA / MVA 2015\n **Allowed options");
+    desc.add_options()
+            ("help,h", "produce help message")
+            ("models_dir,m", po::value<std::string>(&models_dir_)->required(), "directory containing the object models")
+//            ("test_dir,t", po::value<std::string>(&test_dir_)->required(), "Directory with test scenes stored as point clouds (.pcd). The camera pose is taken directly from the pcd header fields \"sensor_orientation_\" and \"sensor_origin_\" (if the test directory contains subdirectories, each subdirectory is considered as seperate sequence for multiview recognition)")
+            ("visualize,v", po::bool_switch(&visualize_), "visualize recognition results")
+            ("do_sift", po::value<bool>(&do_sift)->default_value(true), "if true, generates hypotheses using SIFT (visual texture information)")
+            ("do_shot", po::value<bool>(&do_shot)->default_value(false), "if true, generates hypotheses using SHOT (local geometrical properties)")
+            ("do_ourcvfh", po::value<bool>(&do_ourcvfh)->default_value(false), "if true, generates hypotheses using OurCVFH (global geometrical properties, requires segmentation!)")
+            ("use_go3d", po::value<bool>(&use_go3d)->default_value(false), "if true, verifies against a reconstructed scene from multiple viewpoints. Otherwise only against the current viewpoint.")
+            ("knn_sift", po::value<int>(&paramLocalRecSift.knn_)->default_value(paramLocalRecSift.knn_), "sets the number k of matches for each extracted SIFT feature to its k nearest neighbors")
+            ("knn_shot", po::value<int>(&paramLocalRecShot.knn_)->default_value(paramLocalRecShot.knn_), "sets the number k of matches for each extracted SHOT feature to its k nearest neighbors")
+            ("transfer_feature_matches", po::value<bool>(&paramMultiPipeRec.save_hypotheses_)->default_value(paramMultiPipeRec.save_hypotheses_), "if true, transfers feature matches between views [Faeulhammer ea., ICRA 2015]. Otherwise generated hypotheses [Faeulhammer ea., MVA 2015].")
+            ("icp_iterations", po::value<int>(&paramMultiView.icp_iterations_)->default_value(paramMultiView.icp_iterations_), "number of icp iterations. If 0, no pose refinement will be done")
+            ("icp_type", po::value<int>(&paramMultiView.icp_type_)->default_value(paramMultiView.icp_type_), "defines the icp method being used for pose refinement (0... regular ICP with CorrespondenceRejectorSampleConsensus, 1... crops point cloud of the scene to the bounding box of the model that is going to be refined)")
+            ("max_corr_distance", po::value<double>(&paramMultiView.max_corr_distance_)->default_value(paramMultiView.max_corr_distance_,  boost::str(boost::format("%.2e") % paramMultiView.max_corr_distance_)), "defines the margin for the bounding box used when doing pose refinement with ICP of the cropped scene to the model")
+            ("merge_close_hypotheses", po::value<bool>(&paramMultiView.merge_close_hypotheses_)->default_value(paramMultiView.merge_close_hypotheses_), "if true, close correspondence clusters (object hypotheses) of the same object model are merged together and this big cluster is refined")
+            ("merge_close_hypotheses_dist", po::value<double>(&paramMultiView.merge_close_hypotheses_dist_)->default_value(paramMultiView.merge_close_hypotheses_dist_, boost::str(boost::format("%.2e") % paramMultiView.merge_close_hypotheses_dist_)), "defines the maximum distance of the centroids in meter for clusters to be merged together")
+            ("merge_close_hypotheses_angle", po::value<double>(&paramMultiView.merge_close_hypotheses_angle_)->default_value(paramMultiView.merge_close_hypotheses_angle_, boost::str(boost::format("%.2e") % paramMultiView.merge_close_hypotheses_angle_) ), "defines the maximum angle in degrees for clusters to be merged together")
+            ("chop_z,z", po::value<double>(&paramMultiView.chop_z_)->default_value(paramMultiView.chop_z_, boost::str(boost::format("%.2e") % paramMultiView.chop_z_) ), "points with z-component higher than chop_z_ will be ignored (low chop_z reduces computation time and false positives (noise increase with z)")
+            ("max_vertices_in_graph", po::value<int>(&paramMultiView.max_vertices_in_graph_)->default_value(paramMultiView.max_vertices_in_graph_), "maximum number of views taken into account (views selected in order of latest recognition calls)")
+            ("compute_mst", po::value<bool>(&paramMultiView.compute_mst_)->default_value(paramMultiView.compute_mst_), "if true, does point cloud registration by SIFT background matching (given scene_to_scene_ == true), by using given pose (if use_robot_pose_ == true) and by common object hypotheses (if hyp_to_hyp_ == true) from all the possible connection a Mimimum Spanning Tree is computed. If false, it only uses the given pose for each point cloud ")
+            ("cg_size_thresh", po::value<size_t>(&paramGgcg.gc_threshold_)->default_value(paramGgcg.gc_threshold_), "Minimum cluster size. At least 3 correspondences are needed to compute the 6DOF pose ")
+            ("cg_size,c", po::value<double>(&paramGgcg.gc_size_)->default_value(paramGgcg.gc_size_, boost::str(boost::format("%.2e") % paramGgcg.gc_size_) ), "Resolution of the consensus set used to cluster correspondences together ")
+            ("cg_ransac_threshold", po::value<double>(&paramGgcg.ransac_threshold_)->default_value(paramGgcg.ransac_threshold_, boost::str(boost::format("%.2e") % paramGgcg.ransac_threshold_) ), " ")
+            ("cg_dist_for_clutter_factor", po::value<double>(&paramGgcg.dist_for_cluster_factor_)->default_value(paramGgcg.dist_for_cluster_factor_, boost::str(boost::format("%.2e") % paramGgcg.dist_for_cluster_factor_) ), " ")
+            ("cg_max_taken", po::value<size_t>(&paramGgcg.max_taken_correspondence_)->default_value(paramGgcg.max_taken_correspondence_), " ")
+            ("cg_max_time_for_cliques_computation", po::value<double>(&paramGgcg.max_time_allowed_cliques_comptutation_)->default_value(100.0, "100.0"), " if grouping correspondences takes more processing time in milliseconds than this defined value, correspondences will be no longer computed by this graph based approach but by the simpler greedy correspondence grouping algorithm")
+            ("cg_dot_distance", po::value<double>(&paramGgcg.thres_dot_distance_)->default_value(paramGgcg.thres_dot_distance_, boost::str(boost::format("%.2e") % paramGgcg.thres_dot_distance_) ) ,"")
+            ("cg_use_graph", po::value<bool>(&paramGgcg.use_graph_)->default_value(paramGgcg.use_graph_), " ")
+            ("hv_clutter_regularizer", po::value<double>(&paramGO3D.clutter_regularizer_)->default_value(paramGO3D.clutter_regularizer_, boost::str(boost::format("%.2e") % paramGO3D.clutter_regularizer_) ), "The penalty multiplier used to penalize unexplained scene points within the clutter influence radius <i>radius_neighborhood_clutter_</i> of an explained scene point when they belong to the same smooth segment.")
+            ("hv_color_sigma_ab", po::value<double>(&paramGO3D.color_sigma_ab_)->default_value(paramGO3D.color_sigma_ab_, boost::str(boost::format("%.2e") % paramGO3D.color_sigma_ab_) ), "allowed chrominance (AB channel of LAB color space) variance for a point of an object hypotheses to be considered explained by a corresponding scene point (between 0 and 1, the higher the fewer objects get rejected)")
+            ("hv_color_sigma_l", po::value<double>(&paramGO3D.color_sigma_l_)->default_value(paramGO3D.color_sigma_l_, boost::str(boost::format("%.2e") % paramGO3D.color_sigma_l_) ), "allowed illumination (L channel of LAB color space) variance for a point of an object hypotheses to be considered explained by a corresponding scene point (between 0 and 1, the higher the fewer objects get rejected)")
+            ("hv_detect_clutter", po::value<bool>(&paramGO3D.detect_clutter_)->default_value(paramGO3D.detect_clutter_), " ")
+            ("hv_duplicity_cm_weight", po::value<double>(&paramGO3D.w_occupied_multiple_cm_)->default_value(paramGO3D.w_occupied_multiple_cm_, boost::str(boost::format("%.2e") % paramGO3D.w_occupied_multiple_cm_) ), " ")
+            ("hv_histogram_specification", po::value<bool>(&paramGO3D.use_histogram_specification_)->default_value(paramGO3D.use_histogram_specification_), " ")
+            ("hv_hyp_penalty", po::value<double>(&paramGO3D.active_hyp_penalty_)->default_value(paramGO3D.active_hyp_penalty_, boost::str(boost::format("%.2e") % paramGO3D.active_hyp_penalty_) ), " ")
+            ("hv_ignore_color", po::value<bool>(&paramGO3D.ignore_color_even_if_exists_)->default_value(paramGO3D.ignore_color_even_if_exists_), " ")
+            ("hv_initial_status", po::value<bool>(&paramGO3D.initial_status_)->default_value(paramGO3D.initial_status_), "sets the initial activation status of each hypothesis to this value before starting optimization. E.g. If true, all hypotheses will be active and the cost will be optimized from that initial status.")
+            ("hv_color_space", po::value<int>(&paramGO3D.color_space_)->default_value(paramGO3D.color_space_), "specifies the color space being used for verification (0... LAB, 1... RGB, 2... Grayscale,  3,4,5,6... ?)")
+            ("hv_inlier_threshold", po::value<double>(&paramGO3D.inliers_threshold_)->default_value(paramGO3D.inliers_threshold_, boost::str(boost::format("%.2e") % paramGO3D.inliers_threshold_) ), "Represents the maximum distance between model and scene points in order to state that a scene point is explained by a model point. Valid model points that do not have any corresponding scene point within this threshold are considered model outliers")
+            ("hv_occlusion_threshold", po::value<double>(&paramGO3D.occlusion_thres_)->default_value(paramGO3D.occlusion_thres_, boost::str(boost::format("%.2e") % paramGO3D.occlusion_thres_) ), "Threshold for a point to be considered occluded when model points are back-projected to the scene ( depends e.g. on sensor noise)")
+            ("hv_optimizer_type", po::value<int>(&paramGO3D.opt_type_)->default_value(paramGO3D.opt_type_), "defines the optimization methdod. 0: Local search (converges quickly, but can easily get trapped in local minima), 1: Tabu Search, 4; Tabu Search + Local Search (Replace active hypotheses moves), else: Simulated Annealing")
+            ("hv_radius_clutter", po::value<double>(&paramGO3D.radius_neighborhood_clutter_)->default_value(paramGO3D.radius_neighborhood_clutter_, boost::str(boost::format("%.2e") % paramGO3D.radius_neighborhood_clutter_) ), "defines the maximum distance between two points to be checked for label consistency")
+            ("hv_radius_normals", po::value<double>(&paramGO3D.radius_normals_)->default_value(paramGO3D.radius_normals_, boost::str(boost::format("%.2e") % paramGO3D.radius_normals_) ), " ")
+            ("hv_regularizer,r", po::value<double>(&paramGO3D.regularizer_)->default_value(paramGO3D.regularizer_, boost::str(boost::format("%.2e") % paramGO3D.regularizer_) ), "represents a penalty multiplier for model outliers. In particular, each model outlier associated with an active hypothesis increases the global cost function.")
+            ("hv_plane_method", po::value<int>(&paramGO3D.plane_method_)->default_value(paramGO3D.plane_method_), "defines which method to use for plane extraction (if add_planes_ is true). 0... Multiplane Segmentation, 1... ClusterNormalsForPlane segmentation")
+            ("hv_add_planes", po::value<bool>(&paramGO3D.add_planes_)->default_value(paramGO3D.add_planes_), "if true, adds planes as possible hypotheses (slower but decreases false positives especially for planes detected as flat objects like books)")
+            ("hv_plane_inlier_distance", po::value<double>(&paramGO3D.plane_inlier_distance_)->default_value(paramGO3D.plane_inlier_distance_, boost::str(boost::format("%.2e") % paramGO3D.plane_inlier_distance_) ), "Maximum inlier distance for plane clustering")
+            ("hv_plane_thrAngle", po::value<double>(&paramGO3D.plane_thrAngle_)->default_value(paramGO3D.plane_thrAngle_, boost::str(boost::format("%.2e") % paramGO3D.plane_thrAngle_) ), "Threshold of normal angle in degree for plane clustering")
+            ("hv_use_supervoxels", po::value<bool>(&paramGO3D.use_super_voxels_)->default_value(paramGO3D.use_super_voxels_), "If true, uses supervoxel clustering to detect smoothness violations")
+            ("knn_plane_clustering_search", po::value<int>(&paramGO3D.knn_plane_clustering_search_)->default_value(paramGO3D.knn_plane_clustering_search_), "sets the number of points used for searching nearest neighbors in unorganized point clouds (used in plane segmentation)")
+            ("hv_min_plane_inliers", po::value<size_t>(&paramGO3D.min_plane_inliers_)->default_value(paramGO3D.min_plane_inliers_), "a planar cluster is only added as plane if it has at least min_plane_inliers_ points")
+            ("visualize_go3d_cues", po::value<bool>(&paramGO3D.visualize_cues_)->default_value(paramGO3D.visualize_cues_), "If true, visualizes cues computated at the go3d verification stage such as inlier, outlier points. Mainly used for debugging.")
+            ("visualize_go_cues_", po::value<bool>(&paramGO3D.visualize_go_cues_)->default_value(paramGO3D.visualize_go_cues_), "If true, visualizes cues computated at the hypothesis verification stage such as inlier, outlier points. Mainly used for debugging.")
+            ("normal_method,n", po::value<int>(&normal_computation_method)->default_value(normal_computation_method), "chosen normal computation method of the V4R library")
+            ("octree_radius", po::value<float>(&nmInt_param.octree_resolution_)->default_value(nmInt_param.octree_resolution_, boost::str(boost::format("%.2e") % nmInt_param.octree_resolution_)), "resolution of the octree in the noise model based cloud registration used for hypothesis verification")
+            ("edge_radius_px", po::value<float>(&nmInt_param.edge_radius_px_)->default_value(nmInt_param.edge_radius_px_, boost::str(boost::format("%.2e") % nmInt_param.edge_radius_px_)), "points of the input cloud within this distance (in pixel) to its closest depth discontinuity pixel will be removed in the noise model based cloud registration used for hypothesis verification")
+   ;
 
-    n_->getParam ( "transfer_feature_matches", paramMultiPipeRec.save_hypotheses_);
-
-    int normal_computation_method;
-    if(n_->getParam ( "normal_method", normal_computation_method) != -1)
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    if (vm.count("help"))
     {
-        paramLocalRecSift.normal_computation_method_ =
-                paramLocalRecShot.normal_computation_method_ =
-                paramMultiPipeRec.normal_computation_method_ =
-                paramLocalEstimator.normal_computation_method_ =
-                normal_computation_method;
+        std::cout << desc << std::endl;
+        return false;
     }
 
-    int icp_iterations;
-    if(n_->getParam ( "icp_iterations", icp_iterations) != -1)
-        paramLocalRecSift.icp_iterations_ = paramLocalRecShot.icp_iterations_ = paramMultiPipeRec.icp_iterations_ = icp_iterations;
+    try
+    {
+        po::notify(vm);
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;
+        return false;
+    }
 
-    n_->getParam ( "chop_z", paramMultiView.chop_z_ );
-    n_->getParam ( "max_vertices_in_graph", paramMultiView.max_vertices_in_graph_ );
-    n_->getParam ( "compute_mst", paramMultiView.compute_mst_ );
-
-    n_->getParam ( "cg_size_thresh", paramGgcg.gc_threshold_);
-    n_->getParam ( "cg_size", paramGgcg.gc_size_);
-    n_->getParam ( "cg_ransac_threshold", paramGgcg.ransac_threshold_);
-    n_->getParam ( "cg_dist_for_clutter_factor", paramGgcg.dist_for_cluster_factor_);
-    n_->getParam ( "cg_max_taken", paramGgcg.max_taken_correspondence_);
-    n_->getParam ( "cg_max_time_for_cliques_computation", paramGgcg.max_time_allowed_cliques_comptutation_);
-    n_->getParam ( "cg_dot_distance", paramGgcg.thres_dot_distance_);
-    n_->getParam ( "cg_use_graph", paramGgcg.use_graph_);
-    n_->getParam ( "hv_clutter_regularizer", paramGO3D.clutter_regularizer_);
-    n_->getParam ( "hv_color_sigma_ab", paramGO3D.color_sigma_ab_);
-    n_->getParam ( "hv_color_sigma_l", paramGO3D.color_sigma_l_);
-    n_->getParam ( "hv_detect_clutter", paramGO3D.detect_clutter_);
-    n_->getParam ( "hv_duplicity_cm_weight", paramGO3D.w_occupied_multiple_cm_);
-    n_->getParam ( "hv_histogram_specification", paramGO3D.use_histogram_specification_);
-    n_->getParam ( "hv_hyp_penalty", paramGO3D.active_hyp_penalty_);
-    n_->getParam ( "hv_ignore_color", paramGO3D.ignore_color_even_if_exists_);
-    n_->getParam ( "hv_initial_status", paramGO3D.initial_status_);
-    n_->getParam ( "hv_inlier_threshold", paramGO3D.inliers_threshold_);
-    n_->getParam ( "hv_occlusion_threshold", paramGO3D.occlusion_thres_);
-    n_->getParam ( "hv_optimizer_type", paramGO3D.opt_type_);
-    n_->getParam ( "hv_radius_clutter", paramGO3D.radius_neighborhood_clutter_);
-    n_->getParam ( "hv_radius_normals", paramGO3D.radius_normals_);
-    n_->getParam ( "hv_regularizer", paramGO3D.regularizer_);
-    n_->getParam ( "hv_plane_method", paramGO3D.plane_method_);
-    n_->getParam ( "hv_add_planes", paramGO3D.add_planes_);
-    n_->getParam ( "hv_regularizer", paramGO3D.regularizer_);
-    n_->getParam ( "hv_plane_method", paramGO3D.plane_method_);
-    n_->getParam ( "hv_add_planes", paramGO3D.add_planes_);
-    n_->getParam ( "knn_plane_clustering_search", paramGO3D.knn_plane_clustering_search_);
-
-    int min_plane_inliers;
-    if(n_->getParam ( "hv_min_plane_inliers", min_plane_inliers))
-        paramGO3D.min_plane_inliers_ = static_cast<size_t>(min_plane_inliers);
-
-//        n_->getParam ( "hv_requires_normals", r_.hv_params_.requires_normals_);
+    paramLocalRecSift.normal_computation_method_ = paramLocalRecShot.normal_computation_method_ =
+            paramMultiPipeRec.normal_computation_method_ = paramLocalEstimator.normal_computation_method_ =
+            paramMultiView.normal_computation_method_ = normal_computation_method;
 
     rr_.reset(new MultiRecognitionPipeline<PointT>(paramMultiPipeRec));
 
@@ -277,10 +300,9 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
     {
         boost::shared_ptr < RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT> > src
                 (new RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT>(resolution));
-        src->setPath (models_dir);
-        src->setModelStructureDir (training_dir);
+        src->setPath (models_dir_);
         src->generate ();
-//        src->createVoxelGridAndDistanceTransform(resolution);
+//            src->createVoxelGridAndDistanceTransform(resolution);
         cast_source = boost::static_pointer_cast<RegisteredViewsSource<pcl::PointXYZRGBNormal, PointT, PointT> > (src);
     }
 
@@ -308,13 +330,11 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
         boost::shared_ptr<LocalRecognitionPipeline<flann::L1, PointT, FeatureT > > sift_r;
         sift_r.reset (new LocalRecognitionPipeline<flann::L1, PointT, FeatureT > (paramLocalRecSift));
         sift_r->setDataSource (cast_source);
-        sift_r->setTrainingDir (training_dir);
+        sift_r->setModelsDir (models_dir_);
         sift_r->setFeatureEstimator (cast_estimator);
-        sift_r->initialize (false);
 
         boost::shared_ptr < Recognizer<PointT> > cast_recog;
         cast_recog = boost::static_pointer_cast<LocalRecognitionPipeline<flann::L1, PointT, FeatureT > > (sift_r);
-        std::cout << "Feature Type: " << cast_recog->getFeatureType() << std::endl;
         rr_->addRecognizer (cast_recog);
     }
     if (do_shot)
@@ -332,24 +352,23 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
         boost::shared_ptr<LocalEstimator<PointT, pcl::Histogram<352> > > cast_estimator;
         cast_estimator = boost::dynamic_pointer_cast<LocalEstimator<PointT, pcl::Histogram<352> > > (estimator);
 
-        boost::shared_ptr<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > local;
-        local.reset(new LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > (paramLocalRecShot));
-        local->setDataSource (cast_source);
-        local->setTrainingDir(training_dir);
-        local->setFeatureEstimator (cast_estimator);
-        local->initialize (false);
+        boost::shared_ptr<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > shot_r;
+        shot_r.reset(new LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > (paramLocalRecShot));
+        shot_r->setDataSource (cast_source);
+        shot_r->setModelsDir(models_dir_);
+        shot_r->setFeatureEstimator (cast_estimator);
 
         uniform_kp_extractor->setMaxDistance( paramMultiView.chop_z_ ); // for training we do not want this restriction
 
         boost::shared_ptr<Recognizer<PointT> > cast_recog;
-        cast_recog = boost::static_pointer_cast<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > (local);
-        std::cout << "Feature Type: " << cast_recog->getFeatureType() << std::endl;
+        cast_recog = boost::static_pointer_cast<LocalRecognitionPipeline<flann::L1, PointT, pcl::Histogram<352> > > (shot_r);
         rr_->addRecognizer(cast_recog);
     }
 
-
     if(!paramMultiPipeRec.save_hypotheses_)
         rr_->setCGAlgorithm( gcg_alg );
+
+    rr_->initialize(false);
 
     boost::shared_ptr<HypothesisVerification<PointT,PointT> > cast_hv_pointer;
     if(use_go3d) {
@@ -357,16 +376,19 @@ multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
         cast_hv_pointer = boost::static_pointer_cast<GO3D<PointT, PointT> > (hyp_verification_method);
     }
     else {
+
         typename GHV<PointT, PointT>::Parameter paramGHV2 = paramGO3D;
         boost::shared_ptr<GHV<PointT, PointT> > hyp_verification_method (new GHV<PointT, PointT>(paramGHV2));
         cast_hv_pointer = boost::static_pointer_cast<GHV<PointT, PointT> > (hyp_verification_method);
     }
 
     mv_r_.reset(new MultiviewRecognizer<PointT>(paramMultiView));
+    mv_r_->setNoiseModelIntegrationParameters(nmInt_param);
+    mv_r_->setNoiseModelParameters(nm_param);
     mv_r_->setSingleViewRecognizer(rr_);
     mv_r_->setCGAlgorithm( gcg_alg );
     mv_r_->setHVAlgorithm( cast_hv_pointer );
-    mv_r_->set_sift(sift_);
+    mv_r_->setSift(sift_);
 
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "multiview_recognized_objects", 0 );
     recognition_serv_ = n_->advertiseService("multiview_recognition_service", &multiviewRecognizerROS::recognizeROS, this);

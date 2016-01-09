@@ -1,9 +1,8 @@
 ##usage:
-`rosrun multiview_object_recognizer multiview_object_recognizer_node _extension_mode:=0 _models_dir:=/media/Data/datasets/TUW/models/ _training_dir:=/media/Data/datasets/TUW/training_data _do_sift:=true _do_shot:=false _chop_z:=2.0 _visualize:=true`
+`rosrun multiview_object_recognizer multiview_object_recognizer_node -m /path/to/your/models/ [--optional_parameter p]`
 
-##params:
-*	models\_dir [in] - Directory containing 3D models
-*	training\_dir [in] - directory for training models from different perspectives
+##params (see extended help output with -h):
+*	models\_dir [in] - Directory containing the object models (REQUIRED)
 *	do\_sift [in] - if true, does SIFT feature matching
 *	do\_shot [in] - if true, does SHOT feature matching
 *	chop\_z [in] - cut of distance in meters with respect to the camera coordinate system
@@ -20,14 +19,15 @@
 further description of parameters in the example object\_recognizer\_multiview in V4R/samples
 
 ##Test:
-`rosrun multiview_object_recognizer test_multiview_object_recognizer_node`
+`rosrun multiview_object_recognizer test_multiview_object_recognizer_node [_optional_parameter:=p]`
 
-##Test params:
+##Test params (NOTE THAT THESE ARE ROS PARAMETERS):
 *  input\_method[in] (default: 0) - 0=camera input; 1 = input from disk
 *  topic[in] (default: /camera/depth\_registered/points) - camera topic being used when input\_method=0
 *  directory[in] - directory being used to read test .pcd files when input\_method=1
   
-models and test scenes can be obtained from https://repo.acin.tuwien.ac.at/tmp/permanent/dataset_index.php
+Object models and test scenes can be obtained from https://repo.acin.tuwien.ac.at/tmp/permanent/dataset_index.php
+To model your own objects have a look at *http://www.acin.tuwien.ac.at/forschung/v4r/software-tools/rtm/*
 
 ##References:
 * [*Thomas Fäulhammer, Aitor Aldoma, Michael Zillich, Markus Vincze*, *Temporal Integration of Feature Correspondences For Enhanced Recognition in Cluttered And Dynamic Environments, IEEE Int. Conf. on Robotics and Automation (ICRA), 2015*]

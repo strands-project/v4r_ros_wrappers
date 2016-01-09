@@ -1,27 +1,6 @@
 <launch>
-	<arg name="models_dir" /> <!-- required -->
-	<arg name="training_dir" />  <!-- required -->
-	<arg name="visualize_output" default="true" />
-	<arg name="do_sift" default="true" />
-	<arg name="do_shot" default="false" />
-	<arg name="chop_z" default="3.0" />
-	<arg name="cg_size_thresh" default="5" />
-	<arg name="knn_sift" default="3" />
-	<arg name="knn_shot" default="1" />
-	<arg name="compute_mst" default="true" />
-	<arg name="use_go3d" default="true" />
+  <arg name="param"/>
   
-  <!-- Multiview recognizer -->
-  <node pkg="multiview_object_recognizer" type="multiview_object_recognizer_node" name="multiview_object_recognizer_node" output="screen" >
-       <param name="models_dir" value="$(arg models_dir)" type="string"/>
-       <param name="visualize_output" value="$(arg visualize_output)" type="bool"/>
-		   <param name="do_sift" value="$(arg do_sift)" type="bool"/>
-		   <param name="do_shot" value="$(arg do_shot)" type="bool"/>
-		   <param name="chop_z" value="$(arg chop_z)" type="double"/>
-		   <param name="cg_size_thresh" value="$(arg cg_size_thresh)" type="int"/>
-		   <param name="knn_sift" value="$(arg knn_sift)" type="int"/>
-		   <param name="knn_shot" value="$(arg knn_shot)" type="int"/>
-		   <param name="compute_mst" value="$(arg compute_mst)" type="bool"/>
-		   <param name="use_go3d" value="$(arg use_go3d)" type="bool"/>
-  </node>
+  <!-- Multi-View Object Recognizer -->
+  <node pkg="multiview_object_recognizer" type="multiview_object_recognizer_node" name="multiview_object_recognizer_node" output="screen" args="$(arg param)" />
 </launch> 
