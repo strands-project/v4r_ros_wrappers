@@ -2,6 +2,11 @@
 Changelog for package v4r_ros_wrappers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.11 (2016-01-11)
+-------------------
+* added segment_and_classify to metapackage
+* Contributors: Marc Hanheide
+
 0.0.10 (2015-11-25)
 -------------------
 

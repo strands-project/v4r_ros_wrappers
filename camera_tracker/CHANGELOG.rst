@@ -2,6 +2,15 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.11 (2016-01-11)
+-------------------
+* added object tracker
+* adapt
+* Merge branch 'fix_missing_include'
+* use pcl_conversion from ROS package
+  create camera tracker header
+* Contributors: Thomas Fäulhammer
+
 0.0.10 (2015-11-25)
 -------------------
 
