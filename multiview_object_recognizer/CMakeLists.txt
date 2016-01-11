@@ -5,7 +5,7 @@ project(multiview_object_recognizer)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
-                                        cv_bridge sensor_msgs image_transport)
+                                        cv_bridge sensor_msgs image_transport pcl_conversions)
 
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
@@ -22,7 +22,7 @@ find_package(V4R REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions cv_bridge sensor_msgs image_transport
+   CATKIN_DEPENDS roscpp rospy recognition_srv_definitions cv_bridge sensor_msgs image_transport pcl_conversions
 )
 
 ###########
@@ -40,14 +40,9 @@ include_directories(include
 )
 
 
-set(incs
-    include/pcl_conversions.h
-)
-
 add_executable(multiview_object_recognizer_node
                 src/multiview_object_recognizer_ros.cpp
                 include/multiview_object_recognizer_ros.h
-                include/pcl_conversions.h
 )
 
 add_executable(test_multiview_object_recognizer_node

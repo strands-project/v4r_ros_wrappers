@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>singleview_object_recognizer</name>
-  <version>0.0.6</version>
+  <version>0.0.11</version>
   <description>The recognition_service package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
@@ -48,10 +48,10 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>image_transport</build_depend>
-
   <build_depend>v4r</build_depend>
-  <run_depend>v4r</run_depend>
+  <build_depend>pcl_conversions</build_depend>
 
+  <run_depend>v4r</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>tf</run_depend>
@@ -59,6 +59,7 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>image_transport</run_depend>
+  <run_depend>pcl_conversions</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

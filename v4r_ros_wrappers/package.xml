@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>v4r_ros_wrappers</name>
-  <version>0.0.6</version>
+  <version>0.0.11</version>
   <description>The v4r_ros_wrappers package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
@@ -50,6 +50,7 @@
   <run_depend>segmentation</run_depend>
   <run_depend>segmentation_srv_definitions</run_depend>
   <run_depend>singleview_object_recognizer</run_depend>
+  <run_depend>segment_and_classify</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

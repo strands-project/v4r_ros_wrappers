@@ -17,10 +17,9 @@ private:
     typedef pcl::Histogram<128> FeatureT;
 
     boost::shared_ptr<MultiRecognitionPipeline<PointT> > rr_;
-    std::string test_dir_;
     bool visualize_;
     pcl::visualization::PCLVisualizer::Ptr vis_;
-    float chop_z_;
+    double chop_z_;
     bool debug_publish_;
 
 
@@ -41,7 +40,7 @@ private:
 public:
     RecognizerROS()
     {
-        visualize_ = true;
+        visualize_ = false;
         chop_z_ = std::numeric_limits<float>::max();
         debug_publish_ = false;
         resolution_ = 0.005f;
@@ -53,7 +52,7 @@ public:
     bool recognizeROS (recognition_srv_definitions::recognize::Request & req,
                     recognition_srv_definitions::recognize::Response & response);
 
-    void initialize (int argc, char ** argv);
+    bool initialize (int argc, char ** argv);
 };
 
 }

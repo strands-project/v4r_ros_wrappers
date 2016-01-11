@@ -6,7 +6,7 @@
  */
 
 #include <pcl/common/common.h>
-#include <pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
 
 #include <ros/ros.h>
@@ -101,8 +101,7 @@ public:
 
     bool callSvRecognizerUsingFiles()
     {
-        std::vector<std::string> test_cloud;
-        v4r::io::getFilesInDirectory(directory_, test_cloud, "", ".*.pcd", false);
+        std::vector<std::string> test_cloud = v4r::io::getFilesInDirectory(directory_, ".*.pcd", false);
         for(size_t i=0; i < test_cloud.size(); i++)
         {
             pcl::PointCloud<PointT> cloud;
@@ -157,7 +156,7 @@ public:
         }
         else //input_method==1
         {
-            if(n_->getParam ( "directory", directory_ ) && directory_.length())
+            if(n_->getParam ( " ", directory_ ) && directory_.length())
             {
                 callSvRecognizerUsingFiles();
             }

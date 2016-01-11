@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<package>
+  <name>segment_and_classify</name>
+  <version>0.0.11</version>
+  <description>The segmentation package</description>
+
+  <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
+  <maintainer email="alexandrov@acin.tuwien.ac.at">Sergey Alexandrov</maintainer>
+  <maintainer email="zillich@acin.tuwien.ac.at">Michael Zillich</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>segmentation_srv_definitions</build_depend>
+  <build_depend>classifier_srv_definitions</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>segmentation</build_depend>
+  <build_depend>object_classifier</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>object_classifier</run_depend>
+  <run_depend>segmentation</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>segmentation_srv_definitions</run_depend>
+  <run_depend>classifier_srv_definitions</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+
+  <build_depend>v4r</build_depend>
+  <run_depend>v4r</run_depend>
+
+
+  <export>
+
+  </export>
+</package>

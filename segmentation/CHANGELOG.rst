@@ -2,6 +2,35 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.11 (2016-01-11)
+-------------------
+* adapt
+* adapt_to_new_v4r_interfaces!
+* Contributors: Thomas Fäulhammer
+
+0.0.10 (2015-11-25)
+-------------------
+* using packaged version of pcl_conversions.h
+* Contributors: Thomas Fäulhammer
+
+0.0.9 (2015-11-24)
+------------------
+
+0.0.8 (2015-11-24)
+------------------
+
+0.0.7 (2015-11-23)
+------------------
+* updated ReadMes
+  removed unused files
+  updated some launch files, created segement_and_classify package
+* added object classifer again (compiles but crashes - will be fixed soon)
+  wrote launch file for segmentation + classification
+* updated namespace
+* fix headers and some warnings
+* change namespace according to v4r
+* Contributors: Thomas Fäulhammer
+
 0.0.6 (2015-10-15)
 ------------------
 

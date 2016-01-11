@@ -1,11 +1,18 @@
-usage:
+##usage:
+`rosrun singleview_object_recognizer recognition_service -m /path/to/your/models/ [--optional_parameter p]`
 
-rosrun singleview_object_recognizer recognition_service  _models_dir:=/media/Data/datasets/TUW/models/ _training_dir_sift:=/media/Data/datasets/TUW/sift_trained/ _training_dir_shot:=/media/Data/datasets/TUW/shot_trained/ _recognizer_structure_sift:=/media/Data/TUW/training_data _chop_z:=1.5
+##params (see extended help output with -h)::
+*	models\_dir [in] - Directory containing 3D models (saved as *.pcd files)
+*	chop\_z [in] - cut of distance in meters with respect to the camera
+	
+##Test:
+`rosrun singleview_object_recognizer test_single_view_recognition [_optional_parameter:=p]` 
 
+##Test params (NOTE THAT THESE ARE ROS PARAMETERS):
+*  input\_method[in] (default: 0) - 0=camera input; 1 = input from disk
+*  topic[in] (default: /camera/depth\_registered/points) - camera topic being used when input\_method=0
+*  directory[in] - directory being used to read test .pcd files when input\_method=1
+   
 
-params:
-	models_dir [in] - Directory containing 3D models
-	recognizer_structure_sift [in] - directory for training models from different perspectives
-	training_dir_sift [out] - directory where sift descriptors will be stored
-	training_dir_shot [out] - directory where shot descriptors will be stored
-	chop_z [in] - cut of distance in meters
+Object models and test scenes can be obtained from https://repo.acin.tuwien.ac.at/tmp/permanent/dataset_index.php
+To model your own objects have a look at *http://www.acin.tuwien.ac.at/forschung/v4r/software-tools/rtm/*

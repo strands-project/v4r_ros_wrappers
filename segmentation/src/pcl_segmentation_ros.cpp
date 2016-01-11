@@ -1,5 +1,5 @@
 #include "pcl_segmentation_ros.h"
-#include "pcl_conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/common/common.h>
 #include <pcl/io/io.h>
@@ -54,8 +54,7 @@ PCLSegmenterROS<PointT>::respondSrvCall(segmentation_srv_definitions::segment::R
     segmented_cloud_colored.header.frame_id = req.cloud.header.frame_id;
     vis_pc_pub_.publish(segmented_cloud_colored);
 
-    cv::Mat_<cv::Vec3b> colored_img;
-    PCLOpenCV::ConvertUnorganizedPCLCloud2Image<PointT>(colored_cloud, colored_img);
+    cv::Mat colored_img = ConvertUnorganizedPCLCloud2Image(*colored_cloud);
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", colored_img).toImageMsg();
     image_pub_.publish(msg);
     return true;
@@ -67,6 +66,7 @@ PCLSegmenterROS<PointT>::initialize (int argc, char ** argv)
     ros::init (argc, argv, "pcl_segmentation_service");
 
     n_.reset( new ros::NodeHandle ( "~" ) );
+    param_.seg_type_ = 1;
     n_->getParam ( "seg_type", param_.seg_type_ );
     n_->getParam ( "min_cluster_size", param_.min_cluster_size_ );
     n_->getParam ( "max_vertical_plane_size", param_.max_vertical_plane_size_ );

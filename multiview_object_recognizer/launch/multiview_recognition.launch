@@ -1,45 +1,6 @@
 <launch>
-	<arg name="topic" default="/camera/depth_registered/points" />
-	<arg name="models_dir" default="/media/Data/datasets/willow_dataset/models/" />
-	<arg name="recognizer_structure_sift" default="/media/Data/datasets/willow_dataset/willow_structure" />
-	<arg name="training_dir_sift" default="/media/Data/datasets/willow_dataset/sift_trained/" />
-	<arg name="gt_or_output_dir" default="" />
-	<arg name="visualize_output" default="false" />
-	<arg name="icp_iterations" default="3" />
-	<arg name="mv_keypoints" default="0" />
-	<arg name="opt_type" default="0" />
-	<arg name="chop_z" default="2.5" />
-	<arg name="training_dir_ourcvfh" default="" />
-	<arg name="do_sift" default="true" />
-	<arg name="do_ourcvfh" default="false" />
-	<arg name="ignore_color" default="false" />
-	<arg name="go_3d" default="true" />
-	
-  <!-- Rumblepad control -->
-  <!-- <node pkg="scitos_teleop" type="rumble_control" name="teleop_joystick" output="screen" /> -->
+  <arg name="param"/>
   
-  <!-- Multiview recognizer -->
-  <node pkg="multiview_object_recognizer" type="multiview_object_recognizer_node" name="multiview_object_recognizer_node" output="screen" >
-       <param name="models_dir" value="$(arg models_dir)" type="string"/>
-       <param name="gt_or_output_dir" value="$(arg gt_or_output_dir)" type="string"/>
-       <param name="visualize_output" value="$(arg visualize_output)" type="bool"/>
-       <param name="go_3d" value="$(arg go_3d)" type="bool"/>
-       <param name="icp_iterations" value="$(arg icp_iterations)" type="int"/>
-       <param name="mv_keypoints" value="$(arg mv_keypoints)" type="int"/>
-       <param name="opt_type" value="$(arg opt_type)" type="int"/>
-       <param name="chop_z" value="$(arg chop_z)" type="double"/>
-  </node>
-
-	
-	<!-- recognition service service -->
-	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" >
-		<param name="models_dir" value="$(arg models_dir)" type="string"/>
-		<param name="training_dir_sift" value="$(arg training_dir_sift)" type="string"/>
-		<param name="recognizer_structure_sift" value="$(arg recognizer_structure_sift)" type="string"/>
-		<param name="icp_iterations" value="$(arg icp_iterations)" type="int"/>
-		<param name="do_sift" value="$(arg do_sift)" type="bool"/>
-		<param name="do_ourcvfh" value="$(arg do_ourcvfh)" type="bool"/>
-		<param name="chop_z" value="$(arg chop_z)" type="double"/>
-		<param name="ignore_color" value="$(arg ignore_color)" type="bool"/>
-	</node>
+  <!-- Multi-View Object Recognizer -->
+  <node pkg="multiview_object_recognizer" type="multiview_object_recognizer_node" name="multiview_object_recognizer_node" output="screen" args="$(arg param)" />
 </launch> 

@@ -26,8 +26,9 @@ private:
     boost::shared_ptr<MultiRecognitionPipeline<PointT> > rr_;
     boost::shared_ptr<MultiviewRecognizer<PointT> > mv_r_;
 
-    std::string test_dir_;
     bool visualize_;
+
+    std::string models_dir_;
 
     cv::Ptr<SiftGPU> sift_;
 
