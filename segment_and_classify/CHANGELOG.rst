@@ -2,6 +2,11 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use old pcl grabber to be conform with PCL version 1.7
+* Contributors: Thomas Fäulhammer
+
 0.0.10 (2015-11-25)
 -------------------
 * using packaged version of pcl_conversions.h

@@ -2,6 +2,9 @@
 Changelog for package segmentation_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.10 (2015-11-25)
 -------------------
 

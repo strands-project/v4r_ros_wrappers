@@ -2,6 +2,12 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* adapt
+* adapt_to_new_v4r_interfaces!
+* Contributors: Thomas Fäulhammer
+
 0.0.10 (2015-11-25)
 -------------------
 * using packaged version of pcl_conversions.h

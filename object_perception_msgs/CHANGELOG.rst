@@ -2,6 +2,9 @@
 Changelog for package object_perception_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.10 (2015-11-25)
 -------------------
 
