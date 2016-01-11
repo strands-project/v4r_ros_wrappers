@@ -51,7 +51,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 #include <pcl/io/grabber.h>
-#include <pcl/io/openni2_grabber.h>
+//#include <pcl/io/openni2_grabber.h>
 
 
 namespace v4r
