@@ -2,8 +2,8 @@
 Changelog for package object_tracker_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * and another package version not initialised
   before a repository can be released, *all* `package.xml` need to have the same version or [`prepare-release`](https://lcas.lincoln.ac.uk/jenkins/job/prepare-release/383/console) is doomed to fail :-(
 * added object tracker

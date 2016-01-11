@@ -2,8 +2,8 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * adapt
 * Contributors: Thomas Fäulhammer
 

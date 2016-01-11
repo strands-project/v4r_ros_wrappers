@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * updated readme and launch files
 * adapt
 * adapt_to_new_v4r_interfaces!

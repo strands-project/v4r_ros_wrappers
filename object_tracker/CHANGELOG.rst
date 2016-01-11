@@ -2,8 +2,8 @@
 Changelog for package object_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * use old pcl grabber to be conform with PCL version 1.7
 * made the version the same...
   ...  as in all other packages in this repository. This is needed for `prepare_release` to work. See https://lcas.lincoln.ac.uk/jenkins/job/prepare-release/382/console for an example where this had failed.

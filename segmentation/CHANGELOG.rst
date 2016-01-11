@@ -2,8 +2,8 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * adapt
 * adapt_to_new_v4r_interfaces!
 * Contributors: Thomas Fäulhammer

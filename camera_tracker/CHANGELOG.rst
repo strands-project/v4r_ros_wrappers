@@ -2,8 +2,8 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2016-01-11)
+-------------------
 * added object tracker
 * adapt
 * Merge branch 'fix_missing_include'
