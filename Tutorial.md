@@ -133,6 +133,7 @@ rosrun singleview_object_recognizer test_single_view_recognition_from_file _topi
 where you have to set the topic to the respective RGB-D source of your robot, e.g. the head_xtion.
 
 The recogniser publishes visualisation information.
+
 * `/recognition_service/sv_recogniced_object_instances_img`: displays the original image with overlaid bounding boxes of recognised objects
 * `/recognition_service/sv_recogniced_object_instances`: the model point clouds of the recognised objects, in the camera frame.
 The following picture shows an example where R2-D2 is detected in a shelf, with the debug picture and recognised model displayed in rviz.
@@ -170,20 +171,28 @@ Do the same if you get some `vector::_M_range_check` error. In case you enable S
 
 # Object tracker
 If you stored you object model for tracking, you can track single objects in real-time using the object-tracker module. You can start the service by 
-`rosrun object_tracker object_tracker_service -m /path/to/your/model/data/object_name/tracking_model.ao`
+```
+rosrun object_tracker object_tracker_service -m /path/to/your/model/data/object_name/tracking_model.ao
+```
 
 The tracker will start as soon as you call the service 
-`rosservice call /object_tracker/start_recording`
+```
+rosservice call /object_tracker/start_recording
+```
 
 This will publish topics for the 3D object pose and the confidence of this estimate
-`rostopic echo /object_tracker/object_pose`
-`rostopic echo /object_tracker/object_tracker_confidence`
+```
+rostopic echo /object_tracker/object_pose
+rostopic echo /object_tracker/object_tracker_confidence
+```
 
 To visualize the pose, you can use RVIZ and check out the image topic `/object_tracker/debug_images`.
 
 To stop the tracker call
-`rosservice call /object_tracker/stop_recording`
-`rosservice call /object_tracker/cleanup`
+```
+rosservice call /object_tracker/stop_recording
+rosservice call /object_tracker/cleanup
+```
 
 # References
 
