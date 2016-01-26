@@ -14,14 +14,12 @@ class RecognizerROS
 private:
     typedef Model<PointT> ModelT;
     typedef boost::shared_ptr<ModelT> ModelTPtr;
-    typedef pcl::Histogram<128> FeatureT;
 
     boost::shared_ptr<MultiRecognitionPipeline<PointT> > rr_;
     bool visualize_;
     pcl::visualization::PCLVisualizer::Ptr vis_;
     double chop_z_;
     bool debug_publish_;
-
 
     std::vector<ModelTPtr> models_verified_;
     std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified_;
@@ -46,11 +44,8 @@ public:
         resolution_ = 0.005f;
     }
 
-    bool retrainROS (recognition_srv_definitions::retrain_recognizer::Request & req,
-             recognition_srv_definitions::retrain_recognizer::Response & response);
-
     bool recognizeROS (recognition_srv_definitions::recognize::Request & req,
-                    recognition_srv_definitions::recognize::Response & response);
+                       recognition_srv_definitions::recognize::Response & response);
 
     bool initialize (int argc, char ** argv);
 };
