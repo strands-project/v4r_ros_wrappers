@@ -19,7 +19,7 @@ include_directories(include
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(${PCL_DEFINITIONS})
 
-set(incs include/pcl_conversions.h include/object_learning_ros.h)
+set(incs include/object_learning_ros.h)
 add_executable(incremental_object_learning_service src/object_learning_ros.cpp ${incs})
 add_dependencies(incremental_object_learning_service ${catkin_EXPORTED_TARGETS})
 

@@ -2,6 +2,11 @@
 Changelog for package camera_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.12 (2016-01-27)
+-------------------
+* add c++11 definition
+* Contributors: Thomas Fäulhammer
+
 0.0.11 (2016-01-11)
 -------------------
 * added object tracker

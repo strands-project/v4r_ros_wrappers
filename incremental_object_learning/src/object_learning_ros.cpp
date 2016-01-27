@@ -1,5 +1,5 @@
 #include "object_learning_ros.h"
-#include "pcl_conversions.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <v4r/common/miscellaneous.h>
 
@@ -136,7 +136,7 @@ IOL_ROS::initSIFT (int argc, char ** argv)
     write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &IOL_ROS::writeImagesToDiskROS, this);
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "learned_model", 1 );
 
-    std::cout << "Started dynamic object learning with parameters: " << std::endl
+    std::cout << "Started incremental object learning with parameters: " << std::endl
               << "===================================================" << std::endl;
     printParams(std::cout);
     std::cout << "===================================================" << std::endl << std::endl;
@@ -151,7 +151,7 @@ IOL_ROS::initSIFT (int argc, char ** argv)
 int
 main (int argc, char ** argv)
 {
-    ros::init (argc, argv, "dynamic_object_learning");
+    ros::init (argc, argv, "incremental_object_learning");
     v4r::object_modelling::IOL_ROS m;
     m.initSIFT (argc, argv);
 

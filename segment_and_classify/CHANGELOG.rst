@@ -2,6 +2,9 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.12 (2016-01-27)
+-------------------
+
 0.0.11 (2016-01-11)
 -------------------
 * use old pcl grabber to be conform with PCL version 1.7

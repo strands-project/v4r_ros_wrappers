@@ -2,6 +2,9 @@
 Changelog for package object_tracker_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.12 (2016-01-27)
+-------------------
+
 0.0.11 (2016-01-11)
 -------------------
 * and another package version not initialised

@@ -1,12 +1,12 @@
 /*
  * main.cpp
  *
- *  Created on: Feb 20, 2014
+ *  Created on: July, 2015
  *      Author: Thomas Fäulhammer
  */
 
 #include <pcl/common/common.h>
-#include <pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include "ros/ros.h"
@@ -159,7 +159,6 @@ public:
         }
 
         n_->getParam( "models_dir", models_dir_);
-        n_->getParam( "recognition_dir", recognition_structure_dir_);
         n_->getParam( "object_name", object_name_);
         n_->getParam( "mask_file", mask_file_);
         n_->getParam("visualize", visualize_);
