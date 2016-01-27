@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>segment_and_classify</name>
-  <version>0.0.12</version>
+  <version>0.1.0</version>
   <description>The segmentation package</description>
 
   <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>

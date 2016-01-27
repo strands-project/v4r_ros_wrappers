@@ -2,8 +2,8 @@
 Changelog for package multiview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2016-01-27)
+------------------
 * added possibility to write intermediate images to a file
 * Merge branch 'master' into dynamic_object_learning
   Conflicts:
