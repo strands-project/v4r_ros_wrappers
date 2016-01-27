@@ -50,7 +50,7 @@ catkin_package(
 ## Build ##
 ###########
 
-add_definitions(-std=c++0x)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations

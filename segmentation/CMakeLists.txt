@@ -20,6 +20,9 @@ include_directories(include
 )
 set(incs include/pcl_segmentation_ros.h)
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 add_executable(pcl_segmentation_service src/pcl_segmentation_ros.cpp ${incs})
 add_executable(test_segmentation src/test_segmentation.cpp)
 

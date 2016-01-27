@@ -50,6 +50,9 @@ target_link_libraries(test_multiview_object_recognizer_node
    ${V4R_LIBS}
 )
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 install(TARGETS 
                 multiview_object_recognizer_node
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
