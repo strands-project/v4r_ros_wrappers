@@ -15,6 +15,8 @@ catkin_package(
    CATKIN_DEPENDS classifier_srv_definitions pcl_conversions
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS})
 
 set(incs include/global_nn_classifier_ros.h)

@@ -11,31 +11,15 @@ find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 find_package(V4R REQUIRED)
 
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
    CATKIN_DEPENDS roscpp rospy recognition_srv_definitions cv_bridge sensor_msgs image_transport pcl_conversions
 )
 
-###########
-## Build ##
-###########
-
-#add_definitions(-std=c++0x)
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-
 include_directories(include
     ${PCL_INCLUDE_DIRS}
     ${V4R_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 
@@ -49,28 +33,25 @@ add_executable(test_multiview_object_recognizer_node
                 src/test_multiview_recognizer.cpp
 )
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
 add_dependencies(multiview_object_recognizer_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(test_multiview_object_recognizer_node ${catkin_EXPORTED_TARGETS}})
 
 target_link_libraries(multiview_object_recognizer_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+   ${OpenCV_LIBS}
    ${V4R_LIBS}
 )
 
 target_link_libraries(test_multiview_object_recognizer_node
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
+   ${OpenCV_LIBS}
    ${V4R_LIBS}
 )
 
 
-
-#############
-## Install ##
-#############
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 install(TARGETS 
                 multiview_object_recognizer_node
