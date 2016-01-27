@@ -1,0 +1,6 @@
+sensor_msgs/PointCloud2[] keyframes
+#transformations aligning each keyframe to the first keyframe
+geometry_msgs/Transform[] transforms
+#object indices in the first keyframe (coming from dynamic cluster extraction @rares.ambrus)
+int32[] intial_object_indices
+---
