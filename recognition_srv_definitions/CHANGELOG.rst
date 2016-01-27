@@ -2,6 +2,9 @@
 Changelog for package recognition_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.11 (2016-01-11)
 -------------------
 

@@ -2,6 +2,11 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add c++11 definition
+* Contributors: Thomas Fäulhammer
+
 0.0.11 (2016-01-11)
 -------------------
 * adapt

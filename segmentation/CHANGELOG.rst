@@ -2,6 +2,11 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add c++11 definition
+* Contributors: Thomas Fäulhammer
+
 0.0.11 (2016-01-11)
 -------------------
 * adapt
