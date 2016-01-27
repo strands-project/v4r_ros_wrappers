@@ -1,7 +1,0 @@
-#the name of the object
-std_msgs/String object_name
-#the folder where to save the model (will be saved as object_name.pcd)
-std_msgs/String models_folder
-#the folder where to save keyframes, poses and object_indices (used to train the object)
-std_msgs/String recognition_structure_folder
----

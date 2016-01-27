@@ -122,7 +122,7 @@ public:
 
     bool initialize(int argc, char ** argv)
     {
-        ros::init (argc, argv, "SingleViewRecognizerDemoFromFiles");
+        ros::init (argc, argv, "SingleViewRecognizerDemo");
         n_ = new ros::NodeHandle ( "~" );
 
         std::string service_name_sv_rec = "/recognition_service/sv_recognition";

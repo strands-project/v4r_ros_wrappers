@@ -1,0 +1,5 @@
+#the name of the object
+std_msgs/String object_name
+#the folder where to save the models
+std_msgs/String models_folder
+---

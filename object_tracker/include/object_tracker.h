@@ -28,6 +28,7 @@
 #include "object_tracker_srv_definitions/start_tracker.h"
 #include "object_tracker_srv_definitions/stop_tracker.h"
 #include "object_tracker_srv_definitions/cleanup.h"
+#include "object_tracker_srv_definitions/change_tracking_model.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -114,8 +115,8 @@ private:
 
 
     bool
-    stop (object_tracker_srv_definitions::start_tracker::Request & req,
-          object_tracker_srv_definitions::start_tracker::Response & response);
+    stop (object_tracker_srv_definitions::stop_tracker::Request & req,
+          object_tracker_srv_definitions::stop_tracker::Response & response);
 
     bool
     cleanup (object_tracker_srv_definitions::cleanup::Request & req,
@@ -125,6 +126,11 @@ private:
         (void)response;
         cleanup();
     }
+
+
+    bool
+    changeTrackingModel (object_tracker_srv_definitions::change_tracking_model::Request & req,
+                           object_tracker_srv_definitions::change_tracking_model::Response & response);
 
     void
     cleanup()

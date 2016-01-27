@@ -13,6 +13,8 @@ catkin_package(
    CATKIN_DEPENDS roscpp rospy recognition_srv_definitions pcl_conversions
 )
 
+
+add_definitions(${PCL_DEFINITIONS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(include

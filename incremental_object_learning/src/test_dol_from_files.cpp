@@ -12,76 +12,53 @@
 #include "ros/ros.h"
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
-#include "do_learning_srv_definitions/clear.h"
-#include "do_learning_srv_definitions/learn_object.h"
-#include "do_learning_srv_definitions/save_model.h"
-#include "do_learning_srv_definitions/visualize.h"
+#include "incremental_object_learning_srv_definitions/clear.h"
+#include "incremental_object_learning_srv_definitions/learn_object.h"
+#include "incremental_object_learning_srv_definitions/save_model.h"
+#include "incremental_object_learning_srv_definitions/visualize.h"
 #include <opencv2/opencv.hpp>
 #include <v4r/io/filesystem.h>
 
-class DOLDemoFromFiles
+class IOLDemoFromFiles
 {
 private:
     typedef pcl::PointXYZRGB PointT;
     ros::NodeHandle *n_;
     std::string directory_,
                 models_dir_,
-                recognition_structure_dir_,
                 object_name_,
                 mask_file_;
     bool visualize_;
 
 public:
-    bool callDOL()
+    bool callIOL()
     {
-        //read files from directory
-        std::string so_far = "";
+        std::vector<std::string> keyframes_str = v4r::io::getFilesInDirectory(directory_, ".*.pcd", false);
+        std::vector<std::string> object_indices_str = v4r::io::getFilesInDirectory(directory_, ".*object_indices.*.pcd", false);;
+        std::vector<std::string> poses_str = v4r::io::getFilesInDirectory(directory_, ".*pose.*.txt", false);;
 
-        std::vector<std::string> keyframes_str;
-        std::vector<std::string> object_indices_str;
-        std::vector<std::string> poses_str;
+        std::string service_name_clear = "/incremental_object_learning/clear_cached_model";
+        ros::ServiceClient IOL_clear_client = n_->serviceClient<incremental_object_learning_srv_definitions::clear>(service_name_clear);
+        incremental_object_learning_srv_definitions::clear srv_clear;
 
-        {
-            std::string pattern = ".*.pcd";
-            v4r::io::getFilesInDirectory(directory_, keyframes_str, so_far, pattern, false);
-        }
-
-        {
-            std::string pattern = ".*object_indices.*.pcd";
-            v4r::io::getFilesInDirectory(directory_, object_indices_str, so_far, pattern, false);
-        }
-
-        {
-            std::string pattern = ".*pose.*.txt";
-            v4r::io::getFilesInDirectory(directory_, poses_str, so_far, pattern, false);
-        }
-
-        std::string service_name_clear = "/dynamic_object_learning/clear_cached_model";
-        ros::ServiceClient DOL_clear_client = n_->serviceClient<do_learning_srv_definitions::clear>(service_name_clear);
-        do_learning_srv_definitions::clear srv_clear;
-
-        if ( ! DOL_clear_client.call ( srv_clear ) )
+        if ( ! IOL_clear_client.call ( srv_clear ) )
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_clear << std::endl;
             std::cerr << mm.str() << std::endl;
         }
 
-        std::sort(keyframes_str.begin(), keyframes_str.end());
-        std::sort(poses_str.begin(), poses_str.end());
-        std::sort(object_indices_str.begin(), object_indices_str.end());
+        std::string service_name_learn = "/incremental_object_learning/learn_object";
+        ros::ServiceClient IOLclient = n_->serviceClient<incremental_object_learning_srv_definitions::learn_object>(service_name_learn);
+        incremental_object_learning_srv_definitions::learn_object srv_learn;
 
-        std::string service_name_learn = "/dynamic_object_learning/learn_object";
-        ros::ServiceClient DOLclient = n_->serviceClient<do_learning_srv_definitions::learn_object>(service_name_learn);
-        do_learning_srv_definitions::learn_object srv_learn;
+        std::string service_name_save = "/incremental_object_learning/save_model";
+        ros::ServiceClient IOLclient_save = n_->serviceClient<incremental_object_learning_srv_definitions::save_model>(service_name_save);
+        incremental_object_learning_srv_definitions::save_model srv_save;
 
-        std::string service_name_save = "/dynamic_object_learning/save_model";
-        ros::ServiceClient DOLclient_save = n_->serviceClient<do_learning_srv_definitions::save_model>(service_name_save);
-        do_learning_srv_definitions::save_model srv_save;
-
-        std::string service_name_vis = "/dynamic_object_learning/visualize";
-        ros::ServiceClient DOLclient_vis = n_->serviceClient<do_learning_srv_definitions::visualize>(service_name_vis);
-        do_learning_srv_definitions::visualize srv_vis;
+        std::string service_name_vis = "/incremental_object_learning/visualize";
+        ros::ServiceClient IOLclient_vis = n_->serviceClient<incremental_object_learning_srv_definitions::visualize>(service_name_vis);
+        incremental_object_learning_srv_definitions::visualize srv_vis;
 
         if ( !mask_file_.compare("") )
             mask_file_ = directory_ + "/mask.txt";
@@ -126,7 +103,7 @@ public:
             srv_learn.request.transforms.push_back(tt);
         }
 
-        if ( ! DOLclient.call(srv_learn) )
+        if ( ! IOLclient.call(srv_learn) )
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_learn << std::endl;
@@ -137,9 +114,8 @@ public:
         // Saving model
         srv_save.request.object_name.data = object_name_;
         srv_save.request.models_folder.data = models_dir_;
-        srv_save.request.recognition_structure_folder.data = recognition_structure_dir_;
 
-        if ( ! DOLclient_save.call(srv_save) )
+        if ( ! IOLclient_save.call(srv_save) )
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_save << std::endl;
@@ -149,7 +125,7 @@ public:
 
         if (visualize_)
         {
-            if ( ! DOLclient_vis.call ( srv_vis ) )
+            if ( ! IOLclient_vis.call ( srv_vis ) )
             {
                 std::stringstream mm;
                 mm << "Error calling service: " << service_name_vis << std::endl;
@@ -160,17 +136,16 @@ public:
     }
 
 public:
-    DOLDemoFromFiles()
+    IOLDemoFromFiles()
     {
         visualize_ = true;
-        models_dir_ = "/tmp/dol/models/",
-        recognition_structure_dir_ = "/tmp/dol/recognition_structure/",
-        object_name_ = "my_dynamic_object";
+        models_dir_ = "/tmp/IOL/models/",
+        object_name_ = "my_incremental_object";
     }
 
     bool initialize(int argc, char ** argv)
     {
-        ros::init (argc, argv, "DOLDemoFromFiles");
+        ros::init (argc, argv, "IOLDemoFromFiles");
         if (sizeof(int) != 4)
         {
             ROS_WARN("PC Architectur does not use 32bit for integer - check conflicts with pcl indices.");
@@ -196,9 +171,9 @@ public:
 int
 main (int argc, char ** argv)
 {
-    DOLDemoFromFiles m;
+    IOLDemoFromFiles m;
     if (m.initialize(argc, argv))
-        m.callDOL();
+        m.callIOL();
     else
         return -1;
     return 0;

@@ -14,23 +14,24 @@ namespace object_modelling
 
 
 bool
-DOL_ROS::clear_cached_model (do_learning_srv_definitions::clear::Request & req,
-                 do_learning_srv_definitions::clear::Response & response)
+IOL_ROS::clear_cached_model (incremental_object_learning_srv_definitions::clear::Request & req,
+                 incremental_object_learning_srv_definitions::clear::Response & response)
 {
     clear();
     return true;
 }
 
 bool
-DOL_ROS::save_model (do_learning_srv_definitions::save_model::Request & req,
-                 do_learning_srv_definitions::save_model::Response & response)
+IOL_ROS::save_model (incremental_object_learning_srv_definitions::save_model::Request & req,
+                 incremental_object_learning_srv_definitions::save_model::Response & response)
 {
-    return DOL::save_model(req.models_folder.data, req.recognition_structure_folder.data, req.object_name.data);
+    bool save_views = true;
+    return IOL::save_model(req.models_folder.data, req.object_name.data, save_views);
 }
 
 bool
-DOL_ROS::visualizeROS(do_learning_srv_definitions::visualize::Request & req,
-                    do_learning_srv_definitions::visualize::Response & response)
+IOL_ROS::visualizeROS(incremental_object_learning_srv_definitions::visualize::Request & req,
+                    incremental_object_learning_srv_definitions::visualize::Response & response)
 {
     visualize();
     return true;
@@ -38,23 +39,23 @@ DOL_ROS::visualizeROS(do_learning_srv_definitions::visualize::Request & req,
 
 
 bool
-DOL_ROS::writeImagesToDiskROS(do_learning_srv_definitions::write_debug_images_to_disk::Request & req,
-                    do_learning_srv_definitions::write_debug_images_to_disk::Response & response)
+IOL_ROS::writeImagesToDiskROS(incremental_object_learning_srv_definitions::write_debug_images_to_disk::Request & req,
+                    incremental_object_learning_srv_definitions::write_debug_images_to_disk::Response & response)
 {
     writeImagesToDisk(req.path.data, req.crop_images);
     return true;
 }
 
 bool
-DOL_ROS::learn_object (do_learning_srv_definitions::learn_object::Request & req,
-                   do_learning_srv_definitions::learn_object::Response & response)
+IOL_ROS::learn_object (incremental_object_learning_srv_definitions::learn_object::Request & req,
+                   incremental_object_learning_srv_definitions::learn_object::Response & response)
 {
     bool ok = true;
     assert(req.keyframes.size() == req.transforms.size());
 
     for (size_t i=0; i<req.keyframes.size(); i++)
     {
-        do_learning_srv_definitions::learn_object_inc srv_learn_inc;
+        incremental_object_learning_srv_definitions::learn_object_inc srv_learn_inc;
         srv_learn_inc.request.cloud = req.keyframes[i];
         srv_learn_inc.request.transform = req.transforms[i];
 
@@ -73,8 +74,8 @@ DOL_ROS::learn_object (do_learning_srv_definitions::learn_object::Request & req,
 }
 
 
-bool DOL_ROS::learn_object_inc (do_learning_srv_definitions::learn_object_inc::Request & req,
-                       do_learning_srv_definitions::learn_object_inc::Response & response)
+bool IOL_ROS::learn_object_inc (incremental_object_learning_srv_definitions::learn_object_inc::Request & req,
+                       incremental_object_learning_srv_definitions::learn_object_inc::Response & response)
 {
     pcl::PointCloud<PointT> cloud;
     pcl::fromROSMsg(req.cloud, cloud);
@@ -88,11 +89,11 @@ bool DOL_ROS::learn_object_inc (do_learning_srv_definitions::learn_object_inc::R
     {
         initial_indices[i] = req.object_indices[i];
     }
-    return DOL::learn_object(cloud, tf, initial_indices);
+    return IOL::learn_object(cloud, tf, initial_indices);
 }
 
 void
-DOL_ROS::initSIFT (int argc, char ** argv)
+IOL_ROS::initSIFT (int argc, char ** argv)
 {
     int min_plane_points, min_smooth_points;
     visualize_intermediate_results_ = false;
@@ -125,14 +126,14 @@ DOL_ROS::initSIFT (int argc, char ** argv)
         p_param_.minPointsSmooth = static_cast<unsigned> (min_smooth_points);
 
 
-    DOL::initSIFT();
+    IOL::initSIFT();
 
-    clear_cached_model_  = n_->advertiseService ("clear_cached_model", &DOL_ROS::clear_cached_model, this);
-    learn_object_  = n_->advertiseService ("learn_object", &DOL_ROS::learn_object, this);
-    learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &DOL_ROS::learn_object_inc, this);
-    save_model_  = n_->advertiseService ("save_model", &DOL_ROS::save_model, this);
-    vis_model_  = n_->advertiseService ("visualize", &DOL_ROS::visualizeROS, this);
-    write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &DOL_ROS::writeImagesToDiskROS, this);
+    clear_cached_model_  = n_->advertiseService ("clear_cached_model", &IOL_ROS::clear_cached_model, this);
+    learn_object_  = n_->advertiseService ("learn_object", &IOL_ROS::learn_object, this);
+    learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &IOL_ROS::learn_object_inc, this);
+    save_model_  = n_->advertiseService ("save_model", &IOL_ROS::save_model, this);
+    vis_model_  = n_->advertiseService ("visualize", &IOL_ROS::visualizeROS, this);
+    write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &IOL_ROS::writeImagesToDiskROS, this);
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "learned_model", 1 );
 
     std::cout << "Started dynamic object learning with parameters: " << std::endl
@@ -151,7 +152,7 @@ int
 main (int argc, char ** argv)
 {
     ros::init (argc, argv, "dynamic_object_learning");
-    v4r::object_modelling::DOL_ROS m;
+    v4r::object_modelling::IOL_ROS m;
     m.initSIFT (argc, argv);
 
     return 0;

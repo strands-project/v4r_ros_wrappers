@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>incremental_object_learning_srv_definitions</name>
+  <version>0.0.11</version>
+  <description>The incremental_object_learning_srv_definitions package</description>
+
+  <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
+  <author email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</author> -->
+  <license>MIT</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+
+  <export>
+
+  </export>
+</package>

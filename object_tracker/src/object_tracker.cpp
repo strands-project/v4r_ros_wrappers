@@ -11,6 +11,7 @@
 
 #include <v4r/common/impl/ScopeTime.hpp>
 #include <v4r/common/pcl_opencv.h>
+#include <v4r/io/filesystem.h>
 #include <v4r/keypoints/io.h>
 #include <v4r/reconstruction/impl/projectPointToImage.hpp>
 
@@ -188,9 +189,36 @@ ObjTrackerMono::start (object_tracker_srv_definitions::start_tracker::Request & 
     return true;
 }
 
+
 bool
-ObjTrackerMono::stop (object_tracker_srv_definitions::start_tracker::Request & req,
-      object_tracker_srv_definitions::start_tracker::Response & response)
+ObjTrackerMono::changeTrackingModel (object_tracker_srv_definitions::change_tracking_model::Request & req,
+                                     object_tracker_srv_definitions::change_tracking_model::Response & response)
+{
+    (void) req;
+    (void) response;
+
+    camera_topic_subscriber_.shutdown();
+    confidence_publisher_.shutdown();
+    object_pose_publisher_.shutdown();
+
+    model_file_ = req.filename;
+
+    if(v4r::io::read(model_file_, model_)) {
+        tracker_->reset();
+        if(!src_intrinsic_.empty())
+            tracker_->setObjectCameraParameter(src_intrinsic_, src_dist_coeffs_);
+
+        tracker_->setCameraParameter(intrinsic_, dist_coeffs_);
+        tracker_->setObjectModel(model_);
+    }
+    else
+        throw std::runtime_error("Tracking model file not found!");
+
+}
+
+bool
+ObjTrackerMono::stop (object_tracker_srv_definitions::stop_tracker::Request & req,
+      object_tracker_srv_definitions::stop_tracker::Response & response)
 {
     camera_topic_subscriber_.shutdown();
     confidence_publisher_.shutdown();
