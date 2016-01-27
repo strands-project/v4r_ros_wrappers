@@ -2,8 +2,8 @@
 Changelog for package object_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.12 (2016-01-27)
+-------------------
 * add c++11 definition
 * remove c++11 definition
 * Contributors: Thomas Fäulhammer

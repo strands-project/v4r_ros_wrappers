@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.12 (2016-01-27)
+-------------------
 * add c++11 definition
 * use new parameter parsing option inside V4R library
 * Contributors: Thomas Fäulhammer

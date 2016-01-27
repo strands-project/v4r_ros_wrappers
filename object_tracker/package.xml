@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>object_tracker</name>
-  <version>0.0.11</version>
+  <version>0.0.12</version>
   <description>Tracks on demand the full pose of a (previously) modelled object</description>
 
 
