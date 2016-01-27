@@ -2,6 +2,24 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge remote-tracking branch 'strands/master'
+* add incremental object learning
+* Merge LaMoR15 stuff
+* Merge branch 'master' into dynamic_object_learning
+  Conflicts:
+  multiview_object_recognizer/src/multiview_object_recognizer_ros.cpp
+  singleview_object_recognizer/CMakeLists.txt
+* added possibility to write intermediate images to a file
+* Merge branch 'master' into dynamic_object_learning
+  Conflicts:
+  multiview_object_recognizer/CMakeLists.txt
+  singleview_object_recognizer/CMakeLists.txt
+* updated cmake for new v4r cmake system
+* tmp
+* Contributors: Thomas Fäulhammer
+
 0.0.12 (2016-01-27)
 -------------------
 * add c++11 definition

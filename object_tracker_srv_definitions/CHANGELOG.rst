@@ -2,6 +2,11 @@
 Changelog for package object_tracker_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add incremental object learning
+* Contributors: Thomas Fäulhammer
+
 0.0.12 (2016-01-27)
 -------------------
 

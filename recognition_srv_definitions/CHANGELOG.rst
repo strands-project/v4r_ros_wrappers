@@ -2,6 +2,11 @@
 Changelog for package recognition_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge remote-tracking branch 'strands/master'
+* Contributors: Thomas Fäulhammer
+
 0.0.12 (2016-01-27)
 -------------------
 

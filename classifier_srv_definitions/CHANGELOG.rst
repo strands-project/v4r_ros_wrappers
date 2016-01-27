@@ -2,6 +2,12 @@
 Changelog for package classifier_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added service definitions for camera_tracker, segmentation and classification
+  The modules and interfaces for these services are NOT implemented yet!
+* Contributors: Thomas Fäulhammer
+
 0.0.12 (2016-01-27)
 -------------------
 

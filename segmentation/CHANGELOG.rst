@@ -2,6 +2,9 @@
 Changelog for package segmentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.0.12 (2016-01-27)
 -------------------
 * add c++11 definition
