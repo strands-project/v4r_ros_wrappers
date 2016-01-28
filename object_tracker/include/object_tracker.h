@@ -66,6 +66,7 @@ private:
     ros::ServiceServer cam_tracker_start_;
     ros::ServiceServer cam_tracker_stop_;
     ros::ServiceServer cam_tracker_cleanup_;
+    ros::ServiceServer cam_tracker_change_model_;
     ros::Subscriber camera_topic_subscriber_;
     ros::Subscriber camera_info_subscriber_;
     ros::Publisher confidence_publisher_;

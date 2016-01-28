@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>object_detection_and_tracking</name>
+  <version>0.0.11</version>
+  <description>The object_detection_and_tracking package</description>
+
+  <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
+  <maintainer email="zillich@acin.tuwien.ac.at">Michael Zillich</maintainer>
+  <license>MIT</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>object_tracker</build_depend>
+  <build_depend>object_tracker_srv_definitions</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>recognition_srv_definitions</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>singleview_object_recognizer</build_depend>
+  <build_depend>v4r</build_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>object_tracker</run_depend>
+  <run_depend>object_tracker_srv_definitions</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>recognition_srv_definitions</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>singleview_object_recognizer</run_depend>
+  <run_depend>v4r</run_depend>
+
+  <export>
+
+  </export>
+</package>

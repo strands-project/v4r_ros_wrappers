@@ -89,7 +89,7 @@ ObjTrackerMono::setup(int argc, char **argv)
     po::options_description desc("Monocular Object Tracker\n======================================\n**Allowed options");
     desc.add_options()
             ("help,h", "produce help message")
-            ("model_file,m", po::value<std::string>(&model_file_)->required(), "model file (.ao)  (pointcloud or stored model with .bin)")
+            ("model_file,m", po::value<std::string>(&model_file_), "model file (.ao)  (pointcloud or stored model with .bin)")
             ("camera_topic,t", po::value<std::string>(&camera_topic_)->default_value(camera_topic_), "ROS camera topic")
             ("use_camera_info", po::value<bool>(&use_cam_params_from_ROS_topic_)->default_value(use_cam_params_from_ROS_topic_), "if set, listens to the camera info topic and sets the intrinsics accordingly. Otherwise, it uses default Kinect parameters.")
             ("cam_file,a", po::value<std::string>(&cam_file_), "camera calibration files for the tracking sequence (.yml) (opencv format)")
@@ -98,26 +98,14 @@ ObjTrackerMono::setup(int argc, char **argv)
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
-    if (vm.count("help"))
-    {
-        std::cout << desc << std::endl;
-    }
-
-    try
-    {
-        po::notify(vm);
-    }
-    catch(std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;
-    }
+    if (vm.count("help"))  {  std::cout << desc << std::endl;  return; }
+    try { po::notify(vm); }
+    catch(std::exception& e)  { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl; return; }
 
     n_.reset( new ros::NodeHandle ( "~" ) );
 
-
     intrinsic_(0,0)=intrinsic_(1,1)=525;
     intrinsic_(0,2)=320, intrinsic_(1,2)=240;
-
 
     if (!cam_file_.empty())
     {
@@ -159,18 +147,16 @@ ObjTrackerMono::setup(int argc, char **argv)
     // -------------------- load model ---------------------------
     std::cout << "Load: "<< model_file_ << std::endl;
 
-    if(v4r::io::read(model_file_, model_))
+    if( v4r::io::read(model_file_, model_) ) {
         tracker_->setObjectModel(model_);
+        cam_tracker_start_  = n_->advertiseService ("start_recording", &ObjTrackerMono::start, this);
+    }
     else
-        throw std::runtime_error("Tracking model file not found!");
+        std::cout << "Tracking model file not set/found! Please call the service to /change_tracking_model to change the model filename." << std::endl;
 
-
-    cam_tracker_start_  = n_->advertiseService ("start_recording", &ObjTrackerMono::start, this);
-    cam_tracker_stop_  = n_->advertiseService ("stop_recording", &ObjTrackerMono::stop, this);
-    cam_tracker_cleanup_  = n_->advertiseService ("cleanup", &ObjTrackerMono::cleanup, this);
+    cam_tracker_change_model_ = n_->advertiseService("change_tracking_model", &ObjTrackerMono::changeTrackingModel, this);
     debug_image_transport_.reset(new image_transport::ImageTransport(*n_));
     debug_image_publisher_ = debug_image_transport_->advertise("debug_images", 1);
-
     ros::spin ();
 }
 
@@ -181,6 +167,8 @@ ObjTrackerMono::start (object_tracker_srv_definitions::start_tracker::Request & 
     (void) req;
     (void) response;
 
+    cam_tracker_stop_  = n_->advertiseService ("stop_recording", &ObjTrackerMono::stop, this);
+    cam_tracker_cleanup_  = n_->advertiseService ("cleanup", &ObjTrackerMono::cleanup, this);
     camera_topic_subscriber_ = n_->subscribe(camera_topic_ +"/points", 1, &ObjTrackerMono::trackNewCloud, this);
     confidence_publisher_ = n_->advertise<std_msgs::Float32>("object_tracker_confidence", 1);
     object_pose_publisher_ = n_->advertise<geometry_msgs::Transform>("object_pose", 1);
@@ -194,7 +182,6 @@ bool
 ObjTrackerMono::changeTrackingModel (object_tracker_srv_definitions::change_tracking_model::Request & req,
                                      object_tracker_srv_definitions::change_tracking_model::Response & response)
 {
-    (void) req;
     (void) response;
 
     camera_topic_subscriber_.shutdown();
@@ -203,6 +190,11 @@ ObjTrackerMono::changeTrackingModel (object_tracker_srv_definitions::change_trac
 
     model_file_ = req.filename;
 
+    std::cout << "Changing tracking model to " << model_file_ << std::endl;
+
+    conf_ = 0;
+    pose_ = Eigen::Matrix4f::Identity();
+
     if(v4r::io::read(model_file_, model_)) {
         tracker_->reset();
         if(!src_intrinsic_.empty())
@@ -210,10 +202,15 @@ ObjTrackerMono::changeTrackingModel (object_tracker_srv_definitions::change_trac
 
         tracker_->setCameraParameter(intrinsic_, dist_coeffs_);
         tracker_->setObjectModel(model_);
-    }
-    else
-        throw std::runtime_error("Tracking model file not found!");
 
+        cam_tracker_start_.shutdown();
+        cam_tracker_start_  = n_->advertiseService ("start_recording", &ObjTrackerMono::start, this);
+        return true;
+    }
+    else {
+        std::cerr << "Tracking model file not found!" << std::endl;
+        return false;
+    }
 }
 
 bool
