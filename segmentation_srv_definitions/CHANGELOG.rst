@@ -2,6 +2,9 @@
 Changelog for package segmentation_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.2 (2016-01-28)
 ------------------
 

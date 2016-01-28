@@ -2,6 +2,9 @@
 Changelog for package incremental_object_learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.2 (2016-01-28)
 ------------------
 

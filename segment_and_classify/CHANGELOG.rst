@@ -2,6 +2,9 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.2 (2016-01-28)
 ------------------
 
