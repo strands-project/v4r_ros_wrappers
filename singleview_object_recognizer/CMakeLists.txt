@@ -47,11 +47,6 @@ target_link_libraries(test_single_view_recognition
 )
 
 
-install(PROGRAMS
-scripts/action_server.py
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 install(TARGETS recognition_service
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
