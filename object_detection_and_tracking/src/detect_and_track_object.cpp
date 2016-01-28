@@ -58,8 +58,8 @@ public:
             else {
                 sub_pc_.shutdown();
                 std::cout << "I detected: " << std::endl;
-                for(const auto &id:detected_ids)
-                    std::cout << "  " << id.data << std::endl;
+                for(size_t i=0; i<detected_ids.size(); i++)
+                    std::cout << "  " << detected_ids[i].data << std::endl;
 
                 // Take first model to track
                 std::string new_tracking_model = detected_ids[0].data + "/tracking_model.ao";
