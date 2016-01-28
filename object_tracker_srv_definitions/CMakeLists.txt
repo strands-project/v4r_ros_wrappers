@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs messa
    stop_tracker.srv
    cleanup.srv
    change_tracking_model.srv
+   detect_and_track.srv
  )
 
 generate_messages(

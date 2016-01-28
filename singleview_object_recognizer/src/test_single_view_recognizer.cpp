@@ -46,9 +46,23 @@ public:
         srv.request.cloud = *msg;
 
         if (sv_rec_client_.call(srv))
-            std::cout << "Call done..." << std::endl;
+        {
+            std::vector<std_msgs::String>  detected_ids = srv.response.ids;
+
+            if(detected_ids.empty())
+                std::cout << "I did not detected any object from the model database in the current scene." << std::endl;
+            else {
+                std::cout << "I detected: " << std::endl;
+                for(const auto &id:detected_ids)
+                    std::cout << "  " << id.data << std::endl;
+            }
+            std::cout << std::endl;
+        }
         else
-            ROS_ERROR("Failed to call /recognition_service/sv_recognition");
+        {
+            ROS_ERROR("Error calling recognition service. ");
+            return;
+        }
     }
 
     void checkCloudArrive (const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -111,7 +125,20 @@ public:
             recognition_srv_definitions::recognize srv_rec;
             srv_rec.request.cloud = cloud_ros;
 
-            if (!sv_rec_client_.call(srv_rec))
+            if (sv_rec_client_.call(srv_rec))
+            {
+                std::vector<std_msgs::String>  detected_ids = srv_rec.response.ids;
+
+                if(detected_ids.empty())
+                    std::cout << "I did not detected any object from the model database in the current scene." << std::endl;
+                else {
+                    std::cout << "I detected: " << std::endl;
+                    for(const auto &id:detected_ids)
+                        std::cout << "  " << id.data << std::endl;
+                }
+                std::cout << std::endl;
+            }
+            else
             {
                 ROS_ERROR("Error calling recognition service. ");
                 return false;
