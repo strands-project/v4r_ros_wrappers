@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>singleview_object_recognizer</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>The recognition_service package</description>
 
   <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>
