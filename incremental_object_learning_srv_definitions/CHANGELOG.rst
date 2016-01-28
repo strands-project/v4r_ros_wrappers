@@ -2,6 +2,9 @@
 Changelog for package incremental_object_learning_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.0 (2016-01-27)
 ------------------
 * Merge remote-tracking branch 'strands/master'

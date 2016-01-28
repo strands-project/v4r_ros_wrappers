@@ -2,6 +2,9 @@
 Changelog for package camera_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.0 (2016-01-27)
 ------------------
 * added service definitions for camera_tracker, segmentation and classification

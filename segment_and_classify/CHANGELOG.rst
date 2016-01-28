@@ -2,6 +2,9 @@
 Changelog for package segment_and_classify
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.0 (2016-01-27)
 ------------------
 * add incremental object learning
