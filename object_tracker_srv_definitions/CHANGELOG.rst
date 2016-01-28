@@ -2,8 +2,8 @@
 Changelog for package object_tracker_srv_definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.3 (2016-01-28)
+------------------
 * added object_detection_and_tracking module
   removed action for object presence checking as it is outdated
 * Contributors: Thomas Fäulhammer

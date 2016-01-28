@@ -2,8 +2,8 @@
 Changelog for package singleview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.3 (2016-01-28)
+------------------
 * remove action server.py from install list
 * added object_detection_and_tracking module
   removed action for object presence checking as it is outdated
