@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>incremental_object_learning_srv_definitions</name>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
   <description>The incremental_object_learning_srv_definitions package</description>
 
   <maintainer email="faeulhammer@acin.tuwien.ac.at">Thomas Faeulhammer</maintainer>

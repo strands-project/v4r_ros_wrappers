@@ -2,8 +2,8 @@
 Changelog for package incremental_object_learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.4 (2016-01-29)
+------------------
 * add v4r dependency
 * Contributors: Thomas Fäulhammer
 

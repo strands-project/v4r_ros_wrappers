@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>v4r_ros_wrappers</name>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
   <description>The v4r_ros_wrappers package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
