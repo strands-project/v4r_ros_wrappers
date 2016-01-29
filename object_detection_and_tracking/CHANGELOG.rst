@@ -2,6 +2,9 @@
 Changelog for package object_detection_and_tracking
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.3 (2016-01-28)
 ------------------
 * update version number to match others

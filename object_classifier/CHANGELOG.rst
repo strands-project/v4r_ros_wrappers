@@ -2,6 +2,9 @@
 Changelog for package object_classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.3 (2016-01-28)
 ------------------
 

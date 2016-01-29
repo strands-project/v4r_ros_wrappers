@@ -2,6 +2,9 @@
 Changelog for package multiview_object_recognizer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.3 (2016-01-28)
 ------------------
 

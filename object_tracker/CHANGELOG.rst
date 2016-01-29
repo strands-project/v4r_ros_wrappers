@@ -2,6 +2,9 @@
 Changelog for package object_tracker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.3 (2016-01-28)
 ------------------
 * added object_detection_and_tracking module
