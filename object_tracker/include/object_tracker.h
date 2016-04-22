@@ -29,6 +29,7 @@
 #include "object_tracker_srv_definitions/stop_tracker.h"
 #include "object_tracker_srv_definitions/cleanup.h"
 #include "object_tracker_srv_definitions/change_tracking_model.h"
+#include "object_tracker_msg_definitions/Confidence.h"
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
