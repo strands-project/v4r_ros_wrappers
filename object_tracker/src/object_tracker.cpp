@@ -170,8 +170,8 @@ ObjTrackerMono::start (object_tracker_srv_definitions::start_tracker::Request & 
     cam_tracker_stop_  = n_->advertiseService ("stop_recording", &ObjTrackerMono::stop, this);
     cam_tracker_cleanup_  = n_->advertiseService ("cleanup", &ObjTrackerMono::cleanup, this);
     camera_topic_subscriber_ = n_->subscribe(camera_topic_ +"/points", 1, &ObjTrackerMono::trackNewCloud, this);
-    confidence_publisher_ = n_->advertise<object_tracker_msg_definitions::Confidence>("object_tracker_confidence", 1);
-    object_pose_publisher_ = n_->advertise<geometry_msgs::TransformStamped>("object_pose", 1);
+    confidence_publisher_ = n_->advertise<std_msgs::Float32>("object_tracker_confidence", 1);
+    object_pose_publisher_ = n_->advertise<object_tracker_msg_definitions::ObjectInfo>("object_pose", 1);
 
     cv::namedWindow( "image", CV_WINDOW_AUTOSIZE );
     return true;
@@ -245,9 +245,8 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
         time = t.getTime();
     }
 
-    object_tracker_msg_definitions::Confidence confROS;
+    std_msgs::Float32 confROS;
     confROS.data = conf_;
-    confROS.header.stamp = ros::Time::now();
     confidence_publisher_.publish(confROS);
 
     if(debug_image_publisher_.getNumSubscribers())
@@ -256,19 +255,19 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
 
         if (conf_>0.05)
         {
-            geometry_msgs::TransformStamped tt;
-            tt.transform.translation.x = pose_(0,3);
-            tt.transform.translation.y = pose_(1,3);
-            tt.transform.translation.z = pose_(2,3);
+            object_tracker_msg_definitions::ObjectInfo tt;
+            tt.translation.x = pose_(0,3);
+            tt.translation.y = pose_(1,3);
+            tt.translation.z = pose_(2,3);
 
             Eigen::Matrix3f rotation = pose_.block<3,3>(0,0);
             Eigen::Quaternionf q(rotation);
-            tt.transform.rotation.x = q.x();
-            tt.transform.rotation.y = q.y();
-            tt.transform.rotation.z = q.z();
-            tt.transform.rotation.w = q.w();
+            tt.rotation.x = q.x();
+            tt.rotation.y = q.y();
+            tt.rotation.z = q.z();
+            tt.rotation.w = q.w();
 
-            tt.header.stamp = confROS.header.stamp;
+            tt.confidence = conf_;
             object_pose_publisher_.publish(tt);
 
             if (log_cams_)
