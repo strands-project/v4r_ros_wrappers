@@ -171,7 +171,7 @@ ObjTrackerMono::start (object_tracker_srv_definitions::start_tracker::Request & 
     cam_tracker_cleanup_  = n_->advertiseService ("cleanup", &ObjTrackerMono::cleanup, this);
     camera_topic_subscriber_ = n_->subscribe(camera_topic_ +"/points", 1, &ObjTrackerMono::trackNewCloud, this);
     confidence_publisher_ = n_->advertise<std_msgs::Float32>("object_tracker_confidence", 1);
-    object_pose_publisher_ = n_->advertise<geometry_msgs::Transform>("object_pose", 1);
+    object_pose_publisher_ = n_->advertise<object_tracker_msg_definitions::ObjectInfo>("object_pose", 1);
 
     cv::namedWindow( "image", CV_WINDOW_AUTOSIZE );
     return true;
@@ -255,7 +255,7 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
 
         if (conf_>0.05)
         {
-            geometry_msgs::Transform tt;
+            object_tracker_msg_definitions::ObjectInfo tt;
             tt.translation.x = pose_(0,3);
             tt.translation.y = pose_(1,3);
             tt.translation.z = pose_(2,3);
@@ -266,6 +266,8 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
             tt.rotation.y = q.y();
             tt.rotation.z = q.z();
             tt.rotation.w = q.w();
+
+            tt.confidence = conf_;
             object_pose_publisher_.publish(tt);
 
             if (log_cams_)
