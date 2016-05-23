@@ -24,10 +24,10 @@ set(incs include/pcl_segmentation_ros.h)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_executable(pcl_segmentation_service src/pcl_segmentation_ros.cpp ${incs})
-add_executable(test_cloud_segmentation src/test_segmentation.cpp)
+add_executable(test_v4r_cloud_segmentation src/test_segmentation.cpp)
 
 add_dependencies(pcl_segmentation_service ${catkin_EXPORTED_TARGETS})
-add_dependencies(test_cloud_segmentation ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_v4r_cloud_segmentation ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(pcl_segmentation_service
    ${catkin_LIBRARIES}
@@ -35,7 +35,7 @@ target_link_libraries(pcl_segmentation_service
    ${V4R_LIBS}
 )
 
-target_link_libraries(test_cloud_segmentation
+target_link_libraries(test_v4r_cloud_segmentation
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${V4R_LIBS}
@@ -47,7 +47,7 @@ LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS test_cloud_segmentation
+install(TARGETS test_v4r_cloud_segmentation
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
