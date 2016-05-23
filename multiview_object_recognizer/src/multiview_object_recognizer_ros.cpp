@@ -22,8 +22,8 @@ multiviewRecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::reco
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
     cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
-    std::vector<ModelTPtr> models_verified = mv_r_->getVerifiedModels();
-    std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified = mv_r_->getVerifiedTransforms();
+    std::vector<ModelTPtr> models_verified = rr_->getVerifiedModels();
+    std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified = rr_->getVerifiedTransforms();
 
     for (size_t j = 0; j < models_verified.size(); j++)
     {
@@ -157,9 +157,9 @@ multiviewRecognizerROS<PointT>::recognizeROS (recognition_srv_definitions::recog
     scene_->sensor_orientation_ = Eigen::Quaternionf::Identity();
     scene_->sensor_origin_ = Eigen::Vector4f::Zero();
 
-    mv_r_->setInputCloud (scene_);
-    mv_r_->setCameraPose(tf);
-    mv_r_->recognize();
+    rr_->setInputCloud (scene_);
+    rr_->setCameraPose(tf);
+    rr_->recognize();
 
     respondSrvCall(req, response);
     return true;
@@ -170,14 +170,27 @@ bool
 multiviewRecognizerROS<PointT>::initialize(int argc, char **argv)
 {
     n_.reset( new ros::NodeHandle ( "~" ) );
-    mv_r_.reset( new v4r::MultiviewRecognizer<PointT>(argc, argv));
 
+    po::options_description desc("Multi-View Object Instance Recognizer\n======================================\n**Allowed options");
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("visualize,v", po::bool_switch(&visualize_), "visualize recognition results")
+   ;
+    po::variables_map vm;
+    po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+    po::store(parsed, vm);
+    if (vm.count("help")) { std::cout << desc << std::endl; }
+    try { po::notify(vm); }
+    catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;  }
+
+    rr_.reset( new v4r::MultiviewRecognizer<PointT>(argc, argv));
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "multiview_recognized_objects", 0 );
-    recognition_serv_ = n_->advertiseService("multiview_recognition_service", &multiviewRecognizerROS::recognizeROS, this);
+    recognize_ = n_->advertiseService("multiview_recognition_service", &multiviewRecognizerROS::recognizeROS, this);
+
     it_.reset(new image_transport::ImageTransport(*n_));
     image_pub_ = it_->advertise("multiview_recogniced_object_instances_img", 1, true);
 
-    return 1;
+    return true;
 }
 }
 

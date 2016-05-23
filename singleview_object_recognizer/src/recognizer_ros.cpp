@@ -6,6 +6,8 @@
 #include <v4r/common/pcl_opencv.h>
 #include <v4r/common/visibility_reasoning.h>
 #include <v4r/io/filesystem.h>
+#include <v4r/recognition/object_hypothesis.h>
+
 
 #include <pcl/common/centroid.h>
 #include <pcl/console/parse.h>
@@ -29,13 +31,13 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
     cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
-    for (size_t j = 0; j < models_verified_.size(); j++)
+    for (size_t j = 0; j < ohs_.size(); j++)
     {
       std_msgs::String ss_tmp;
-      ss_tmp.data = models_verified_[j]->id_;
+      ss_tmp.data = ohs_[j]->model_->id_;
       response.ids.push_back(ss_tmp);
 
-      Eigen::Matrix4f trans = transforms_verified_[j];
+      const Eigen::Matrix4f &trans = ohs_[j]->transform_;
       geometry_msgs::Transform tt;
       tt.translation.x = trans(0,3);
       tt.translation.y = trans(1,3);
@@ -49,18 +51,18 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
       tt.rotation.w = q.w();
       response.transforms.push_back(tt);
 
-      typename pcl::PointCloud<PointT>::ConstPtr model_cloud = models_verified_[j]->getAssembled ( resolution_ );
+      typename pcl::PointCloud<PointT>::ConstPtr model_cloud = ohs_[j]->model_->getAssembled ( resolution_ );
       typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
-      pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
+      pcl::transformPointCloud (*model_cloud, *model_aligned, trans);
       *pRecognizedModels += *model_aligned;
       sensor_msgs::PointCloud2 rec_model;
       pcl::toROSMsg(*model_aligned, rec_model);
       response.models_cloud.push_back(rec_model);
 
-      pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
+      pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = ohs_[j]->model_->getNormalsAssembled ( resolution_ );
 
       pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      transformNormals(*normal_cloud, *normal_aligned, transforms_verified_[j]);
+      transformNormals(*normal_cloud, *normal_aligned, trans);
 
       //ratio of inlier points
       float confidence = 0;
@@ -134,7 +136,7 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
       cv::Point text_start;
       text_start.x = min_u;
       text_start.y = std::max(0, min_v - 10);
-      cv::putText(annotated_img, models_verified_[j]->id_, text_start, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255,0,255), 1, CV_AA);
+      cv::putText(annotated_img, ohs_[j]->model_->id_, text_start, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255,0,255), 1, CV_AA);
       cv::rectangle(annotated_img, cv::Point(min_u, min_v), cv::Point(max_u, max_v), cv::Scalar( 0, 255, 255 ), 2);
     }
 
@@ -156,24 +158,29 @@ RecognizerROS<PointT>::recognizeROS(recognition_srv_definitions::recognize::Requ
 {
     scene_.reset(new pcl::PointCloud<PointT>());
     pcl::fromROSMsg (req.cloud, *scene_);
+    scene_->sensor_orientation_ = Eigen::Quaternionf::Identity();
+    scene_->sensor_origin_ = Eigen::Vector4f::Zero(4);
 
-    if( chop_z_ > 0)
-    {
-        pcl::PassThrough<PointT> pass;
-        pass.setFilterLimits ( 0.f, chop_z_ );
-        pass.setFilterFieldName ("z");
-        pass.setInputCloud (scene_);
-        pass.setKeepOrganized (true);
-        pass.filter (*scene_);
-    }
+//    if( chop_z_ > 0)
+//    {
+//        pcl::PassThrough<PointT> pass;
+//        pass.setFilterLimits ( 0.f, chop_z_ );
+//        pass.setFilterFieldName ("z");
+//        pass.setInputCloud (scene_);
+//        pass.setKeepOrganized (true);
+//        pass.filter (*scene_);
+//    }
 
     rr_->setInputCloud (scene_);
     rr_->recognize();
-    models_verified_ = rr_->getVerifiedModels();
-    transforms_verified_ = rr_->getVerifiedTransforms();
+
+    ohs_ = rr_->getVerifiedHypotheses();
+
     bool b = respondSrvCall(req, response);
+
     if(visualize_)
         rr_->visualize();
+
     return b;
 }
 
@@ -191,12 +198,13 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
    ;
     po::variables_map vm;
     po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+    std::vector<std::string> to_pass_further = po::collect_unrecognized(parsed.options, po::include_positional);
     po::store(parsed, vm);
     if (vm.count("help")) { std::cout << desc << std::endl; }
     try { po::notify(vm); }
     catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;  }
 
-    rr_.reset( new v4r::MultiRecognitionPipeline<PointT> (argc, argv));
+    rr_.reset( new v4r::MultiRecognitionPipeline<PointT> (to_pass_further));
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
     recognize_  = n_->advertiseService ("sv_recognition", &RecognizerROS::recognizeROS, this);
 

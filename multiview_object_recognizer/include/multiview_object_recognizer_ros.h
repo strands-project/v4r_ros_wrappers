@@ -18,9 +18,9 @@ private:
     image_transport::Publisher image_pub_;
     boost::shared_ptr<ros::NodeHandle> n_;
     ros::Publisher vis_pc_pub_;
-    ros::ServiceServer recognition_serv_;
+    ros::ServiceServer recognize_;
 
-    boost::shared_ptr<MultiviewRecognizer<PointT> > mv_r_;
+    boost::shared_ptr<MultiviewRecognizer<PointT> > rr_;
 
     bool visualize_;
 

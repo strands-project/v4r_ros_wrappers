@@ -21,8 +21,7 @@ private:
     double chop_z_;
     bool debug_publish_;
 
-    std::vector<ModelTPtr> models_verified_;
-    std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified_;
+    std::vector<typename v4r::ObjectHypothesis<PointT>::Ptr > ohs_;
 
     boost::shared_ptr<image_transport::ImageTransport> it_;
     image_transport::Publisher image_pub_;
