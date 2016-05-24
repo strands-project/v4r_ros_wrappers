@@ -109,6 +109,12 @@ public:
 
         std::vector< std::string > views = io::getFilesInDirectory(input_dir, ".*.pcd", false);
 
+        if(views.empty())
+        {
+            std::cerr << "No .pcd file in given directory (" << input_dir << "). Aborting. " << std::endl;
+            return false;
+        }
+
         typename pcl::PointCloud<PointT>::Ptr big_cloud_unfiltered (new pcl::PointCloud<PointT>);
         std::vector< typename pcl::PointCloud<PointT>::Ptr > clouds (views.size());
         std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals (views.size());
