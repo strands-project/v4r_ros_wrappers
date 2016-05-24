@@ -207,6 +207,7 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
     rr_.reset( new v4r::MultiRecognitionPipeline<PointT> (to_pass_further));
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
     recognize_  = n_->advertiseService ("sv_recognition", &RecognizerROS::recognizeROS, this);
+    update_modeldb_  = n_->advertiseService ("update_recognition_database", &RecognizerROS::updateRecognizer, this);
 
     it_.reset(new image_transport::ImageTransport(*n_));
     image_pub_ = it_->advertise("sv_recogniced_object_instances_img", 1, true);

@@ -28,6 +28,7 @@ private:
     boost::shared_ptr<ros::NodeHandle> n_;
     ros::Publisher vis_pc_pub_;
     ros::ServiceServer recognize_;
+    ros::ServiceServer update_modeldb_;
     float resolution_;
 
     typename pcl::PointCloud<PointT>::Ptr scene_;
@@ -45,6 +46,12 @@ public:
 
     bool recognizeROS (recognition_srv_definitions::recognize::Request & req,
                        recognition_srv_definitions::recognize::Response & response);
+
+    bool updateRecognizer(recognition_srv_definitions::retrain_recognizer::Request &req,
+                          recognition_srv_definitions::retrain_recognizer::Response &response)
+    {
+        rr_->update();
+    }
 
     bool initialize (int argc, char ** argv);
 };
