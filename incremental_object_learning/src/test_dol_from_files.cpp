@@ -63,8 +63,7 @@ public:
         if ( !mask_file_.compare("") )
             mask_file_ = directory_ + "/mask.txt";
 
-        std::ifstream initial_mask_file;
-        initial_mask_file.open( mask_file_ );
+        std::ifstream initial_mask_file ( mask_file_.c_str() );
 
         int idx_tmp;
         pcl::PointIndices pind;

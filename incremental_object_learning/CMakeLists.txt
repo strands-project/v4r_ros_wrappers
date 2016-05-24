@@ -16,7 +16,7 @@ include_directories(include
   ${OpenCV_INCLUDE_DIRS}
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 add_definitions(${PCL_DEFINITIONS})
 
 set(incs include/object_learning_ros.h)
@@ -42,6 +42,19 @@ target_link_libraries(test_incremental_object_learning_service
    ${CERES_LIBRARIES}
 )
 
+
+add_executable( noise_model_based_cloud_integration_service src/noise_model_based_cloud_integration.cpp)
+add_dependencies( noise_model_based_cloud_integration_service ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(noise_model_based_cloud_integration_service
+   ${catkin_LIBRARIES}
+   ${V4R_LIBS}
+   ${PCL_LIBRARIES}
+   ${OpenCV_LIBS}
+   ${CERES_LIBRARIES}
+)
+
+
 install(TARGETS incremental_object_learning_service
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -50,6 +63,12 @@ RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 
 
 install(TARGETS test_incremental_object_learning_service
+ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS noise_model_based_cloud_integration_service
 ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

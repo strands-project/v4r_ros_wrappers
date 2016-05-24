@@ -1,0 +1,5 @@
+#the input directory where all individual views are stored
+std_msgs/String input_dir
+#the folder where to save the 3D model (as 3D_model.pcd)
+std_msgs/String output_dir
+---
