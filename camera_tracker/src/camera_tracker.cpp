@@ -21,7 +21,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/features/normal_3d_omp.h>
 
-#include <v4r/common/impl/ScopeTime.hpp>
 #include <v4r/common/noise_models.h>
 #include <v4r/common/convertCloud.h>
 #include <v4r/common/convertImage.h>
