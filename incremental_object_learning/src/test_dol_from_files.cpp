@@ -119,7 +119,7 @@ public:
         {
             std::stringstream mm;
             mm << "Error calling service: " << service_name_save << std::endl;
-            std::cerr << mm << std::endl;
+            std::cerr << mm.str() << std::endl;
             return false;
         }
 

@@ -3,7 +3,6 @@
 #include "recognition_srv_definitions/retrain_recognizer.h"
 
 #include <image_transport/image_transport.h>
-#include <pcl/visualization/cloud_viewer.h>
 #include <v4r/recognition/multi_pipeline_recognizer.h>
 
 namespace v4r
