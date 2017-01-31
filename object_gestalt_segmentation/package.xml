@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package>
+  <name>object_gestalt_segmentation</name>
+  <version>0.0.0</version>
+  <description>The object gestalt segmentation package</description>
+
+  <maintainer email="bajones@acin.tuwien.ac.at">Markus &quot;Bajo&quot; Bajones</maintainer>
+  <maintainer email="suchi@acin.tuwien.ac.at">Markus Suchi</maintainer>
+
+  <license>TODO</license>
+
+  <!-- <url type="website">http://wiki.ros.org/squirrel_segmentation</url> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>segmentation_srv_definitions</build_depend>
+  <build_depend>v4r</build_depend>
+
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>pcl_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf2</run_depend>
+  <run_depend>v4r</run_depend>
+  <run_depend>segmentation_srv_definitions</run_depend>
+
+  
+</package>

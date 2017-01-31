@@ -1,0 +1,14 @@
+<launch>
+
+  <arg name="model_filename" default="$(find object_gestalt_segmentation)/data/ST-TrainAll.txt.model" />
+  <arg name="scaling_filename" default="$(find object_gestalt_segmentation)/data/ST-TrainAll.txt.scalingparams" />
+
+  <node name="object_gestalt_segmentation"
+        pkg="object_gestalt_segmentation"
+        type="object_gestalt_segmentation"
+        required="true" output="screen">
+        <param name="model_filename" type="string" value="$(arg model_filename)"/>
+        <param name="scaling_filename" type="string" value="$(arg scaling_filename)"/>
+  </node>
+
+</launch>
