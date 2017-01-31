@@ -29,13 +29,14 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
     typename pcl::PointCloud<PointT>::Ptr pRecognizedModels (new pcl::PointCloud<PointT>);
     cv::Mat annotated_img = ConvertPCLCloud2Image(*scene_);
 
-    for (size_t j = 0; j < models_verified_.size(); j++)
+    for (size_t j = 0; j < verified_hypotheses_.size(); j++)
     {
+      const typename ObjectHypothesis<PointT>::Ptr oh = verified_hypotheses_[j];
       std_msgs::String ss_tmp;
-      ss_tmp.data = models_verified_[j]->id_;
+      ss_tmp.data = oh->model_->id_;
       response.ids.push_back(ss_tmp);
 
-      Eigen::Matrix4f trans = transforms_verified_[j];
+      Eigen::Matrix4f trans = oh->transform_;
       geometry_msgs::Transform tt;
       tt.translation.x = trans(0,3);
       tt.translation.y = trans(1,3);
@@ -49,18 +50,18 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
       tt.rotation.w = q.w();
       response.transforms.push_back(tt);
 
-      typename pcl::PointCloud<PointT>::ConstPtr model_cloud = models_verified_[j]->getAssembled ( resolution_ );
+      typename pcl::PointCloud<PointT>::ConstPtr model_cloud = oh->model_->getAssembled ( resolution_ );
       typename pcl::PointCloud<PointT>::Ptr model_aligned (new pcl::PointCloud<PointT>);
-      pcl::transformPointCloud (*model_cloud, *model_aligned, transforms_verified_[j]);
+      pcl::transformPointCloud (*model_cloud, *model_aligned, oh->transform_);
       *pRecognizedModels += *model_aligned;
       sensor_msgs::PointCloud2 rec_model;
       pcl::toROSMsg(*model_aligned, rec_model);
       response.models_cloud.push_back(rec_model);
 
-      pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = models_verified_[j]->getNormalsAssembled ( resolution_ );
+      pcl::PointCloud<pcl::Normal>::ConstPtr normal_cloud = oh->model_->getNormalsAssembled ( resolution_ );
 
       pcl::PointCloud<pcl::Normal>::Ptr normal_aligned (new pcl::PointCloud<pcl::Normal>);
-      transformNormals(*normal_cloud, *normal_aligned, transforms_verified_[j]);
+      transformNormals(*normal_cloud, *normal_aligned, oh->transform_);
 
       //ratio of inlier points
       float confidence = 0;
@@ -134,7 +135,7 @@ RecognizerROS<PointT>::respondSrvCall(recognition_srv_definitions::recognize::Re
       cv::Point text_start;
       text_start.x = min_u;
       text_start.y = std::max(0, min_v - 10);
-      cv::putText(annotated_img, models_verified_[j]->id_, text_start, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255,0,255), 1, CV_AA);
+      cv::putText(annotated_img, oh->model_->id_, text_start, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255,0,255), 1, CV_AA);
       cv::rectangle(annotated_img, cv::Point(min_u, min_v), cv::Point(max_u, max_v), cv::Scalar( 0, 255, 255 ), 2);
     }
 
@@ -169,9 +170,9 @@ RecognizerROS<PointT>::recognizeROS(recognition_srv_definitions::recognize::Requ
 
     rr_->setInputCloud (scene_);
     rr_->recognize();
-    models_verified_ = rr_->getVerifiedModels();
-    transforms_verified_ = rr_->getVerifiedTransforms();
-    bool b = respondSrvCall(req, response);
+	verified_hypotheses_ = rr_->getVerifiedHypotheses(); 
+    
+	bool b = respondSrvCall(req, response);
     if(visualize_)
         rr_->visualize();
     return b;
@@ -196,7 +197,8 @@ RecognizerROS<PointT>::initialize (int argc, char ** argv)
     try { po::notify(vm); }
     catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;  }
 
-    rr_.reset( new v4r::MultiRecognitionPipeline<PointT> (argc, argv));
+    std::vector<std::string> arguments(argv + 1, argv + argc);
+    rr_.reset( new v4r::MultiRecognitionPipeline<PointT> (arguments));
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "sv_recogniced_object_instances", 1 );
     recognize_  = n_->advertiseService ("sv_recognition", &RecognizerROS::recognizeROS, this);
 

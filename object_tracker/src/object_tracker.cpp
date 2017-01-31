@@ -9,7 +9,6 @@
 #include <pcl/common/time.h>
 #include <geometry_msgs/Transform.h>
 
-#include <v4r/common/impl/ScopeTime.hpp>
 #include <v4r/common/pcl_opencv.h>
 #include <v4r/io/filesystem.h>
 #include <v4r/keypoints/io.h>
@@ -240,7 +239,7 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
 
     bool is_ok;
     {
-        v4r::ScopeTime t("overall time");
+        pcl::ScopeTime t("overall time");
         is_ok = tracker_->track(image_, pose_, conf_);
         time = t.getTime();
     }

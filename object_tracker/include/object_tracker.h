@@ -48,7 +48,6 @@
 #include <v4r/tracking/ObjectTrackerMono.h>
 
 #include <pcl/common/common.h>
-#include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
 #include <pcl/io/grabber.h>
