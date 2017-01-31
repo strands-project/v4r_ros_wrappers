@@ -107,7 +107,7 @@ IOL_ROS::initSIFT (int argc, char ** argv)
     n_->getParam ( "ratio", param_.ratio_supervoxel_);
     n_->getParam ( "do_erosion", param_.do_erosion_);
     n_->getParam ( "do_mst_refinement", param_.do_mst_refinement_);
-    n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
+//    n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
     n_->getParam ( "transfer_latest_only", param_.transfer_indices_from_latest_frame_only_);
     n_->getParam ( "chop_z", param_.chop_z_);
     n_->getParam ( "normal_method", param_.normal_method_);
@@ -125,8 +125,6 @@ IOL_ROS::initSIFT (int argc, char ** argv)
     if ( n_->getParam ( "min_points_smooth_cluster", min_smooth_points) )
         p_param_.minPointsSmooth = static_cast<unsigned> (min_smooth_points);
 
-
-    IOL::initSIFT();
 
     clear_cached_model_  = n_->advertiseService ("clear_cached_model", &IOL_ROS::clear_cached_model, this);
     learn_object_  = n_->advertiseService ("learn_object", &IOL_ROS::learn_object, this);

@@ -3,7 +3,6 @@
 #include "recognition_srv_definitions/retrain_recognizer.h"
 
 #include <image_transport/image_transport.h>
-#include <pcl/visualization/cloud_viewer.h>
 #include <v4r/recognition/multi_pipeline_recognizer.h>
 
 namespace v4r
@@ -21,8 +20,7 @@ private:
     double chop_z_;
     bool debug_publish_;
 
-    std::vector<ModelTPtr> models_verified_;
-    std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transforms_verified_;
+	std::vector<typename ObjectHypothesis<PointT>::Ptr > verified_hypotheses_;    
 
     boost::shared_ptr<image_transport::ImageTransport> it_;
     image_transport::Publisher image_pub_;
