@@ -1,0 +1,6 @@
+<launch>
+  <arg name="start" default="false"/>
+  <node name="temporal_filtering" pkg="temporal_filtering" type="temporal_filtering" output="screen">
+     <param name="/start" value="$(arg start)" type="bool"/>
+  </node>
+</launch>
