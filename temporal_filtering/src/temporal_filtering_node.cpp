@@ -18,7 +18,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
-#include <temporal_filtering_srv_definitions/temporal.h>
+#include <std_srvs/SetBool.h>
 
 boost::mutex toggle_mutex; // The iostreams are not guaranteed to be thread-safe!
 
@@ -86,16 +86,20 @@ void stopFiltering()
     frameCount=0;
 }
 
-bool service_callback(temporal_filtering_srv_definitions::temporal::Request &req, temporal_filtering_srv_definitions::temporal::Response &resp)
+bool service_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response& response)
 {
     boost::mutex::scoped_lock(toggle_mutex);
-    if(req.enable)
+    if(req.data==true)
     {
         startFiltering();
+        response.success=true;
+        response.message="enabled";
     }
     else
     {
         stopFiltering();
+        response.success=true;
+        response.message="disabled";
     }
     return true;
 }

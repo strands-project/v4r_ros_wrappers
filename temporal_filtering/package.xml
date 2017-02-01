@@ -43,19 +43,19 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
   <build_depend>opencv</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>v4r</build_depend>
-  <build_depend>temporal_filtering_srv_definitions</build_depend>
  <!-- <run_depend>cv_bridge</run_depend> -->
 
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
   <run_depend>opencv</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>v4r</run_depend>
-  <run_depend>temporal_filtering_srv_definitions</run_depend>
 <!--  <run_depend>cv_bridge</run_depend> -->
 
   <!-- The export tag contains other, unspecified, tags -->

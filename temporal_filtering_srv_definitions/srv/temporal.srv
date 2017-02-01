@@ -1,6 +1,0 @@
-# enable temproal smoothing filter
-# true: turns filter on
-# false: turns filter off
-bool enable
----
-

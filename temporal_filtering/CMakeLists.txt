@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  temporal_filtering_srv_definitions
+  std_srvs
   #cv_bridge
 )
 
@@ -112,7 +112,7 @@ find_package(PCL REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS
-   CATKIN_DEPENDS roscpp rospy temporal_filtering_srv_definitions std_msgs
+   CATKIN_DEPENDS roscpp rospy std_msgs std_srvs
    )
 
 ###########
