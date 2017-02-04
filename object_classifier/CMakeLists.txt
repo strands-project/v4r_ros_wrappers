@@ -19,9 +19,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${V4R_INCLUDE_DIRS})
 
-set(incs include/global_nn_classifier_ros.h)
+set(incs include/global_classifier.h)
 
-add_executable(object_classifier_node src/global_nn_classifier_ros.cpp ${incs})
+add_executable(object_classifier_node src/global_classifier.cpp ${incs})
 add_executable(object_classifier_demo_node src/test.cpp)
 
 add_dependencies(object_classifier_demo_node ${catkin_EXPORTED_TARGETS})

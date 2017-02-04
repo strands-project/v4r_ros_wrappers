@@ -1,6 +1,4 @@
 <launch>
-  <arg name="param"/>
-  
 	<!-- Single-View Object Recognizer -->
-	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" args="$(arg param)" respawn="true" />
+	<node pkg="singleview_object_recognizer" type="recognition_service" name="recognition_service" output="screen" args="$(arg param) --hv_config_xml $(hv_config_xml)" respawn="true" />
 </launch>

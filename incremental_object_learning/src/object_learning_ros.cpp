@@ -37,15 +37,6 @@ IOL_ROS::visualizeROS(incremental_object_learning_srv_definitions::visualize::Re
     return true;
 }
 
-
-bool
-IOL_ROS::writeImagesToDiskROS(incremental_object_learning_srv_definitions::write_debug_images_to_disk::Request & req,
-                    incremental_object_learning_srv_definitions::write_debug_images_to_disk::Response & response)
-{
-    writeImagesToDisk(req.path.data, req.crop_images);
-    return true;
-}
-
 bool
 IOL_ROS::learn_object (incremental_object_learning_srv_definitions::learn_object::Request & req,
                    incremental_object_learning_srv_definitions::learn_object::Response & response)
@@ -131,7 +122,6 @@ IOL_ROS::initSIFT (int argc, char ** argv)
     learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &IOL_ROS::learn_object_inc, this);
     save_model_  = n_->advertiseService ("save_model", &IOL_ROS::save_model, this);
     vis_model_  = n_->advertiseService ("visualize", &IOL_ROS::visualizeROS, this);
-    write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &IOL_ROS::writeImagesToDiskROS, this);
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "learned_model", 1 );
 
     std::cout << "Started incremental object learning with parameters: " << std::endl

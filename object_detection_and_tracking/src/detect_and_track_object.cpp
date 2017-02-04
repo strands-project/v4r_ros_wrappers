@@ -15,7 +15,6 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include <v4r/common/pcl_opencv.h>
 #include <v4r/io/filesystem.h>
 
 #include "recognition_srv_definitions/recognize.h"

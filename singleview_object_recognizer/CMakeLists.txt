@@ -68,4 +68,9 @@ PATTERN ".svn" EXCLUDE
 install(DIRECTORY launch/
 DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 FILES_MATCHING PATTERN "*.launch"
+)	
+
+install(DIRECTORY cfg/
+DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
+FILES_MATCHING PATTERN "*.xml"
 )																																																																																																																

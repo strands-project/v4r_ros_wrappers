@@ -228,9 +228,12 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
     double time;
 
     pcl::ScopeTime t("trackNewCloud");
-    pcl::PointCloud<pcl::PointXYZRGB> cloud_tmp;
-    pcl::moveFromROSMsg (*msg, cloud_tmp);
-    image_ = v4r::ConvertPCLCloud2Image(cloud_tmp);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::moveFromROSMsg (*msg, *cloud_tmp);
+
+    v4r::PCLOpenCVConverter<pcl::PointXYZRGB> img_conv;
+    img_conv.setInputCloud(cloud_tmp);
+    image_ = img_conv.getRGBImage();
 
     image_.copyTo(im_draw_);
 
