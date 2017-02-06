@@ -9,9 +9,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy camera_srv_definitions
                                          genmsg tf2 tf visualization_msgs
                                         cv_bridge image_transport pcl_conversions)
 
-find_package(PCL 1.7 REQUIRED)
-find_package( OpenCV 2.4 REQUIRED )
-find_package( V4R REQUIRED )
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED )
+find_package(V4R REQUIRED )
 find_package(GLEW REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(X11 REQUIRED)

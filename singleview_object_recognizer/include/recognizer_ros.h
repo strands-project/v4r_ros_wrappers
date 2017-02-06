@@ -34,6 +34,7 @@ private:
     bool respondSrvCall(recognition_srv_definitions::recognize::Request &req, recognition_srv_definitions::recognize::Response &response) const;
 
 public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     RecognizerROS()
     {
         visualize_ = false;

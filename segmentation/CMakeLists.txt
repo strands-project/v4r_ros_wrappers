@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy segmentation_srv_definition
 )
 find_package(PCL REQUIRED)
 find_package(V4R REQUIRED)
+find_package(OpenCV REQUIRED )
 
 catkin_package(
    INCLUDE_DIRS include
