@@ -76,7 +76,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES recognition_srv_definitions
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS object_perception_msgs
 #  DEPENDS system_lib
 )
 
