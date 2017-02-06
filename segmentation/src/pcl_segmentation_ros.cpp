@@ -77,12 +77,12 @@ SegmenterROS<PointT>::respondSrvCall(segmentation_srv_definitions::segment::Requ
     segmented_cloud_colored.header.frame_id = req.cloud.header.frame_id;
     vis_pc_pub_.publish(segmented_cloud_colored);
 
-    //v4r::PCLOpenCVConverter<PointT> img_conv;
-    //img_conv.setInputCloud(cloud_); //assumes organized cloud
-    //cv::Mat colored_img = img_conv.getRGBImage();
+    v4r::PCLOpenCVConverter<PointT> img_conv;
+    img_conv.setInputCloud(cloud_); //assumes organized cloud
+    cv::Mat colored_img = img_conv.getRGBImage();
 
-    //sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", colored_img).toImageMsg();
-    //image_pub_.publish(msg);
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", colored_img).toImageMsg();
+    image_pub_.publish(msg);
     return true;
 }
 
