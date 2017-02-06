@@ -46,39 +46,38 @@ template<typename PointT> bool
 SegmenterROS<PointT>::respondSrvCall(segmentation_srv_definitions::segment::Request &req,
                             segmentation_srv_definitions::segment::Response &response) const
 {
-    typename pcl::PointCloud<PointT>::Ptr colored_cloud (new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr colored_cloud (new pcl::PointCloud<PointT>(*cloud_));
+
+    for( PointT &p : colored_cloud->points)
+        p.r = p.g = p.b = 0.f;
 
     for(size_t i=0; i < found_clusters_.size(); i++)
     {
-        typename pcl::PointCloud<PointT>::Ptr cluster (new pcl::PointCloud<PointT>());
-        pcl::copyPointCloud(*cloud_, found_clusters_[i], *cluster);
-
+        const pcl::PointIndices &indices = found_clusters_[i];
         const uint8_t r = rand()%255;
         const uint8_t g = rand()%255;
         const uint8_t b = rand()%255;
-        for(size_t pt_id=0; pt_id<cluster->points.size(); pt_id++)
-        {
-            cluster->points[pt_id].r = r;
-            cluster->points[pt_id].g = g;
-            cluster->points[pt_id].b = b;
-        }
-        *colored_cloud += *cluster;
 
         std_msgs::Int32MultiArray indx;
-        for(size_t k=0; k < found_clusters_[i].indices.size(); k++)
+        for( int idx : indices.indices )
         {
-            indx.data.push_back(found_clusters_[i].indices[k]);
+            PointT &p1 = colored_cloud->points[idx];
+            p1.r = r;
+            p1.g = g;
+            p1.b = b;
+            indx.data.push_back(idx);
         }
         response.clusters_indices.push_back(indx);
     }
 
-    sensor_msgs::PointCloud2 segmented_cloud_colored;
-    pcl::toROSMsg (*colored_cloud, segmented_cloud_colored);
-    segmented_cloud_colored.header.frame_id = req.cloud.header.frame_id;
-    vis_pc_pub_.publish(segmented_cloud_colored);
+    sensor_msgs::PointCloud2 colored_cloud_ros;
+    pcl::toROSMsg (*colored_cloud, colored_cloud_ros);
+    colored_cloud_ros.header.frame_id = req.cloud.header.frame_id;
+    colored_cloud_ros.header.stamp = req.cloud.header.stamp;
+    vis_pc_pub_.publish(colored_cloud_ros);
 
     v4r::PCLOpenCVConverter<PointT> img_conv;
-    img_conv.setInputCloud(cloud_); //assumes organized cloud
+    img_conv.setInputCloud(colored_cloud); //assumes organized cloud
     cv::Mat colored_img = img_conv.getRGBImage();
 
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", colored_img).toImageMsg();
