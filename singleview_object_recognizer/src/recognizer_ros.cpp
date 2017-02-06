@@ -21,6 +21,7 @@
 #include <pcl/recognition/cg/geometric_consistency.h>
 #include <pcl/features/integral_image_normal.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
 #include <iostream>
 #include <sstream>

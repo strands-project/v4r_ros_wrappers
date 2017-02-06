@@ -3,8 +3,8 @@ project(object_gestalt_segmentation)
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge pcl_conversions pcl_ros roscpp rospy sensor_msgs std_msgs tf tf2 segmentation_srv_definitions)
 
-find_package(PCL 1.7 REQUIRED)
-find_package(OpenCV 2.4 REQUIRED)
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(V4R REQUIRED)
 
 #find_package(rostest REQUIRED)

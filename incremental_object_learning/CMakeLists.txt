@@ -3,8 +3,8 @@ project(incremental_object_learning)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy incremental_object_learning_srv_definitions cv_bridge sensor_msgs image_transport)
 
-find_package(PCL 1.7 REQUIRED)
-find_package(OpenCV 2.4 REQUIRED )
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED )
 find_package(V4R REQUIRED)
 
 catkin_package( CATKIN_DEPENDS roscpp rospy tf incremental_object_learning_srv_definitions )
