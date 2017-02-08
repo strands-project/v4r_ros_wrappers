@@ -1,7 +1,6 @@
-#ifndef V4R_PCL_SEGMENTATION_ROS_H__
-#define V4R_PCL_SEGMENTATION_ROS_H__
+#pragma once
 
-#include <v4r/segmentation/pcl_segmentation_methods.h>
+#include <v4r/segmentation/all_headers.h>
 
 #include <ros/ros.h>
 
@@ -11,21 +10,25 @@
 namespace v4r
 {
 template<typename PointT>
-class PCLSegmenterROS : public PCLSegmenter<PointT>
+class SegmenterROS
 {
-    using PCLSegmenter<PointT>::param_;
-    using PCLSegmenter<PointT>::input_cloud_;
-    using PCLSegmenter<PointT>::do_segmentation;
 
 private:
+    typename pcl::PointCloud<PointT>::Ptr cloud_;
     ros::ServiceServer segment_srv_;
     boost::shared_ptr<ros::NodeHandle> n_;
     std::vector<pcl::PointIndices> found_clusters_;
     ros::Publisher vis_pc_pub_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
     image_transport::Publisher image_pub_;
+    int normal_computation_method_;
+
+    typename v4r::Segmenter<PointT>::Ptr cast_segmenter;
 
 public:
+    SegmenterROS() : normal_computation_method_(2)
+    { }
+
     void initialize(int argc, char ** argv);
 
     bool do_segmentation_ROS(segmentation_srv_definitions::segment::Request & req,
@@ -36,5 +39,3 @@ public:
 };
 
 }
-
-#endif

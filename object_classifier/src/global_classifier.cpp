@@ -8,29 +8,42 @@
 
 #include <sstream>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
 #include <Eigen/Eigenvalues>
-#include <pcl/common/common.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <v4r/recognition/mesh_source.h>
+
+#include "global_classifier.h"
+
 #include <v4r/features/esf_estimator.h>
-#include <v4r/recognition/metrics.h>
+#include <v4r/io/filesystem.h>
+#include <v4r/ml/nearestNeighbor.h>
+#include <v4r/ml/svmWrapper.h>
+#include <v4r/recognition/source.h>
+#include <v4r/segmentation/all_headers.h>
 
-#include "global_nn_classifier_ros.h"
+#include <opencv2/opencv.hpp>
+#include <pcl/common/common.h>
+#include <pcl/common/centroid.h>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/program_options.hpp>
+#include <glog/logging.h>
+
+#include <fstream>
+#include <sstream>
+
+
+namespace po = boost::program_options;
 
 namespace v4r
 {
 
-template<template<class > class Distance, typename PointT>
+template<typename PointT>
 bool
-GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions::classify::Request &req, classifier_srv_definitions::classify::Response &response)
+ClassifierROS<PointT>::classify (classifier_srv_definitions::classify::Request &req, classifier_srv_definitions::classify::Response &response)
 {
-    typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>());
-    pcl::fromROSMsg(req.cloud, *cloud);
-    this->input_ = cloud;
+    cloud_.reset (new pcl::PointCloud<PointT>());
+    pcl::fromROSMsg(req.cloud, *cloud_);
 
     //clear all data from previous visualization steps and publish empty markers/point cloud
     for (size_t i=0; i < markerArray_.markers.size(); i++)
@@ -41,8 +54,8 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
     vis_pc_pub_.publish(scenePc2);
     markerArray_.markers.clear();
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::copyPointCloud(*cloud, *cluster);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster_rgb (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::copyPointCloud(*cloud_, *cluster_rgb);
 
     for(size_t cluster_id=0; cluster_id < req.clusters_indices.size(); cluster_id++)
     {
@@ -50,35 +63,39 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
         const float g = std::rand() % 255;
         const float b = std::rand() % 255;
 
-        this->indices_.resize(req.clusters_indices[cluster_id].data.size());
-
+        std::vector<int> cluster_indices (req.clusters_indices[cluster_id].data.size());
         for(size_t kk=0; kk < req.clusters_indices[cluster_id].data.size(); kk++)
         {
-            this->indices_[kk] = static_cast<int>(req.clusters_indices[cluster_id].data[kk]);
-            cluster->at(req.clusters_indices[cluster_id].data[kk]).r = 0.8*r;
-            cluster->at(req.clusters_indices[cluster_id].data[kk]).g = 0.8*g;
-            cluster->at(req.clusters_indices[cluster_id].data[kk]).b = 0.8*b;
+            cluster_indices[kk] = static_cast<int>(req.clusters_indices[cluster_id].data[kk]);
+            cluster_rgb->at(req.clusters_indices[cluster_id].data[kk]).r = 0.8*r;
+            cluster_rgb->at(req.clusters_indices[cluster_id].data[kk]).g = 0.8*g;
+            cluster_rgb->at(req.clusters_indices[cluster_id].data[kk]).b = 0.8*b;
         }
 
-        this->classify ();
+        typename GlobalRecognizer<PointT>::Cluster::Ptr cluster (
+                    new typename GlobalRecognizer<PointT>::Cluster (*cloud_, cluster_indices, false ) );
+        rec_->setInputCloud( cloud_ );
+        rec_->setCluster( cluster );
+        rec_->recognize();
+        const std::vector<typename ObjectHypothesis<PointT>::Ptr > ohs = rec_->getHypotheses();
 
-        std::cout << "for cluster " << cluster_id << " with size " << this->indices_.size() << ", I have following hypotheses: " << std::endl;
+        std::cout << "for cluster " << cluster_id << " with size " << cluster_indices.size() << ", I have following hypotheses: " << std::endl;
 
         object_perception_msgs::classification class_tmp;
-        for(size_t kk=0; kk < this->categories_.size(); kk++)
+        for(typename ObjectHypothesis<PointT>::Ptr oh : ohs)
         {
-            std::cout << this->categories_[kk] << " with confidence " << this->confidences_[kk] << std::endl;
+            std::cout << oh->model_id_ << " with confidence " << oh->confidence_ << std::endl;
             std_msgs::String str_tmp;
-            str_tmp.data = this->categories_[kk];
+            str_tmp.data = oh->model_id_;
             class_tmp.class_type.push_back(str_tmp);
-            class_tmp.confidence.push_back( this->confidences_[kk] );
+            class_tmp.confidence.push_back( oh->confidence_ );
         }
         response.class_results.push_back(class_tmp);
 
         Eigen::Vector4f centroid;
         Eigen::Matrix3f covariance_matrix;
         typename pcl::PointCloud<PointT>::Ptr pClusterPCl_transformed (new pcl::PointCloud<PointT>());
-        pcl::computeMeanAndCovarianceMatrix(*this->input_, this->indices_, covariance_matrix, centroid);
+        pcl::computeMeanAndCovarianceMatrix(*cloud_, cluster_indices, covariance_matrix, centroid);
         Eigen::Matrix3f eigvects;
         Eigen::Vector3f eigvals;
         pcl::eigen33(covariance_matrix, eigvects,  eigvals);
@@ -90,7 +107,7 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
         transformation_matrix.block<3,1>(0,3) = -centroid_transformed;
         transformation_matrix(3,3) = 1;
 
-        pcl::transformPointCloud(*this->input_, this->indices_, *pClusterPCl_transformed, transformation_matrix);
+        pcl::transformPointCloud(*cloud_, cluster_indices, *pClusterPCl_transformed, transformation_matrix);
 
         //pcl::transformPointCloud(*frame_, cluster_indices_int, *frame_eigencoordinates_, eigvects);
         PointT min_pt, max_pt;
@@ -107,7 +124,7 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
         // calculating the bounding box of the cluster
         Eigen::Vector4f min;
         Eigen::Vector4f max;
-        pcl::getMinMax3D (*this->input_, this->indices_, min, max);
+        pcl::getMinMax3D (*cloud_, cluster_indices, min, max);
 
         object_perception_msgs::BBox bbox;
         geometry_msgs::Point32 pt;
@@ -122,11 +139,11 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
         response.bbox.push_back(bbox);
 
         // getting the point cloud of the cluster
-        typename pcl::PointCloud<PointT>::Ptr cluster (new pcl::PointCloud<PointT>);
-        pcl::copyPointCloud(*this->input_, this->indices_, *cluster);
+        typename pcl::PointCloud<PointT>::Ptr cluster_pcl (new pcl::PointCloud<PointT>);
+        pcl::copyPointCloud(*cloud_, cluster_indices, *cluster_pcl);
 
         sensor_msgs::PointCloud2  pc2;
-        pcl::toROSMsg (*cluster, pc2);
+        pcl::toROSMsg (*cluster_pcl, pc2);
         response.cloud.push_back(pc2);
 
         // visualize the result as ROS topic
@@ -152,12 +169,12 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
         marker.color.b = b/255.f;
         std::stringstream marker_text;
         marker_text.precision(2);
-        marker_text << this->categories_[0] << this->confidences_[0];
+        marker_text << ohs[0]->model_id_ << ohs[0]->confidence_;
         marker.text = marker_text.str();
         markerArray_.markers.push_back(marker);
     }
 
-    pcl::toROSMsg (*cluster, scenePc2);
+    pcl::toROSMsg (*cluster_rgb, scenePc2);
     vis_pc_pub_.publish(scenePc2);
     vis_pub_.publish( markerArray_ );
 
@@ -165,71 +182,65 @@ GlobalNNClassifierROS<Distance,PointT>::classifyROS (classifier_srv_definitions:
     return true;
 }
 
-template<template<class > class Distance, typename PointT>
-void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** argv)
+template<typename PointT>
+void ClassifierROS<PointT>::initialize(int argc, char ** argv)
 {
     //    PCLSegmenter<pcl::PointXYZRGB>::Parameter seg_param;
     ros::init (argc, argv, "classifier_service");
     n_.reset( new ros::NodeHandle ( "~" ) );
-    n_->getParam ( "chop_z", chop_at_z_ );
-    //    n_->getParam ( "chop_z", seg_param.chop_at_z_ );
-    //    n_->getParam ( "seg_type", seg_param.seg_type_ );
-    //    n_->getParam ( "min_cluster_size", seg_param.min_cluster_size_ );
-    //    n_->getParam ( "max_vertical_plane_size", seg_param.max_vertical_plane_size_ );
-    //    n_->getParam ( "num_plane_inliers", seg_param.num_plane_inliers_ );
-    //    n_->getParam ( "max_angle_plane_to_ground", seg_param.max_angle_plane_to_ground_ );
-    //    n_->getParam ( "sensor_noise_max", seg_param.sensor_noise_max_ );
-    //    n_->getParam ( "table_range_min", seg_param.table_range_min_ );
-    //    n_->getParam ( "table_range_max", seg_param.table_range_max_ );
-    //    n_->getParam ( "angular_threshold_deg", seg_param.angular_threshold_deg_ );
 
-    ROS_INFO("models_dir, training dir:  %s, %s",  models_dir_.c_str(), this->training_dir_.c_str());
+    std::string models_dir;
+    int knn = 5;
+    bool retrain = false;
 
-    if(!n_->getParam ( "models_dir", models_dir_ ))
-    {
-        PCL_ERROR("Set -models_dir option in the command line, ABORTING");
-        return;
-    }
+    google::InitGoogleLogging(argv[0]);
 
-    if(!n_->getParam ( "training_dir", this->training_dir_ ))
-    {
-        PCL_ERROR("Set -training_dir option in the command line, ABORTING");
-        return;
-    }
+    po::options_description desc("Depth-map and point cloud Rendering from mesh file\n======================================\n**Allowed options");
+    desc.add_options()
+            ("help,h", "produce help message")
+            ("models_dir,m", po::value<std::string>(&models_dir)->required(), "model directory ")
+            ("kNN,k", po::value<int>(&knn)->default_value(knn), "defines the number k of nearest neighbor for classification")
+            ("retrain", po::bool_switch(&retrain), "if true, retrains the model database no matter if they already exist")
+            ;
+    po::variables_map vm;
+    po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+    std::vector<std::string> to_pass_further = po::collect_unrecognized(parsed.options, po::include_positional);
+    po::store(parsed, vm);
+    if (vm.count("help"))
+    { std::cout << desc << std::endl; return; }
 
-    int nn = static_cast<int>(this->NN_);
-    n_->getParam ( "nn", nn);
-    this->NN_ = static_cast<size_t>(nn);
+    try {po::notify(vm);}
+    catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl; return; }
+
+    ROS_INFO("models_dir:  %s",  models_dir.c_str());
 
 
-    //  seg_.reset( new PCLSegmenter<pcl::PointXYZRGB>(seg_param));
+    // ==== SETUP RECOGNIZER ======
+    typename Source<PointT>::Ptr model_database (new Source<PointT> ( models_dir, true ) );
+    typename ESFEstimation<PointT>::Ptr estimator (new ESFEstimation<PointT>);
+    typename GlobalEstimator<PointT>::Ptr cast_estimator = boost::dynamic_pointer_cast<ESFEstimation<PointT> > (estimator);
 
-    boost::shared_ptr<MeshSource<PointT> > mesh_source (new MeshSource<PointT>);
-    mesh_source->setPath (models_dir_);
-    mesh_source->setMeshDir(this->training_dir_);
-    mesh_source->setResolution (150);
-    mesh_source->setTesselationLevel (0);
-    //  mesh_source->setViewAngle (57.f);
-    mesh_source->setRadiusSphere (1.f);
-    mesh_source->setModelScale (1.f);
-    mesh_source->generate ();
+    rec_.reset(new GlobalRecognizer<PointT>);
+    rec_->setModelDatabase( model_database );
+    rec_->setFeatureEstimator( cast_estimator );
 
-    this->source_ = boost::static_pointer_cast<MeshSource<PointT> > (mesh_source);
+//    NearestNeighborClassifier::Ptr classifier (new NearestNeighborClassifier);
+    svmClassifier::Parameter svmParam;
+    svmParam.svm_.kernel_type = ::RBF;
+    svmParam.svm_.gamma = 1./640.;
+    svmParam.svm_.probability = 1;
+    svmParam.knn_ = 3;
 
-    boost::shared_ptr<ESFEstimation<PointT> > estimator;
-    estimator.reset (new ESFEstimation<PointT>);
-
-    boost::shared_ptr<GlobalEstimator<PointT> > cast_estimator;
-    cast_estimator = boost::dynamic_pointer_cast<ESFEstimation<PointT> > (estimator);
-
-    this->setDescriptorName("esf");
-    this->setFeatureEstimator (cast_estimator);
-    this->initialize (false);
+    svmClassifier::Ptr classifier (new svmClassifier (svmParam));
+    rec_->setClassifier(classifier);
+    rec_->initialize(models_dir, retrain);
 
     //  segment_and_classify_service_ = n_->advertiseService("segment_and_classify", ShapeClassifier::segmentAndClassify, this);
-    classify_service_ = n_->advertiseService("classify", &GlobalNNClassifierROS<Distance,PointT>::classifyROS, this);
+    classify_service_ = n_->advertiseService("classify", &ClassifierROS<PointT>::classify, this);
     vis_pub_ = n_->advertise<visualization_msgs::MarkerArray>( "visualization_marker", 0 );
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "clusters", 1 );
+
+    ROS_INFO("Ready to get service calls.");
     ros::spin();
 }
 
@@ -238,8 +249,8 @@ void GlobalNNClassifierROS<Distance, PointT>::initializeROS(int argc, char ** ar
 int
 main (int argc, char ** argv)
 {
-    v4r::GlobalNNClassifierROS<flann::L1, pcl::PointXYZ> ros_classifier;
-    ros_classifier.initializeROS (argc, argv);
+    v4r::ClassifierROS<pcl::PointXYZ> ros_classifier;
+    ros_classifier.initialize (argc, argv);
 
     return 0;
 }

@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs messa
    learn_object_inc.srv
    save_model.srv
    visualize.srv
-   write_debug_images_to_disk.srv
 )
 
 generate_messages(
