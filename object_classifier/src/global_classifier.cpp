@@ -225,7 +225,7 @@ void ClassifierROS<PointT>::initialize(int argc, char ** argv)
     rec_->setFeatureEstimator( cast_estimator );
 
 //    NearestNeighborClassifier::Ptr classifier (new NearestNeighborClassifier);
-    svmClassifier::Parameter svmParam;
+    SVMParameter svmParam;
     svmParam.svm_.kernel_type = ::RBF;
     svmParam.svm_.gamma = 1./640.;
     svmParam.svm_.probability = 1;

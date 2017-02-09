@@ -109,36 +109,7 @@ SegmenterROS<PointT>::initialize (int argc, char ** argv)
     try { po::notify(vm); }
     catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;  }
 
-
-    if(method == v4r::SegmentationType::DominantPlane)
-    {
-        typename v4r::DominantPlaneSegmenter<PointT>::Parameter param;
-        to_pass_further = param.init(to_pass_further);
-        typename v4r::DominantPlaneSegmenter<PointT>::Ptr seg (new v4r::DominantPlaneSegmenter<PointT> (param));
-        cast_segmenter = boost::dynamic_pointer_cast<v4r::Segmenter<PointT> > (seg);
-    }
-    else if(method == v4r::SegmentationType::MultiPlane)
-    {
-        typename v4r::MultiplaneSegmenter<PointT>::Parameter param;
-        to_pass_further = param.init(to_pass_further);
-        typename v4r::MultiplaneSegmenter<PointT>::Ptr seg (new v4r::MultiplaneSegmenter<PointT> (param));
-        cast_segmenter = boost::dynamic_pointer_cast<v4r::Segmenter<PointT> > (seg);
-    }
-    else if(method == v4r::SegmentationType::EuclideanSegmentation)
-    {
-        typename v4r::EuclideanSegmenter<PointT>::Parameter param;
-        to_pass_further = param.init(to_pass_further);
-        typename v4r::EuclideanSegmenter<PointT>::Ptr seg (new v4r::EuclideanSegmenter<PointT> (param));
-        cast_segmenter = boost::dynamic_pointer_cast<v4r::Segmenter<PointT> > (seg);
-    }
-    else if(method == v4r::SegmentationType::SmoothEuclideanClustering)
-    {
-        typename v4r::SmoothEuclideanSegmenter<PointT>::Parameter param;
-        to_pass_further = param.init(to_pass_further);
-        typename v4r::SmoothEuclideanSegmenter<PointT>::Ptr seg (new v4r::SmoothEuclideanSegmenter<PointT> (param));
-        cast_segmenter = boost::dynamic_pointer_cast<v4r::Segmenter<PointT> > (seg);
-    }
-
+    cast_segmenter = v4r::initSegmenter<PointT>( method, to_pass_further );
 
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "segmented_cloud_colored", 1 );
     it_.reset(new image_transport::ImageTransport(*n_));
