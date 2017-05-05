@@ -4,8 +4,8 @@ project(singleview_object_recognizer)
 find_package(catkin REQUIRED COMPONENTS roscpp rospy recognition_srv_definitions
                                          genmsg cv_bridge sensor_msgs image_transport pcl_conversions)
 
-find_package( PCL 1.7 REQUIRED )
-find_package( OpenCV 2.4 REQUIRED )
+find_package( PCL REQUIRED )
+find_package( OpenCV REQUIRED )
 find_package( V4R REQUIRED )
 
 catkin_package(
@@ -23,6 +23,7 @@ include_directories(include
   ${V4R_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
+add_definitions(${PCL_DEFINITIONS})
 
 set(incs include/recognizer_ros.h)
 
@@ -68,4 +69,9 @@ PATTERN ".svn" EXCLUDE
 install(DIRECTORY launch/
 DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 FILES_MATCHING PATTERN "*.launch"
+)	
+
+install(DIRECTORY cfg/
+DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
+FILES_MATCHING PATTERN "*.xml"
 )																																																																																																																

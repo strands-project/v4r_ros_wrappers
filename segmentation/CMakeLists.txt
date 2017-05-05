@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy segmentation_srv_definition
 )
 find_package(PCL REQUIRED)
 find_package(V4R REQUIRED)
+find_package(OpenCV REQUIRED )
 
 catkin_package(
    INCLUDE_DIRS include
@@ -17,6 +18,7 @@ include_directories(include
   ${PCL_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${V4R_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 set(incs include/pcl_segmentation_ros.h)
 
@@ -39,6 +41,7 @@ target_link_libraries(test_segmentation
    ${catkin_LIBRARIES}
    ${PCL_LIBRARIES}
    ${V4R_LIBS}
+   ${OpenCV_LIBS}
 )
 
 install(TARGETS pcl_segmentation_service

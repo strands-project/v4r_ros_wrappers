@@ -15,8 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 
-find_package(PCL 1.7 REQUIRED)
-find_package( OpenCV 2.4 REQUIRED )
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(V4R REQUIRED)
 
 catkin_package()

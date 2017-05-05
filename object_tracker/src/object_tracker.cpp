@@ -9,7 +9,6 @@
 #include <pcl/common/time.h>
 #include <geometry_msgs/Transform.h>
 
-#include <v4r/common/impl/ScopeTime.hpp>
 #include <v4r/common/pcl_opencv.h>
 #include <v4r/io/filesystem.h>
 #include <v4r/keypoints/io.h>
@@ -229,9 +228,12 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
     double time;
 
     pcl::ScopeTime t("trackNewCloud");
-    pcl::PointCloud<pcl::PointXYZRGB> cloud_tmp;
-    pcl::moveFromROSMsg (*msg, cloud_tmp);
-    image_ = v4r::ConvertPCLCloud2Image(cloud_tmp);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::moveFromROSMsg (*msg, *cloud_tmp);
+
+    v4r::PCLOpenCVConverter<pcl::PointXYZRGB> img_conv;
+    img_conv.setInputCloud(cloud_tmp);
+    image_ = img_conv.getRGBImage();
 
     image_.copyTo(im_draw_);
 
@@ -240,7 +242,7 @@ ObjTrackerMono::trackNewCloud(const sensor_msgs::PointCloud2Ptr& msg)
 
     bool is_ok;
     {
-        v4r::ScopeTime t("overall time");
+        pcl::ScopeTime t("overall time");
         is_ok = tracker_->track(image_, pose_, conf_);
         time = t.getTime();
     }

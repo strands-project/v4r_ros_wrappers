@@ -37,15 +37,6 @@ IOL_ROS::visualizeROS(incremental_object_learning_srv_definitions::visualize::Re
     return true;
 }
 
-
-bool
-IOL_ROS::writeImagesToDiskROS(incremental_object_learning_srv_definitions::write_debug_images_to_disk::Request & req,
-                    incremental_object_learning_srv_definitions::write_debug_images_to_disk::Response & response)
-{
-    writeImagesToDisk(req.path.data, req.crop_images);
-    return true;
-}
-
 bool
 IOL_ROS::learn_object (incremental_object_learning_srv_definitions::learn_object::Request & req,
                    incremental_object_learning_srv_definitions::learn_object::Response & response)
@@ -107,7 +98,7 @@ IOL_ROS::initSIFT (int argc, char ** argv)
     n_->getParam ( "ratio", param_.ratio_supervoxel_);
     n_->getParam ( "do_erosion", param_.do_erosion_);
     n_->getParam ( "do_mst_refinement", param_.do_mst_refinement_);
-    n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
+//    n_->getParam ( "do_sift_based_camera_pose_estimation", param_.do_sift_based_camera_pose_estimation_);
     n_->getParam ( "transfer_latest_only", param_.transfer_indices_from_latest_frame_only_);
     n_->getParam ( "chop_z", param_.chop_z_);
     n_->getParam ( "normal_method", param_.normal_method_);
@@ -126,14 +117,11 @@ IOL_ROS::initSIFT (int argc, char ** argv)
         p_param_.minPointsSmooth = static_cast<unsigned> (min_smooth_points);
 
 
-    IOL::initSIFT();
-
     clear_cached_model_  = n_->advertiseService ("clear_cached_model", &IOL_ROS::clear_cached_model, this);
     learn_object_  = n_->advertiseService ("learn_object", &IOL_ROS::learn_object, this);
     learn_object_inc_  = n_->advertiseService ("learn_object_incremental", &IOL_ROS::learn_object_inc, this);
     save_model_  = n_->advertiseService ("save_model", &IOL_ROS::save_model, this);
     vis_model_  = n_->advertiseService ("visualize", &IOL_ROS::visualizeROS, this);
-    write_images_to_disk_srv_ = n_->advertiseService("write_debug_images_to_disk", &IOL_ROS::writeImagesToDiskROS, this);
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "learned_model", 1 );
 
     std::cout << "Started incremental object learning with parameters: " << std::endl

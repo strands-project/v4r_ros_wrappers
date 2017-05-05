@@ -8,16 +8,9 @@ simply install `sudo apt-get install ros-indigo-v4r-ros-wrappers` after enabling
 
 ## From Source
 
-Make sure you install [V4R](https://github.com/strands-project/v4r) first.
+Make sure you install the V4R library first.
 
-Clone v4r_ros_wrappers into your catkin workspace:
-```
-cd my_catkin_ws/src
-git clone https://github.com/strands-project/v4r_ros_wrappers.git
-cd ..
-```
-
-Then call `catkin_make` once. You might get an error regarding V4RModules.cmake. This is easy to fix:
+Then clone this repository and build it with `catkin_make`. You might get an error regarding V4RModules.cmake. This is easy to fix:
 ```
 cd my_catkin_ws/build
 ccmake ../src

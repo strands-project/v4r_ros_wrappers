@@ -1,5 +1,4 @@
-#ifndef OBJECT_LEARNING_ROS_H__
-#define OBJECT_LEARNING_ROS_H__
+#pragma once
 
 #include <v4r/object_modelling/incremental_object_learning.h>
 
@@ -11,7 +10,6 @@
 #include "incremental_object_learning_srv_definitions/learn_object_inc.h"
 #include "incremental_object_learning_srv_definitions/save_model.h"
 #include "incremental_object_learning_srv_definitions/visualize.h"
-#include "incremental_object_learning_srv_definitions/write_debug_images_to_disk.h"
 
 namespace v4r
 {
@@ -43,9 +41,6 @@ public:
     bool visualizeROS(incremental_object_learning_srv_definitions::visualize::Request & req,
                         incremental_object_learning_srv_definitions::visualize::Response & response);
 
-    bool writeImagesToDiskROS(incremental_object_learning_srv_definitions::write_debug_images_to_disk::Request & req,
-                        incremental_object_learning_srv_definitions::write_debug_images_to_disk::Response & response);
-
     bool learn_object (incremental_object_learning_srv_definitions::learn_object::Request & req,
                        incremental_object_learning_srv_definitions::learn_object::Response & response);
 
@@ -75,5 +70,3 @@ public:
 
 }
 }
-
-#endif //OBJECT_LEARNING_ROS_H__

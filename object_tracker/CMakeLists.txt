@@ -5,8 +5,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy object_tracker_srv_definiti
                                          genmsg tf2 tf visualization_msgs
                                         cv_bridge image_transport pcl_conversions)
 
-find_package(PCL 1.7 REQUIRED)
-find_package( OpenCV 2.4 REQUIRED )
+find_package(PCL REQUIRED)
+find_package( OpenCV REQUIRED )
 find_package( V4R REQUIRED )
 catkin_package(
    INCLUDE_DIRS include

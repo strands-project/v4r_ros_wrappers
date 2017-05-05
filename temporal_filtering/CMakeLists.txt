@@ -1,13 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(recognition_srv_definitions)
+project(temporal_filtering)
+
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs object_perception_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  std_srvs
+  #cv_bridge
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+
+
+find_package(OpenCV REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(V4R REQUIRED)
+find_package(PCL REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -24,10 +37,10 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs objec
 ## * Let MSG_DEP_SET be the set of packages whose message types you use in
 ##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
 ## * In the file package.xml:
+##   * add a build_depend tag for "message_generation"
 ##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependencies might have been
-##     pulled in transitively but can be declared for certainty nonetheless:
-##     * add a build_depend tag for "message_generation"
+##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
+##     but can be declared for certainty nonetheless:
 ##     * add a run_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
@@ -47,22 +60,45 @@ find_package(catkin REQUIRED COMPONENTS sensor_msgs std_msgs geometry_msgs objec
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-  FILES
-   retrain_recognizer.srv
-   recognize.srv
-   get_configuration.srv
- )
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
+## Generate actions in the 'action' folder
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
+#include <sensor_msgs/PointCloud.h>
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
-   geometry_msgs  # Or other packages containing msgs
-   object_perception_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
+
+################################################
+## Declare ROS dynamic reconfigure parameters ##
+################################################
+
+## To declare and build dynamic reconfigure parameters within this
+## package, follow these steps:
+## * In the file package.xml:
+##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
+## * In this file (CMakeLists.txt):
+##   * add "dynamic_reconfigure" to
+##     find_package(catkin REQUIRED COMPONENTS ...)
+##   * uncomment the "generate_dynamic_reconfigure_options" section below
+##     and list every .cfg file to be processed
+
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -74,13 +110,57 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES recognition_srv_definitions
-  CATKIN_DEPENDS object_perception_msgs
-#  DEPENDS system_lib
-)
+   INCLUDE_DIRS
+   CATKIN_DEPENDS roscpp rospy std_msgs std_srvs
+   )
 
+###########
+## Build ##
+###########
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+# include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
+  ${V4R_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+)
+#message(${V4R_INCLUDE_DIRS})
+add_definitions(-std=c++11)
+## Declare a C++ library
+# add_library(rgbd_stereo_fusion
+#   src/${PROJECT_NAME}/rgbd_stereo_fusion.cpp
 # )
+
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+# add_dependencies(rgbd_stereo_fusion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Declare a C++ executable
+add_executable(temporal_filtering src/temporal_filtering_node.cpp)
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(temporal_filtering ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(temporal_filtering
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ${CERES_LIBRARIES}
+  ${PCL_LIBRARIES}
+  ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_}
+  ${V4R_LIBRARIES}
+  ${V4R_LIBS}
+)
+#message(${PCL_LIBRARIES})
+
+
+
 
 #############
 ## Install ##
@@ -97,7 +177,7 @@ catkin_package(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS recognition_srv_definitions recognition_srv_definitions_node
+# install(TARGETS rgbd_stereo_fusion rgbd_stereo_fusion_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -122,7 +202,7 @@ catkin_package(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_recognition_srv_definitions.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rgbd_stereo_fusion.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
