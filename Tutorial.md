@@ -22,7 +22,7 @@ This library is part of the STRANDS repositories 'https://github.com/strands-pro
 * GLEW - The OpenGL Extension Wrangler Library (libglew-dev): `sudo apt-get install libglew-dev`
 * libraries for sparse matrices computations (libsuitesparse-dev): `sudo apt-get install libsuitesparse-dev`
 * Google Logging Library `sudo apt-get install libgoogle-glog-dev`
-* X-related libraries `sudo apt-get install libx11-dev libxinerama-dev libxi-dev libxrandr-de libassimp-dev`
+* X-related libraries `sudo apt-get install libx11-dev libxinerama-dev libxi-dev libxrandr-dev libassimp-dev`
 
 ## Installation
 Clone 'https://github.com/strands-project/v4r' somewhere on your computer, e.g. `~/somewhere/v4r/') and build using cmake:
