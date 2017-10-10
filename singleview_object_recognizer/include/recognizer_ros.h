@@ -18,8 +18,9 @@ private:
     ros::Publisher vis_pc_pub_;
     ros::ServiceServer recognize_;
 
-    std::vector<typename ObjectHypothesis<PointT>::Ptr > verified_hypotheses_; ///< recognized objects
-    typename v4r::apps::ObjectRecognizer<PointT> mrec_; ///< recognizer
+    std::vector< ObjectHypothesesGroup > object_hypotheses_; ///< recognized objects
+    typename boost::shared_ptr<v4r::apps::ObjectRecognizer<PointT> > mrec_; ///< recognizer
+    v4r::apps::ObjectRecognizerParameter mrec_param_;
     typename pcl::PointCloud<PointT>::Ptr scene_; ///< input cloud
     mutable v4r::Camera::Ptr camera_; ///< camera (if cloud is not organized)
 

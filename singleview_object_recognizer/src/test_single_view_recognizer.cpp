@@ -183,13 +183,13 @@ public:
         }
         else //input_method==1
         {
-            if(n_->getParam ( " ", directory_ ) && directory_.length())
+            if(n_->getParam ( "test_dir", directory_ ) && directory_.length())
             {
                 callSvRecognizerUsingFiles();
             }
             else
             {
-                std::cout << "No test directory (param directory) specified. " << std::endl;
+                std::cout << "No test directory (param test_dir) specified. " << std::endl;
                 return false;
             }
         }

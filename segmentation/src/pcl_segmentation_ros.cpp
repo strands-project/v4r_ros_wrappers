@@ -8,15 +8,11 @@
 #include <opencv2/opencv.hpp>
 #include <pcl/common/common.h>
 #include <pcl/point_cloud.h>
+#include <v4r/common/miscellaneous.h>
 #include <v4r/common/normals.h>
 #include <v4r/common/pcl_opencv.h>
+#include <v4r/segmentation/plane_utils.h>
 #include <v4r/io/filesystem.h>
-
-#include <boost/any.hpp>
-#include <boost/program_options.hpp>
-#include <glog/logging.h>
-
-namespace po = boost::program_options;
 
 namespace v4r
 {
@@ -28,16 +24,8 @@ SegmenterROS<PointT>::do_segmentation_ROS(segmentation_srv_definitions::segment:
     cloud_.reset(new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(req.cloud, *cloud_);
 
-    cast_segmenter->setInputCloud(cloud_);
-    if(cast_segmenter->getRequiresNormals())
-    {
-        pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-        v4r::computeNormals<PointT>(cloud_, normals, normal_computation_method_);
-        cast_segmenter->setNormalsCloud( normals );
-    }
-
-    cast_segmenter->segment();
-    cast_segmenter->getSegmentIndices( found_clusters_ );
+    segmenter_.segment(cloud_);
+    found_clusters_ = segmenter_.getClusters();
     return respondSrvCall(req, response);
 
 }
@@ -51,15 +39,16 @@ SegmenterROS<PointT>::respondSrvCall(segmentation_srv_definitions::segment::Requ
     for( PointT &p : colored_cloud->points)
         p.r = p.g = p.b = 0.f;
 
-    for(size_t i=0; i < found_clusters_.size(); i++)
+    for(const std::vector<int> &indices : found_clusters_)
     {
-        const pcl::PointIndices &indices = found_clusters_[i];
         const uint8_t r = rand()%255;
         const uint8_t g = rand()%255;
         const uint8_t b = rand()%255;
 
         std_msgs::Int32MultiArray indx;
-        for( int idx : indices.indices )
+        indx.data.reserve( indices.size() );
+
+        for( int idx : indices )
         {
             PointT &p1 = colored_cloud->points[idx];
             p1.r = r;
@@ -90,26 +79,9 @@ SegmenterROS<PointT>::initialize (int argc, char ** argv)
 {
     ros::init (argc, argv, "pcl_segmentation_service");
     n_.reset( new ros::NodeHandle ( "~" ) );
-
-    int method = v4r::SegmentationType::DominantPlane;
-
     google::InitGoogleLogging(argv[0]);
-
-    po::options_description desc("Point Cloud Segmentation Example\n======================================\n**Allowed options");
-    desc.add_options()
-        ("help,h", "produce help message")
-        ("method", po::value<int>(&method)->default_value(method), "segmentation method used")
-        ("normal_computation_method,n", po::value<int>(&normal_computation_method_)->default_value(normal_computation_method_), "normal computation method (if needed by segmentation approach)")
-    ;
-    po::variables_map vm;
-    po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
-    std::vector<std::string> to_pass_further = po::collect_unrecognized(parsed.options, po::include_positional);
-    po::store(parsed, vm);
-    if (vm.count("help")) { std::cout << desc << std::endl; }
-    try { po::notify(vm); }
-    catch(std::exception& e) { std::cerr << "Error: " << e.what() << std::endl << std::endl << desc << std::endl;  }
-
-    cast_segmenter = v4r::initSegmenter<PointT>( method, to_pass_further );
+    std::vector<std::string> arguments(argv + 1, argv + argc);
+    segmenter_ .initialize(arguments);
 
     vis_pc_pub_ = n_->advertise<sensor_msgs::PointCloud2>( "segmented_cloud_colored", 1 );
     it_.reset(new image_transport::ImageTransport(*n_));
@@ -118,12 +90,12 @@ SegmenterROS<PointT>::initialize (int argc, char ** argv)
     std::cout << "Ready to get service calls..." << std::endl;
     ros::spin ();
 }
+
 }
 
 int
 main (int argc, char ** argv)
 {
-    /* initialize random seed: */
     srand (time(NULL));
     v4r::SegmenterROS<pcl::PointXYZRGB> s;
     s.initialize(argc, argv);

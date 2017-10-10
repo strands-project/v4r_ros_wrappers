@@ -45,6 +45,7 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include <v4r/common/normals.h>
 #include <v4r/reconstruction/KeypointSlamRGBD2.h>
 #include <v4r/reconstruction/ProjBundleAdjuster.h>
 
@@ -85,6 +86,8 @@ private:
 
     v4r::KeypointSlamRGBD2::Parameter param;
     v4r::KeypointSlamRGBD2::Ptr camtracker;
+
+    v4r::NormalEstimator<pcl::PointXYZRGB>::Ptr normal_estimator_;    ///< normal estimator used for computing surface normals (currently only used at training)
 
     // Distance threshold to the last position for adding new visualization markers to the trajectory
     double trajectory_threshold_;

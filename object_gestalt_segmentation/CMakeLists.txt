@@ -10,7 +10,7 @@ find_package(V4R REQUIRED)
 #find_package(rostest REQUIRED)
 
 catkin_package(
- INCLUDE_DIRS include #  LIBRARIES object_segmentation_segmentation
+ INCLUDE_DIRS  #  LIBRARIES object_segmentation_segmentation
  CATKIN_DEPENDS #  DEPENDS system_lib
  cv_bridge pcl_conversions pcl_ros sensor_msgs std_msgs tf tf2 segmentation_srv_definitions 
 )

@@ -77,12 +77,12 @@ ClassifierROS<PointT>::classify (classifier_srv_definitions::classify::Request &
         rec_->setInputCloud( cloud_ );
         rec_->setCluster( cluster );
         rec_->recognize();
-        const std::vector<typename ObjectHypothesis<PointT>::Ptr > ohs = rec_->getHypotheses();
+        std::vector<typename ObjectHypothesis::Ptr > ohs = rec_->getHypotheses();
 
         std::cout << "for cluster " << cluster_id << " with size " << cluster_indices.size() << ", I have following hypotheses: " << std::endl;
 
         object_perception_msgs::classification class_tmp;
-        for(typename ObjectHypothesis<PointT>::Ptr oh : ohs)
+        for(typename ObjectHypothesis::Ptr oh : ohs)
         {
             std::cout << oh->model_id_ << " with confidence " << oh->confidence_ << std::endl;
             std_msgs::String str_tmp;

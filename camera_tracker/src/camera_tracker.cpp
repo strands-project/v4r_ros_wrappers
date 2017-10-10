@@ -302,28 +302,27 @@ CamTracker::createObjectCloudFiltered(pcl::PointCloud<pcl::PointXYZRGB>::Ptr & o
 {
     v4r::NguyenNoiseModel<pcl::PointXYZRGB> nm;
     std::vector<std::vector<std::vector<float> > > pt_properties (keyframes_.size());
-    std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > ptr_clouds(keyframes_.size());
-    std::vector< pcl::PointCloud<pcl::Normal>::Ptr > normals(keyframes_.size());
+    std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr > ptr_clouds(keyframes_.size());
+    std::vector< pcl::PointCloud<pcl::Normal>::ConstPtr > normals(keyframes_.size());
 
     if (!keyframes_.empty())
     {
-        for (unsigned i=0; i<keyframes_.size(); i++)
+        for (size_t i=0; i<keyframes_.size(); i++)
         {
+            ptr_clouds[i].reset(new pcl::PointCloud<pcl::PointXYZRGB>(keyframes_[i]));
 
-            ptr_clouds[i].reset(new pcl::PointCloud<PointT>(keyframes_[i]));
-            pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> ne;
-            ne.setRadiusSearch(0.01f);
-            ne.setInputCloud (ptr_clouds[i]);
-            normals[i].reset(new pcl::PointCloud<pcl::Normal>());
-            ne.compute (*normals[i]);
+            normal_estimator_->setInputCloud( ptr_clouds[i] );
+            pcl::PointCloud<pcl::Normal>::Ptr normal = normal_estimator_->compute();
 
             nm.setInputCloud(ptr_clouds[i]);
-            nm.setInputNormals(normals[i]);
+            nm.setInputNormals(normal);
             nm.compute();
+
             pt_properties[i] = nm.getPointProperties();
+	    normals[i] = normal;
         }
 
-        v4r::NMBasedCloudIntegration<pcl::PointXYZRGB>::Parameter nmParam;
+        v4r::NMBasedCloudIntegrationParameter nmParam;
         nmParam.octree_resolution_ = 0.005f;
         nmParam.min_points_per_voxel_ = 1;
         v4r::NMBasedCloudIntegration<pcl::PointXYZRGB> nmIntegration (nmParam);
@@ -474,6 +473,10 @@ void
 CamTracker::initialize (int argc, char ** argv)
 {
     n_.reset( new ros::NodeHandle ( "~" ) );
+
+    int normal_computation_method = v4r::NormalEstimatorType::PCL_INTEGRAL_NORMAL;
+    std::vector<std::string> params;
+    normal_estimator_ = v4r::initNormalEstimator<pcl::PointXYZRGB> ( normal_computation_method, params );
 
     confidence_publisher_ = n_->advertise<visualization_msgs::Marker>("confidence", 1);
     trajectory_publisher_ = n_->advertise<visualization_msgs::Marker>("trajectory", 1);
